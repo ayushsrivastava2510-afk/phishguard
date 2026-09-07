@@ -10,3 +10,5 @@ networkx>=3.0
 tldextract>=5.0.0
 requests>=2.31.0
 pillow>=10.0.0
+matplotlib>=3.7.0
+filelock>=3.12.0

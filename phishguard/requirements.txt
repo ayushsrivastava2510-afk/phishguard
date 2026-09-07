@@ -5,6 +5,10 @@ streamlit==1.63.0
 dnspython==2.8.0
 python-whois==0.9.6
 requests==2.33.1
-networkx==3.6.1
-tldextract==5.3.2
-matplotlib==3.10.8
+networkx>=3.0
+tldextract>=5.0.0
+matplotlib>=3.7.0
+pydeck>=0.8.0
+reportlab>=4.0.0
+pillow>=10.0.0
+filelock>=3.12.0
