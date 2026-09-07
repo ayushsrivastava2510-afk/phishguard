@@ -1,0 +1,38 @@
+Delivered-To: victim@company.com
+Received: by 2002:a05:6402:1a8b:0:0:0:0 with SMTP id victim;
+        Mon, 1 Sep 2026 03:14:22 -0700 (PDT)
+Received: from mail-relay-unknown.suspicious-host.ru (mail-relay-unknown.suspicious-host.ru. [185.220.101.47])
+        by mx.company.com with ESMTPS id x1-20020a05;
+        Mon, 1 Sep 2026 03:14:20 -0700 (PDT)
+Received: from [10.0.0.5] (unverified [45.155.204.12])
+        by mail-relay-unknown.suspicious-host.ru with SMTP id abc123;
+        Mon, 1 Sep 2026 10:14:15 +0000
+Authentication-Results: mx.company.com;
+       spf=fail (google.com: domain of security@paypa1-support.com does not designate 45.155.204.12 as permitted sender) smtp.mailfrom=security@paypa1-support.com;
+       dkim=fail (signature did not verify) header.d=paypal.com;
+       dmarc=fail (p=REJECT sp=REJECT dis=NONE) header.from=paypal.com
+Return-Path: <bounce-2847@paypa1-support.com>
+From: "PayPal Security Team" <security@paypa1-support.com>
+Reply-To: <recovery-support@paypa1-support.com>
+To: victim@company.com
+Subject: Urgent: Your Account Has Been Limited - Verify Now
+Date: Mon, 1 Sep 2026 10:14:10 +0000
+Message-ID: <8823kd9-random-string@paypa1-support.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+
+Dear Customer,
+
+We have detected unusual activity on your PayPal account. Your account
+access has been limited until we can confirm your identity.
+
+To restore full access, please verify your account immediately by
+clicking the link below:
+
+http://paypal-account-verify-secure.com/login?id=8823kd9
+
+Failure to verify within 24 hours will result in permanent suspension
+of your account.
+
+Thank you,
+PayPal Security Team

@@ -1,0 +1,38 @@
+Delivered-To: customer@national-portal.gov.in
+Received: by 2002:a05:6402:1a8b:0:0:0:0 with SMTP id national;
+        Wed, 3 Sep 2026 01:10:00 -0700 (PDT)
+Received: from mail-gateway.bulletproof-dns.is ([185.220.101.47])
+        by mx.national-portal.gov.in with ESMTPS id k3-99020a05;
+        Wed, 3 Sep 2026 01:09:55 -0700 (PDT)
+Received: from [192.168.1.100] (tor-exit-node.anonymizer.org [45.155.204.12])
+        by mail-gateway.bulletproof-dns.is with ESMTP id sbi9021;
+        Wed, 3 Sep 2026 08:09:40 +0000
+Authentication-Results: mx.national-portal.gov.in;
+       spf=fail (sbi.co.in: domain does not designate 45.155.204.12 as permitted sender) smtp.mailfrom=alerts@sbi-kyc-portal.online;
+       dkim=fail;
+       dmarc=fail (p=REJECT) header.from=sbi.co.in
+Return-Path: <bounce@sbi-kyc-portal.online>
+From: "State Bank of India (SBI) Alerts" <alerts@sbi-kyc-portal.online>
+Reply-To: <support-kyc@sbi-kyc-portal.online>
+To: customer@national-portal.gov.in
+Subject: MANDATORY: Your SBI Net Banking & Debit Card Blocked - Update KYC Immediately
+Date: Wed, 3 Sep 2026 08:09:30 +0000
+Message-ID: <sbi-kyc-block-notice-9921@sbi-kyc-portal.online>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+
+Dear State Bank of India Customer,
+
+This is an urgent notification from SBI Net Banking Compliance Cell. As per recent RBI guidelines, all banking customers must complete mandatory KYC verification with PAN Card and Aadhaar details.
+
+Your SBI Net Banking access and Debit Card services have been temporarily suspended due to pending KYC verification.
+
+To unblock your account immediately within 24 hours, click on the official SBI portal link below:
+
+http://sbi-online-kyc-verification.top/netbanking/login
+
+Failure to update KYC within 24 hours will lead to permanent freezing of your bank account and forfeiture of online services.
+
+Yours faithfully,
+SBI Regulatory & Fraud Prevention Cell
+State Bank of India

@@ -1,0 +1,41 @@
+Delivered-To: accounts-payable@enterprise.com
+Received: by 2002:a05:6402:1a8b:0:0:0:0 with SMTP id accounts;
+        Tue, 2 Sep 2026 04:20:10 -0700 (PDT)
+Received: from gateway.cloudhoster-relay.net ([194.26.29.112])
+        by mx.enterprise.com with ESMTPS id b2-10020a05;
+        Tue, 2 Sep 2026 04:20:08 -0700 (PDT)
+Received: from [10.2.1.8] (client-host.vps-vpn.org [185.220.101.5])
+        by gateway.cloudhoster-relay.net with ESMTP id bec7719;
+        Tue, 2 Sep 2026 11:20:00 +0000
+Authentication-Results: mx.enterprise.com;
+       spf=fail (enterprise.com: domain of finance-exec@enterprise-executive.com does not designate 185.220.101.5 as permitted sender);
+       dkim=fail (no key for signature);
+       dmarc=fail (p=REJECT) header.from=enterprise.com
+Return-Path: <spoofed-bounce@enterprise-executive.com>
+From: "David Chen, Chief Financial Officer" <ceo-office@enterprise-executive.com>
+Reply-To: <confidential-wire-exec@offshore-mail.net>
+To: accounts-payable@enterprise.com
+Subject: URGENT: Revised Wire Transfer Instructions for Pending Acquisition Invoice #9941
+Date: Tue, 2 Sep 2026 11:19:50 +0000
+Message-ID: <9941-bec-urgent-chen@enterprise-executive.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+
+Hi Team,
+
+Please note that due to our mid-quarter banking audit, our standard wire transfer instructions have been updated for vendor invoice #9941. 
+
+Do not use the previous routing number on file. Please execute an immediate bank wire transfer of $78,500 to the updated corporate accounts details attached below within 24 hours:
+
+Bank Name: Global Commerce Trust
+Account Name: Enterprise Settlement Services
+IBAN: GB29NWBK60161331926819
+SWIFT: NWBKGB2L
+Reference: INV-9941-SETTLE
+
+This transaction is strictly confidential and time-sensitive to finalize our acquisition closing today. Send me the remittance advice confirmation as soon as executed.
+
+Regards,
+David Chen
+Chief Financial Officer
+Enterprise Global Holdings

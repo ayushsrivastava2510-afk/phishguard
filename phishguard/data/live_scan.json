@@ -1,0 +1,69 @@
+{
+  "case_id": "PG-LIVE-2330",
+  "subject": "The Pre-Festive Sale is live",
+  "from": "Cityflo <support@cityflo.com>",
+  "from_domain": "cityflo.com",
+  "originating_ip": "15.207.59.115",
+  "risk_score": 26,
+  "threat_category": "Benign Communication",
+  "urgency_level": "Normal",
+  "attribution_source": "Standard / Direct Transmission",
+  "attribution_confidence": "Normal (60%)",
+  "attribution_explanation": "No overt anonymizer or authentication anomaly detected in transmission headers.",
+  "attribution_recommendation": "Standard baseline monitoring.",
+  "text_label": "phishing",
+  "text_confidence": 0.6842105326726341,
+  "body_snippet": "The Pre-Festive Sale is live\n\n\n\nSome good news ahead of the season.\n\nFor a limited time, our ride packs are at their lowest of the season:\n\n\n\n\n30-day Unlimited pack: up to \u20b9600 off\n\n90-day Unlimited pack: up to \u20b92,000 off\n\n\n\n\nNo code to remember. The discount applies automatically at checkout.\n\n\n\nBuy your pack\n\n\n\nSale ends soon.\n\n\n\n\u00a0\n\n\n\nYou can reach us at support@cityflo.com or call us on 022-489",
+  "red_flags": [
+    "No traceable IP found in headers \u2014 relay path may be stripped or malformed",
+    "Sending IP belongs to a cloud/hosting provider, not a typical mail server \u2014 common for attacker infrastructure"
+  ],
+  "relay_hops": [],
+  "auth_results": {
+    "spf": "unknown",
+    "dkim": "unknown",
+    "dmarc": "unknown"
+  },
+  "geolocation": {
+    "status": "success",
+    "country": "India",
+    "region": "Maharashtra",
+    "city": "Mumbai",
+    "isp": "Amazon Technologies Inc.",
+    "org": "AWS EC2 (ap-south-1)",
+    "asn": "AS16509 Amazon.com, Inc.",
+    "is_likely_proxy_or_vpn": false,
+    "is_hosting_provider": true,
+    "latitude": 19.07283,
+    "longitude": 72.88261,
+    "resolution_source": "Extracted from Transmission Header (Received: hop)",
+    "resolved_ip": "15.207.59.115"
+  },
+  "dns_intelligence": {
+    "has_spf_record": true,
+    "has_dmarc_record": true,
+    "mx_records": [
+      "alt2.aspmx.l.google.com.",
+      "alt3.aspmx.l.google.com.",
+      "alt4.aspmx.l.google.com.",
+      "alt1.aspmx.l.google.com.",
+      "aspmx.l.google.com."
+    ]
+  },
+  "domain_age": {
+    "status": "success",
+    "creation_date": "2015-05-14 06:28:22",
+    "age_days": 4134,
+    "is_recently_registered": false,
+    "registrar": "GoDaddy.com, LLC"
+  },
+  "evidence_hashes": {
+    "sha256": "9d3fc5e3461f860d7ba8cdd70461a38c3f994bb7e4e79014a3bc27048aafc5b4",
+    "md5": "3baa9fa9d5fc77cf98fb9df2911d4029",
+    "size_bytes": 667,
+    "timestamp_utc": "2026-09-07 14:45:27 UTC"
+  },
+  "has_headers": true,
+  "source": "Gmail Web",
+  "timestamp": "2026-09-07 20:15:30"
+}

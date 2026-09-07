@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhishGuard Mail Sentinel</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <div class="shield-badge">🛡️</div>
+        <div>
+          <div class="title">PhishGuard Sentinel</div>
+          <div class="subtitle">AI Forensic & Origin Tracer</div>
+        </div>
+      </div>
+      <div id="bridge-status" class="status-indicator">
+        <span class="status-dot"></span>
+        <span id="status-text">Checking SOC...</span>
+      </div>
+    </div>
+
+    <!-- Active Tab Context -->
+    <div class="context-card" id="context-card">
+      <div class="context-header">
+        <span id="active-client-icon">📧</span>
+        <span id="active-client-name" class="client-name">Detecting Mail Client...</span>
+      </div>
+      <div id="active-email-subject" class="subject-preview">Open an email in Gmail or Outlook to audit</div>
+    </div>
+
+    <!-- Main Action Button -->
+    <button id="scan-now-btn" class="btn-primary">
+      <span class="btn-icon">⚡</span>
+      <span id="btn-text">Audit Active Email Now</span>
+    </button>
+
+    <!-- Scan Results Card (Initially hidden) -->
+    <div id="results-card" class="results-card" style="display: none;">
+      <div class="verdict-banner" id="verdict-banner">
+        <div class="score-circle" id="score-circle">--</div>
+        <div class="verdict-details">
+          <div class="verdict-title" id="verdict-title">ANALYZING</div>
+          <div class="threat-category" id="threat-category">Please wait...</div>
+        </div>
+      </div>
+
+      <div class="intel-grid">
+        <div class="intel-item">
+          <div class="intel-label">Origin IP</div>
+          <div class="intel-value" id="intel-ip">—</div>
+        </div>
+        <div class="intel-item">
+          <div class="intel-label">Geolocation</div>
+          <div class="intel-value" id="intel-geo">—</div>
+        </div>
+        <div class="intel-item">
+          <div class="intel-label">Infrastructure</div>
+          <div class="intel-value" id="intel-infra">—</div>
+        </div>
+        <div class="intel-item">
+          <div class="intel-label">Chain of Custody</div>
+          <div class="intel-value" id="intel-hash">SHA-256</div>
+        </div>
+      </div>
+
+      <button id="open-soc-btn" class="btn-secondary">
+        <span>🚀 Open Full 3D SOC Dashboard</span>
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span>SIH 2026 &bull; Binary Battalion</span>
+      <a href="http://localhost:8501" target="_blank" class="footer-link">SOC Web</a>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

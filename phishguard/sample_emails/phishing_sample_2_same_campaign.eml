@@ -1,0 +1,34 @@
+Delivered-To: another.victim@company.com
+Received: by 2002:a05:6402:1a8b:0:0:0:0 with SMTP id victim2;
+        Mon, 1 Sep 2026 05:40:11 -0700 (PDT)
+Received: from mail-relay-unknown.suspicious-host.ru (mail-relay-unknown.suspicious-host.ru. [185.220.101.47])
+        by mx.company.com with ESMTPS id x2-20020a05;
+        Mon, 1 Sep 2026 05:40:08 -0700 (PDT)
+Received: from [10.0.0.7] (unverified [45.155.204.12])
+        by mail-relay-unknown.suspicious-host.ru with SMTP id def456;
+        Mon, 1 Sep 2026 12:40:02 +0000
+Authentication-Results: mx.company.com;
+       spf=fail (google.com: domain of billing@micros0ft-alerts.net does not designate 45.155.204.12 as permitted sender) smtp.mailfrom=billing@micros0ft-alerts.net;
+       dkim=fail (signature did not verify) header.d=microsoft.com;
+       dmarc=fail (p=REJECT sp=REJECT dis=NONE) header.from=microsoft.com
+Return-Path: <bounce-9931@micros0ft-alerts.net>
+From: "Microsoft Billing Team" <billing@micros0ft-alerts.net>
+Reply-To: <billing-support@micros0ft-alerts.net>
+To: another.victim@company.com
+Subject: Action Required: Your Microsoft 365 Subscription Payment Failed
+Date: Mon, 1 Sep 2026 12:40:00 +0000
+Message-ID: <9931kd2-random-string@micros0ft-alerts.net>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+
+Dear Customer,
+
+We were unable to process your latest Microsoft 365 subscription payment.
+Your services will be suspended within 24 hours unless payment is updated.
+
+Please update your billing details immediately:
+
+http://microsft-office365-login.com/billing/update?id=9931kd2
+
+Thank you,
+Microsoft Billing Team

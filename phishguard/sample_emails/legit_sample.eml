@@ -1,0 +1,26 @@
+Delivered-To: priya@company.com
+Received: by 2002:a05:6402:1a8b:0:0:0:0 with SMTP id priya;
+        Mon, 1 Sep 2026 09:02:11 -0700 (PDT)
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.company.com with ESMTPS id y2-20020a05;
+        Mon, 1 Sep 2026 09:02:09 -0700 (PDT)
+Authentication-Results: mx.company.com;
+       spf=pass (google.com: domain of rahul@partnerfirm.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=rahul@partnerfirm.com;
+       dkim=pass header.d=partnerfirm.com;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=partnerfirm.com
+Return-Path: <rahul@partnerfirm.com>
+From: "Rahul Sharma" <rahul@partnerfirm.com>
+To: priya@company.com
+Subject: Slides for tomorrow's stand-up
+Date: Mon, 1 Sep 2026 09:02:05 -0700
+Message-ID: <CAB3xyz-normal-id@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+
+Hi Priya,
+
+Attaching the slides for tomorrow morning's stand-up. Let me know if
+anything looks off before 9am.
+
+Thanks,
+Rahul
