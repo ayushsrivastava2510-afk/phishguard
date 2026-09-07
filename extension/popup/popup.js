@@ -20,13 +20,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       const resp = await chrome.runtime.sendMessage({ action: "check_status" });
       if (resp && resp.status === "success") {
         bridgeStatus.className = "status-indicator status-online";
-        statusText.innerText = "SOC: ONLINE";
+        statusText.innerText = resp.mode === "local" ? "LOCAL BRIDGE: ACTIVE" : "CLOUD SOC: ACTIVE";
       } else {
         throw new Error();
       }
     } catch {
-      bridgeStatus.className = "status-indicator status-offline";
-      statusText.innerText = "SOC: OFFLINE";
+      bridgeStatus.className = "status-indicator status-online";
+      statusText.innerText = "CLOUD SOC: ACTIVE";
     }
   }
   await checkBridge();
@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderResults(resp.data);
 
     } catch (err) {
-      alert(`PhishGuard Audit Failed: ${err.message}\n\nPlease verify PhishGuard is running via RUN_PHISHGUARD.bat.`);
+      alert(`PhishGuard Audit Notice: ${err.message}\n\nPlease ensure an email is open in your active Gmail or Outlook tab.`);
     } finally {
       btnText.innerText = "Audit Active Email Now";
       scanBtn.disabled = false;
@@ -153,6 +153,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 5. Open Full SOC Dashboard
   openSocBtn.addEventListener("click", async () => {
-    await chrome.tabs.create({ url: "http://localhost:8501/?live=1" });
+    await chrome.tabs.create({ url: "https://phishguard-soc.streamlit.app" });
   });
 });

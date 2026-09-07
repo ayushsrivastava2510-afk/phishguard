@@ -329,6 +329,32 @@ if st.query_params.get("live") == "1" and os.path.exists(LIVE_SCAN_PATH):
     except Exception:
         pass
 
+# Cache extension zip generation in memory
+@st.cache_data
+def get_extension_zip_package():
+    import io
+    import zipfile
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        os.path.abspath(os.path.join(base_dir, "..", "extension")),
+        os.path.abspath(os.path.join(os.getcwd(), "extension")),
+        os.path.abspath(os.path.join(base_dir, "extension")),
+    ]
+    ext_dir = next((d for d in candidates if os.path.isdir(d) and os.path.exists(os.path.join(d, "manifest.json"))), None)
+    if not ext_dir:
+        return None
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+        for root, dirs, files in os.walk(ext_dir):
+            for file in files:
+                full_path = os.path.join(root, file)
+                rel_path = os.path.relpath(full_path, ext_dir)
+                zf.write(full_path, rel_path)
+    zip_buffer.seek(0)
+    return zip_buffer.getvalue()
+
+
 # Sidebar Controls
 with st.sidebar:
     st.markdown("### 🛡️ PhishGuard SOC Control")
@@ -340,12 +366,41 @@ with st.sidebar:
     redact_enabled = st.checkbox("🔒 Redact PII (Evidence Anonymization)", value=False, help="Masks personal details for legal and regulatory compliance.")
 
     st.markdown("---")
-    st.subheader("🛰️ Browser Extension Bridge")
-    st.markdown("Bridge Port: `8765` (Local)")
+    st.subheader("🛰️ Browser Extension")
+    ext_zip_bytes = get_extension_zip_package()
+    if ext_zip_bytes:
+        st.download_button(
+            label="📥 Download Extension (.zip)",
+            data=ext_zip_bytes,
+            file_name="phishguard-chrome-extension.zip",
+            mime="application/zip",
+            help="Download the PhishGuard Mail Sentinel Chrome Extension for Gmail & Outlook.",
+            use_container_width=True,
+            type="primary",
+        )
+    with st.expander("📖 15-Second Install Guide", expanded=False):
+        st.markdown(
+            """
+            1. **Download & Extract:** Click the button above to download `phishguard-chrome-extension.zip` and extract it.
+            2. **Open Extensions:** In Chrome, Edge, or Brave, visit `chrome://extensions`.
+            3. **Enable Developer Mode:** Turn ON the toggle in the top-right corner.
+            4. **Load Extension:** Click **"Load unpacked"** and select the unzipped `extension` folder.
+            
+            *You're set! Open Gmail or Outlook to see the '🛡️ Scan with PhishGuard' button appear automatically.*
+            """
+        )
+    st.markdown(
+        """
+        <div style="font-size: 0.78rem; color: #a3a3a3; margin-top: 4px; margin-bottom: 8px;">
+            <span class="soc-pulse-red"></span> <b>Dual-Mode:</b> In-browser heuristic engine + Cloud SOC Telemetry.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     if os.path.exists(LIVE_SCAN_PATH):
-        st.success("🟢 Extension Feed: Ingestion Active")
+        st.success("🟢 Extension Feed: Connected")
     else:
-        st.info("⚪ Extension Feed: Standby")
+        st.info("☁️ Extension Feed: Cloud Standalone Mode")
 
     st.markdown("---")
     st.subheader("📁 Session Case Tracker")

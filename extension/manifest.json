@@ -31,7 +31,8 @@
     "http://localhost:8765/*",
     "http://127.0.0.1:8765/*",
     "http://localhost:8501/*",
-    "http://127.0.0.1:8501/*"
+    "http://127.0.0.1:8501/*",
+    "https://phishguard-soc.streamlit.app/*"
   ],
   "background": {
     "service_worker": "background.js"

@@ -144,7 +144,7 @@ async function handleInPageScan(e) {
 
   } catch (err) {
     console.error("[PhishGuard Error]", err);
-    alert(`Could not connect to PhishGuard SOC Bridge at http://127.0.0.1:8765.\n\nMake sure PhishGuard SOC is running via RUN_PHISHGUARD.bat (http://localhost:8501)!\nError: ${err.message}`);
+    alert(`PhishGuard Sentinel Notice: ${err.message}\n\nPlease verify an email message is open and readable.`);
   } finally {
     if (btn) {
       btn.innerHTML = originalText;
@@ -224,7 +224,7 @@ function renderInPageAlertCard(data) {
   card.querySelector("#pg-open-soc-btn").addEventListener("click", () => {
     chrome.runtime.sendMessage({
       action: "open_dashboard",
-      url: `http://localhost:8501/?live=1`,
+      url: `https://phishguard-soc.streamlit.app`,
     });
   });
 
