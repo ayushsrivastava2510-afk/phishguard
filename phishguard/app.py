@@ -527,7 +527,7 @@ with q_col5:
         selected_file_to_run = "sample_emails/legit_sample.eml"
 
 # Optional Custom Investigation Expander
-with st.expander("📂 Or Audit Custom Email (.eml Upload / Paste Raw Text)", expanded=False):
+with st.expander("📂 Audit Custom Email (.eml Upload / Paste Raw Text)", expanded=False):
     tab_up, tab_paste = st.tabs(["Upload .eml File", "Paste Raw Email Text"])
     with tab_up:
         custom_file = st.file_uploader("Upload an .eml email file", type=["eml"], key="cust_eml")
@@ -541,6 +541,45 @@ with st.expander("📂 Or Audit Custom Email (.eml Upload / Paste Raw Text)", ex
         if custom_text and st.button("🔍 Analyze Pasted Content", type="primary", key="btn_cust_text"):
             plain_text_only = custom_text
             selected_file_to_run = "CUSTOM_PASTE_TEXT"
+
+# Chrome Extension Direct Download & Setup (Main Page)
+with st.expander("🧩 PhishGuard Chrome Extension — 1-Click Download & Setup Guide (Gmail & Outlook)", expanded=False):
+    ext_col1, ext_col2 = st.columns([1.5, 2.5])
+    with ext_col1:
+        st.markdown("#### 📥 Direct Download")
+        st.caption("Packaged Manifest V3 extension ready for Chrome, Edge, and Brave.")
+        main_ext_bytes = get_extension_zip_package()
+        if main_ext_bytes:
+            st.download_button(
+                label="📥 Download Chrome Extension (.zip)",
+                data=main_ext_bytes,
+                file_name="phishguard-chrome-extension.zip",
+                mime="application/zip",
+                help="Download the PhishGuard Mail Sentinel Chrome Extension for Gmail & Outlook.",
+                use_container_width=True,
+                type="primary",
+                key="btn_dl_ext_main_page",
+            )
+        st.markdown(
+            """
+            <div style="font-size: 0.8rem; color: #a3a3a3; margin-top: 10px; line-height: 1.4;">
+                <span class="soc-pulse-red"></span> <b>Client-Side Intelligence:</b> Operates completely standalone on any machine with built-in heuristic threat inspection.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with ext_col2:
+        st.markdown("#### 📖 15-Second Installation Guide")
+        st.markdown(
+            """
+            1. **Extract ZIP:** Unpack the downloaded `phishguard-chrome-extension.zip` file to any folder on your computer.
+            2. **Open Extensions Page:** In Chrome, Edge, or Brave, open a new tab and go to `chrome://extensions`.
+            3. **Enable Developer Mode:** Turn **ON** the `Developer mode` toggle switch at the top-right corner.
+            4. **Load Unpacked:** Click the **"Load unpacked"** button (top-left) and select the extracted folder.
+            
+            *You're all set! Open any message in **Gmail** or **Outlook Web** to see the **'🛡️ Scan with PhishGuard'** button appear.*
+            """
+        )
 
 # Auto-run initial demo scenario on first launch if empty
 if st.session_state.last_analysis is None and selected_file_to_run is None:
