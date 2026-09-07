@@ -38,3 +38,9 @@ scratch/
 
 # Temporary Office / PowerPoint lock files
 ~$*
+
+# Ignore stray slides in root (presentations are kept in /presentations)
+/*.pptx
+/*.pdf
+!/presentations/*.pptx
+!/presentations/*.pdf
