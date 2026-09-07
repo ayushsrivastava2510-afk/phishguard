@@ -127,22 +127,22 @@ def generate_interactive_graph_html(G):
         lbl = G.nodes[n].get("label", n)
 
         if kind == "email":
-            color = {"background": "#8b5cf6", "border": "#c4b5fd", "highlight": {"background": "#7c3aed", "border": "#ffffff"}}
+            color = {"background": "#1e1e24", "border": "#E50914", "highlight": {"background": "#E50914", "border": "#ffffff"}}
             shape = "dot"
             size = 24
             title = f"Email Incident: {lbl}"
         elif kind == "domain":
-            color = {"background": "#f97316", "border": "#fdba74", "highlight": {"background": "#ea580c", "border": "#ffffff"}}
+            color = {"background": "#b81d24", "border": "#ff4d58", "highlight": {"background": "#E50914", "border": "#ffffff"}}
             shape = "diamond"
             size = 20
             title = f"Sender Domain: {lbl}"
         elif kind == "ip":
-            color = {"background": "#ef4444", "border": "#fca5a5", "highlight": {"background": "#dc2626", "border": "#ffffff"}}
+            color = {"background": "#E50914", "border": "#ffffff", "highlight": {"background": "#ff1e27", "border": "#ffffff"}}
             shape = "hexagon"
-            size = 26
-            title = f"Attacker Origin IP: {lbl} (Shared Infrastructure)"
+            size = 28
+            title = f"Attacker Origin IP: {lbl} (Shared Threat Infrastructure)"
         else:
-            color = {"background": "#64748b", "border": "#94a3b8", "highlight": {"background": "#475569", "border": "#ffffff"}}
+            color = {"background": "#2a2a32", "border": "#737373", "highlight": {"background": "#E50914", "border": "#ffffff"}}
             shape = "dot"
             size = 18
             title = lbl
@@ -153,7 +153,7 @@ def generate_interactive_graph_html(G):
             "shape": shape,
             "size": size,
             "color": color,
-            "font": {"color": "#f8fafc", "size": 11, "face": "Inter, sans-serif"},
+            "font": {"color": "#ffffff", "size": 11, "face": "Inter, sans-serif"},
             "title": title,
         })
 
@@ -161,7 +161,7 @@ def generate_interactive_graph_html(G):
         edges.append({
             "from": u,
             "to": v,
-            "color": {"color": "#64748b", "highlight": "#38bdf8", "opacity": 0.8},
+            "color": {"color": "#40404a", "highlight": "#E50914", "opacity": 0.85},
             "width": 2,
             "smooth": {"type": "continuous"},
         })
@@ -178,7 +178,7 @@ def generate_interactive_graph_html(G):
       <style>
         body, html {{
           margin: 0; padding: 0; width: 100%; height: 100%;
-          background: #0b1329; overflow: hidden;
+          background: #0b0b0e; overflow: hidden;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }}
         #mynetwork {{
@@ -186,25 +186,27 @@ def generate_interactive_graph_html(G):
         }}
         .legend {{
           position: absolute; top: 12px; left: 14px;
-          background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);
-          border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px;
-          padding: 8px 14px; font-size: 11px; color: #94a3b8; z-index: 10;
+          background: rgba(20, 20, 25, 0.9); backdrop-filter: blur(8px);
+          border: 1px solid rgba(229, 9, 20, 0.35); border-radius: 8px;
+          padding: 8px 14px; font-size: 11px; color: #a3a3a3; z-index: 10;
           display: flex; gap: 14px; align-items: center;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
         }}
         .legend-item {{ display: flex; align-items: center; gap: 6px; }}
         .dot {{ width: 10px; height: 10px; border-radius: 50%; display: inline-block; }}
         .hint {{
           position: absolute; bottom: 10px; right: 14px;
-          background: rgba(15, 23, 42, 0.75); border-radius: 6px;
-          padding: 4px 10px; font-size: 10px; color: #64748b;
+          background: rgba(20, 20, 25, 0.85); border-radius: 6px;
+          padding: 4px 10px; font-size: 10px; color: #737373;
+          border: 1px solid rgba(255, 255, 255, 0.08);
         }}
       </style>
     </head>
     <body>
       <div class="legend">
-        <div class="legend-item"><span class="dot" style="background:#8b5cf6;"></span> <span>Email Incident</span></div>
-        <div class="legend-item"><span class="dot" style="background:#f97316;"></span> <span>Domain Node</span></div>
-        <div class="legend-item"><span class="dot" style="background:#ef4444;"></span> <span>Origin IP (Attacker Node)</span></div>
+        <div class="legend-item"><span class="dot" style="background:#1e1e24; border:1px solid #E50914;"></span> <span style="color:#ffffff;">Email Incident</span></div>
+        <div class="legend-item"><span class="dot" style="background:#b81d24;"></span> <span style="color:#ffffff;">Domain Node</span></div>
+        <div class="legend-item"><span class="dot" style="background:#E50914; box-shadow:0 0 6px #E50914;"></span> <span style="color:#ffffff;">Origin IP (Attacker Node)</span></div>
       </div>
       <div class="hint">💡 Drag nodes to interact &bull; Scroll to zoom</div>
       <div id="mynetwork"></div>
