@@ -21,22 +21,6 @@ import streamlit as st
 import pandas as pd
 import pydeck as pdk
 import streamlit.components.v1 as components
-
-import importlib
-import header_analysis
-import origin_intel
-import forensics_core
-import threat_classifier
-import report_generator
-import attribution_graph
-
-importlib.reload(header_analysis)
-importlib.reload(origin_intel)
-importlib.reload(forensics_core)
-importlib.reload(threat_classifier)
-importlib.reload(report_generator)
-importlib.reload(attribution_graph)
-
 from header_analysis import parse_eml_bytes, analyze_headers, get_body_text
 from origin_intel import analyze_origin
 from attribution_graph import (
@@ -391,9 +375,7 @@ if os.path.exists(LIVE_SCAN_PATH):
         pass
 
 # -------------------------------------------------------------
-# SLEEK 1-CLICK QUICK-SCENARIO SELECTOR
-# -------------------------------------------------------------
-st.markdown("<div style='font-size: 0.92rem; font-weight: 600; color: #cbd5e1; margin-bottom: 8px;'>⚡ 1-Click Threat Scenarios (Judge Interactive Demo):</div>", unsafe_allow_html=True)
+st.markdown("<div style='font-size: 0.92rem; font-weight: 600; color: #cbd5e1; margin-bottom: 8px;'>⚡ 1-Click Threat Scenarios (Quick Forensic Telemetry):</div>", unsafe_allow_html=True)
 
 q_col1, q_col2, q_col3, q_col4, q_col5 = st.columns(5)
 selected_file_to_run = None
@@ -804,7 +786,7 @@ if st.session_state.last_analysis is not None:
         c_chip4.metric("Recipient Destination", "New Delhi, India (Target MX)")
 
     # -------------------------------------------------------------
-    # 3. COLLAPSIBLE ADVANCED FORENSIC DEEP DIVE (For Technical Judges)
+    # 3. COLLAPSIBLE ADVANCED FORENSIC DEEP DIVE
     # -------------------------------------------------------------
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
     with st.expander("🔬 Open Advanced Forensic Deep Dive (For Technical Auditors & SOC Analysts)", expanded=False):
@@ -917,9 +899,9 @@ if st.session_state.last_analysis is not None:
 
             if len(history) < 2:
                 st.info(
-                    "💡 **Judge Demo Workflow:** Click **PayPal Phishing** above, then click **SBI Bank KYC Scam**! "
-                    "The interactive graph will automatically discover they share the same sending IP (`45.155.204.12`), "
-                    "visually proving both separate attacks belong to the same organized threat campaign."
+                    "💡 **Syndicate Correlation Insight:** Load multiple incidents (e.g. **PayPal Phishing** followed by **Microsoft 365 Attack**). "
+                    "The graph engine cross-references historical telemetry to unmask shared threat infrastructure (identical bulletproof IP `45.155.204.12`), "
+                    "uncovering coordinated multi-stage campaigns in real time."
                 )
             else:
                 G = build_attribution_graph(history)

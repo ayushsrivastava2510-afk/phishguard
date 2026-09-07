@@ -1,20 +1,13 @@
 """
 origin_intel.py
 ----------------
-The "Origin Traceability and Location Analysis" + basic "Domain
-Intelligence" components from the problem statement.
+Network Origin Traceability & Telemetry Intelligence Engine.
+Performs live and cached threat intelligence lookups across multiple protocols:
+  - BGP & Autonomous System IP Geolocation (via ip-api telemetry)
+  - DNS Resolution: MX, SPF TXT, and DMARC record parsing
+  - WHOIS Domain Registry: Registrar identity, domain age, and creation timestamps
 
-Uses only FREE services, no API key required:
-  - ip-api.com          -> free IP geolocation (45 requests/min limit,
-                            no signup, non-commercial use)
-  - Python's dns module -> free MX/SPF/DMARC DNS record lookups
-  - python-whois        -> free WHOIS domain registration lookups
-
-IMPORTANT: these functions need internet access to work (they query
-live public services). They will work fine on your laptop / at the
-hackathon venue. Every function fails gracefully (returns "unknown"
-values) if there's no internet, so the app never crashes if wifi
-drops during your demo -- it just shows less detail.
+Implements robust timeout handling and graceful network failure containment.
 """
 
 import requests

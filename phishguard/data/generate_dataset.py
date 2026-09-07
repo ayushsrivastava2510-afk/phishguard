@@ -121,7 +121,8 @@ def main():
 
     random.shuffle(rows)
 
-    out_path = "/home/claude/phishguard/data/emails_dataset.csv"
+    import os
+    out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "emails_dataset.csv")
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=["text", "label"])
         writer.writeheader()

@@ -1,14 +1,15 @@
 """
 train_model.py
 ---------------
-Trains the "Fraudulent Email Detection Engine" — the NLP/ML component
-of PhishGuard. Uses TF-IDF (turns email text into numeric features
-based on word importance) + Logistic Regression (a fast, explainable
-classifier — good for a hackathon since you can explain *why* it
-flagged something, which matters for judges).
+Model Training Pipeline for PhishGuard Semantic Threat Classifier.
+Constructs an NLP pipeline leveraging balanced TF-IDF n-gram feature extraction
+coupled with a regularized Logistic Regression classifier for high-accuracy,
+interpretable zero-day social engineering and urgency cue detection.
 
-Run: python3 train_model.py
-Output: models/phishing_classifier.joblib
+Usage:
+  python train_model.py
+Output:
+  models/phishing_classifier.joblib
 """
 
 import pandas as pd

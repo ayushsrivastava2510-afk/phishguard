@@ -68,8 +68,8 @@ The platform includes 5 built-in, 1-click real-world threat scenarios for instan
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/phishguard-soc.git
-cd phishguard-soc
+git clone https://github.com/ayushsrivastava2510-afk/phishguard.git
+cd phishguard
 ```
 
 ### 2. Set Up Virtual Environment & Dependencies

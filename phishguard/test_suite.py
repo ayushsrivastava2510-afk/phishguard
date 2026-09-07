@@ -15,17 +15,20 @@ from report_generator import generate_pdf_report, generate_json_report
 from attribution_graph import build_attribution_graph, find_campaign_clusters
 
 def run_tests():
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(base_dir)
+
     print("=" * 60)
     print("STARTING PHISHGUARD END-TO-END VERIFICATION TEST")
     print("=" * 60)
 
     model = joblib.load("models/phishing_classifier.joblib")
     sample_files = [
-        ("Demo 1: PayPal Phishing", "sample_emails/phishing_sample.eml"),
-        ("Demo 2: Microsoft Alert", "sample_emails/phishing_sample_2_same_campaign.eml"),
-        ("Demo 3: SBI KYC Banking Fraud", "sample_emails/sbi_kyc_fraud.eml"),
-        ("Demo 4: BEC Payment Diversion", "sample_emails/bec_payment_diversion.eml"),
-        ("Demo 5: Legitimate Partner", "sample_emails/legit_sample.eml"),
+        ("Scenario 1: PayPal Phishing", "sample_emails/phishing_sample.eml"),
+        ("Scenario 2: Microsoft Alert", "sample_emails/phishing_sample_2_same_campaign.eml"),
+        ("Scenario 3: SBI KYC Banking Fraud", "sample_emails/sbi_kyc_fraud.eml"),
+        ("Scenario 4: BEC Payment Diversion", "sample_emails/bec_payment_diversion.eml"),
+        ("Scenario 5: Legitimate Partner", "sample_emails/legit_sample.eml"),
     ]
 
     history = []
@@ -106,7 +109,7 @@ def run_tests():
     assert len(clusters) >= 1, "Expected at least 1 campaign cluster!"
 
     print("\n" + "=" * 60)
-    print("ALL TESTS PASSED SUCCESSFULLY! PLATFORM READY FOR SIH DEMO.")
+    print("ALL TESTS PASSED SUCCESSFULLY! PLATFORM VERIFICATION COMPLETE.")
     print("=" * 60)
 
 if __name__ == "__main__":

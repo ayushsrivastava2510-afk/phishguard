@@ -23,13 +23,10 @@ from email.parser import BytesParser
 import tldextract
 
 # Force tldextract to use its bundled offline domain-suffix snapshot
-# instead of trying to download an updated list from the internet.
-# This makes the app 100% reliable even with no/unstable wifi during
-# your demo.
+# for deterministic, air-gapped performance without remote HTTP overhead.
 _tld_extractor = tldextract.TLDExtract(suffix_list_urls=())
 
-# A small list of frequently-impersonated brands, used to catch
-# lookalike/typosquatted domains. Expand this list for a real deployment.
+# Frequently impersonated brand identifiers used for typosquatting detection
 COMMONLY_SPOOFED_BRANDS = [
     "paypal", "microsoft", "google", "amazon", "apple", "netflix",
     "facebook", "bankofamerica", "hdfcbank", "icicibank", "sbi",

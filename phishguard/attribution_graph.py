@@ -1,20 +1,11 @@
 """
 attribution_graph.py
 ---------------------
-The "Identity Correlation and Attribution Support" component from the
-problem statement, simplified for a hackathon prototype.
-
-Idea: a single phishing email is a data point. But attackers reuse
-infrastructure (the same sending IP, the same domain family) across
-many emails in a campaign. By keeping a history of every email
-PhishGuard has analyzed and linking ones that share an IP or domain,
-we can visually reveal "these 3 emails are part of the same attack
-campaign" -- which is real forensic/attribution value, not just a
-per-email spam filter.
-
-Uses networkx (free, open-source graph library) + matplotlib for
-rendering. No paid service, no external API calls -- this module is
-fully offline.
+Identity Correlation and Campaign Attribution Engine.
+Reconstructs shared attacker infrastructure across multiple forensic cases:
+  - Correlates shared originating IP subnets, ASN providers, and sender domains
+  - Detects coordinated Advanced Persistent Threat (APT) / Phishing campaigns
+  - Generates interactive Vis.js physical topological graph maps and static clusters
 """
 
 import networkx as nx
