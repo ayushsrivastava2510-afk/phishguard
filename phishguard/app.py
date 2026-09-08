@@ -981,58 +981,40 @@ if st.session_state.last_analysis is not None:
     telemetry_info = resolve_email_telemetry_display(data)
 
     # Dedicated Active Email Identification Hero Card (GeekPay Clean High-Trust Palette)
-    st.markdown(
-        f"""
-        <div class="metric-card" style="margin-bottom: 20px; padding: 18px 22px; border-left: 4px solid #4d65ff; background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.92) 100%);">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 10px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span class="sub-head-top" style="margin-bottom: 0; background: rgba(77, 101, 255, 0.2); color: #93c5fd; border: 1px solid rgba(77, 101, 255, 0.45); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase;">
-                        🔍 CURRENTLY ANALYZING
-                    </span>
-                    <span style="font-size: 1.1rem; font-weight: 800; color: #ffffff;">
-                        {telemetry_info['title']}
-                    </span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <span style="background: rgba(148, 163, 184, 0.12); color: #94a3b8; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.2); font-weight: 500;">
-                        Pipeline: <b>{telemetry_info['source']}</b>
-                    </span>
-                    <span style="background: rgba(77, 101, 255, 0.15); color: #93c5fd; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; font-weight: 600;">
-                        Case: <code>{data.get('case_id', 'PG-AUDIT')}</code>
-                    </span>
-                </div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 2.2fr 1.6fr 1.1fr 1.1fr; gap: 14px;">
-                <div>
-                    <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Email Subject Line</div>
-                    <div style="font-size: 0.90rem; color: #f8fafc; font-weight: 600; line-height: 1.4; word-break: break-word;" title="{telemetry_info['subject']}">
-                        {telemetry_info['subject']}
-                    </div>
-                </div>
-                <div>
-                    <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Sender Entity (From)</div>
-                    <div style="font-size: 0.84rem; color: #cbd5e1; font-weight: 500; line-height: 1.4; word-break: break-all;" title="{telemetry_info['from']}">
-                        <code>{telemetry_info['from']}</code>
-                    </div>
-                </div>
-                <div>
-                    <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Sender Domain</div>
-                    <div style="font-size: 0.84rem; color: #38bdf8; font-weight: 600; line-height: 1.4;">
-                        <code>{telemetry_info['domain']}</code>
-                    </div>
-                </div>
-                <div>
-                    <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Originating IP</div>
-                    <div style="font-size: 0.84rem; color: #e2e8f0; font-weight: 600; line-height: 1.4;">
-                        <code>{origin_ip or '127.0.0.1'}</code>
-                    </div>
-                </div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    currently_analyzing_html = f"""<div class="metric-card" style="margin-bottom: 20px; padding: 18px 22px; border-left: 4px solid #4d65ff; background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.92) 100%);">
+<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 10px;">
+<div style="display: flex; align-items: center; gap: 10px;">
+<span class="sub-head-top" style="margin-bottom: 0; background: rgba(77, 101, 255, 0.2); color: #93c5fd; border: 1px solid rgba(77, 101, 255, 0.45); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase;">🔍 CURRENTLY ANALYZING</span>
+<span style="font-size: 1.1rem; font-weight: 800; color: #ffffff;">{telemetry_info['title']}</span>
+</div>
+<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+<span style="background: rgba(148, 163, 184, 0.12); color: #94a3b8; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.2); font-weight: 500;">Pipeline: <b>{telemetry_info['source']}</b></span>
+<span style="background: rgba(77, 101, 255, 0.15); color: #93c5fd; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; font-weight: 600;">Case: <code>{data.get('case_id', 'PG-AUDIT')}</code></span>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: 2.2fr 1.6fr 1.1fr 1.1fr; gap: 14px;">
+<div>
+<div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Email Subject Line</div>
+<div style="font-size: 0.90rem; color: #f8fafc; font-weight: 600; line-height: 1.4; word-break: break-word;" title="{telemetry_info['subject']}">{telemetry_info['subject']}</div>
+</div>
+<div>
+<div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Sender Entity (From)</div>
+<div style="font-size: 0.84rem; color: #cbd5e1; font-weight: 500; line-height: 1.4; word-break: break-all;" title="{telemetry_info['from']}"><code>{telemetry_info['from']}</code></div>
+</div>
+<div>
+<div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Sender Domain</div>
+<div style="font-size: 0.84rem; color: #38bdf8; font-weight: 600; line-height: 1.4;"><code>{telemetry_info['domain']}</code></div>
+</div>
+<div>
+<div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Originating IP</div>
+<div style="font-size: 0.84rem; color: #e2e8f0; font-weight: 600; line-height: 1.4;"><code>{origin_ip or '127.0.0.1'}</code></div>
+</div>
+</div>
+</div>"""
+    if hasattr(st, "html"):
+        st.html(currently_analyzing_html)
+    else:
+        st.markdown(currently_analyzing_html, unsafe_allow_html=True)
 
     col_gauge, col_reasons, col_action = st.columns([1.1, 2.3, 1.4])
 
