@@ -79,7 +79,7 @@ def render_graph_image(G):
     if G.number_of_nodes() == 0:
         return None
 
-    color_map = {"email": "#6B46C1", "domain": "#DD6B20", "ip": "#2B6CB0"}
+    color_map = {"email": "#2563EB", "domain": "#EF4444", "ip": "#0284C7"}
     node_colors = [color_map.get(G.nodes[n]["kind"], "#718096") for n in G.nodes]
     labels = {n: G.nodes[n]["label"] for n in G.nodes}
 
@@ -87,17 +87,17 @@ def render_graph_image(G):
     pos = nx.spring_layout(G, seed=42, k=1.0)
 
     nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=1500, ax=ax, alpha=0.9)
-    nx.draw_networkx_edges(G, pos, ax=ax, edge_color="#CBD5E0", width=2.0)
-    nx.draw_networkx_labels(G, pos, labels=labels, font_size=7.5, ax=ax, font_weight="bold", font_color="#1A202C")
+    nx.draw_networkx_edges(G, pos, ax=ax, edge_color="#BFDBFE", width=2.0)
+    nx.draw_networkx_labels(G, pos, labels=labels, font_size=7.5, ax=ax, font_weight="bold", font_color="#0F172A")
 
     # Legend elements
     from matplotlib.lines import Line2D
     legend_elements = [
-        Line2D([0], [0], marker='o', color='w', label='Email Incident', markerfacecolor='#6B46C1', markersize=10),
-        Line2D([0], [0], marker='o', color='w', label='Domain Node', markerfacecolor='#DD6B20', markersize=10),
-        Line2D([0], [0], marker='o', color='w', label='Originating IP', markerfacecolor='#2B6CB0', markersize=10),
+        Line2D([0], [0], marker='o', color='w', label='Email Incident', markerfacecolor='#2563EB', markersize=10),
+        Line2D([0], [0], marker='o', color='w', label='Domain Node', markerfacecolor='#EF4444', markersize=10),
+        Line2D([0], [0], marker='o', color='w', label='Originating IP', markerfacecolor='#0284C7', markersize=10),
     ]
-    ax.legend(handles=legend_elements, loc='upper left', framealpha=0.8, fontsize=8)
+    ax.legend(handles=legend_elements, loc='upper left', framealpha=0.9, fontsize=8)
 
     ax.axis("off")
     fig.tight_layout()
@@ -115,7 +115,7 @@ def generate_interactive_graph_html(G):
     Allows user to drag nodes, zoom, pan, and click to inspect shared campaign infrastructure.
     """
     if G.number_of_nodes() == 0:
-        return "<div style='color:#94a3b8; padding:20px;'>No graph nodes to display.</div>"
+        return "<div style='color:#64748b; padding:20px;'>No graph nodes to display.</div>"
 
     import json
 
@@ -127,22 +127,22 @@ def generate_interactive_graph_html(G):
         lbl = G.nodes[n].get("label", n)
 
         if kind == "email":
-            color = {"background": "#ffffff", "border": "#000000", "highlight": {"background": "#000000", "border": "#000000"}}
+            color = {"background": "#ffffff", "border": "#2563eb", "highlight": {"background": "#dbeafe", "border": "#1d4ed8"}}
             shape = "dot"
             size = 24
             title = f"Email Incident: {lbl}"
         elif kind == "domain":
-            color = {"background": "#fef3c7", "border": "#d97706", "highlight": {"background": "#d97706", "border": "#b45309"}}
+            color = {"background": "#fee2e2", "border": "#ef4444", "highlight": {"background": "#fecaca", "border": "#dc2626"}}
             shape = "diamond"
-            size = 22
+            size = 20
             title = f"Sender Domain: {lbl}"
         elif kind == "ip":
-            color = {"background": "#fee2e2", "border": "#dc2626", "highlight": {"background": "#dc2626", "border": "#991b1b"}}
+            color = {"background": "#2563eb", "border": "#1e40af", "highlight": {"background": "#1d4ed8", "border": "#1e3a8a"}}
             shape = "hexagon"
             size = 28
             title = f"Attacker Origin IP: {lbl} (Shared Threat Infrastructure)"
         else:
-            color = {"background": "#f1f5f9", "border": "#64748b", "highlight": {"background": "#64748b", "border": "#334155"}}
+            color = {"background": "#f1f5f9", "border": "#94a3b8", "highlight": {"background": "#e2e8f0", "border": "#64748b"}}
             shape = "dot"
             size = 18
             title = lbl
@@ -161,7 +161,7 @@ def generate_interactive_graph_html(G):
         edges.append({
             "from": u,
             "to": v,
-            "color": {"color": "#94a3b8", "highlight": "#000000", "opacity": 0.85},
+            "color": {"color": "#bfdbfe", "highlight": "#2563eb", "opacity": 0.85},
             "width": 2,
             "smooth": {"type": "continuous"},
         })
@@ -186,28 +186,27 @@ def generate_interactive_graph_html(G):
         }}
         .legend {{
           position: absolute; top: 12px; left: 14px;
-          background: #ffffff;
-          border: 1px solid #e2e8f0; border-radius: 8px;
+          background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px);
+          border: 1px solid #bfdbfe; border-radius: 8px;
           padding: 8px 14px; font-size: 11px; color: #334155; z-index: 10;
           display: flex; gap: 14px; align-items: center;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
         }}
         .legend-item {{ display: flex; align-items: center; gap: 6px; }}
         .dot {{ width: 10px; height: 10px; border-radius: 50%; display: inline-block; }}
         .hint {{
           position: absolute; bottom: 10px; right: 14px;
-          background: #ffffff; border-radius: 6px;
+          background: rgba(255, 255, 255, 0.95); border-radius: 6px;
           padding: 4px 10px; font-size: 10px; color: #64748b;
-          border: 1px solid #e2e8f0;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+          border: 1px solid #bfdbfe;
         }}
       </style>
     </head>
     <body>
       <div class="legend">
-        <div class="legend-item"><span class="dot" style="background:#ffffff; border:1.5px solid #000000;"></span> <span style="color:#0f172a; font-weight:600;">Email Incident</span></div>
-        <div class="legend-item"><span class="dot" style="background:#fef3c7; border:1px solid #d97706;"></span> <span style="color:#0f172a; font-weight:600;">Domain Node</span></div>
-        <div class="legend-item"><span class="dot" style="background:#fee2e2; border:1px solid #dc2626;"></span> <span style="color:#0f172a; font-weight:600;">Origin IP (Attacker Node)</span></div>
+        <div class="legend-item"><span class="dot" style="background:#ffffff; border:2px solid #2563eb;"></span> <span style="color:#0f172a; font-weight:600;">Email Incident</span></div>
+        <div class="legend-item"><span class="dot" style="background:#fee2e2; border:1px solid #ef4444;"></span> <span style="color:#0f172a; font-weight:600;">Domain Node</span></div>
+        <div class="legend-item"><span class="dot" style="background:#2563eb; box-shadow:0 0 6px rgba(37,99,235,0.4);"></span> <span style="color:#0f172a; font-weight:600;">Origin IP (Attacker Node)</span></div>
       </div>
       <div class="hint">💡 Drag nodes to interact &bull; Scroll to zoom</div>
       <div id="mynetwork"></div>
@@ -249,25 +248,13 @@ def generate_interactive_graph_html(G):
 if __name__ == "__main__":
     # Self-test with fake records -- two emails share the same IP,
     # simulating a real campaign.
-    test_records = [
-        {"id": "email_1", "subject": "PayPal verify now", "from_domain": "paypa1-support.com",
-         "originating_ip": "45.155.204.12", "risk_score": 88},
-        {"id": "email_2", "subject": "Microsoft billing failed", "from_domain": "micros0ft-alerts.net",
-         "originating_ip": "45.155.204.12", "risk_score": 82},
-        {"id": "email_3", "subject": "Team lunch Thursday?", "from_domain": "partnerfirm.com",
-         "originating_ip": "209.85.220.41", "risk_score": 5},
+    records = [
+        {"id": "1", "subject": "Urgent Invoice", "from_domain": "bad1.com", "originating_ip": "45.155.204.12"},
+        {"id": "2", "subject": "Account Suspended", "from_domain": "bad2.com", "originating_ip": "45.155.204.12"},
+        {"id": "3", "subject": "Newsletter", "from_domain": "clean.com", "originating_ip": "1.2.3.4"},
     ]
-
-    G = build_attribution_graph(test_records)
-    print(f"Graph has {G.number_of_nodes()} nodes and {G.number_of_edges()} edges")
-
+    G = build_attribution_graph(records)
+    print("Nodes:", G.nodes)
+    print("Edges:", G.edges)
     clusters = find_campaign_clusters(G)
-    print(f"Detected {len(clusters)} campaign cluster(s):")
-    for c in clusters:
-        print(f"  -> {c}")
-
-    img_buf = render_graph_image(G)
-    if img_buf:
-        with open("attribution_test_output.png", "wb") as f:
-            f.write(img_buf.read())
-        print("Saved test image -> attribution_test_output.png")
+    print("Campaign clusters:", clusters)
