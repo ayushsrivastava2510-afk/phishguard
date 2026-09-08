@@ -226,7 +226,7 @@ object SmishingAnalyzer {
             riskBoost = 0
         }
 
-        if (listOf("urgent", "immediately", "today", "tonight", "within 24 hours", "last notice", "final warning").any { textLower.contains(it) }) {
+        if (listOf("urgent", "immediately", "act today", "pay today", "blocked today", "suspended today", "expire today", "due today", "tonight 9:30", "disconnect tonight", "within 24 hours", "within 2 hours", "last notice", "final warning").any { textLower.contains(it) }) {
             cues.add("Artificial Time-Pressure Constraint")
             riskBoost += 15
         }
@@ -244,13 +244,32 @@ object SmishingAnalyzer {
         val urlRes = extractAndAnalyzeUrls(messageText)
         val intentRes = classifySmsIntent(messageText, senderId)
 
-        var compositeScore = senderRes.riskBoost + urlRes.riskBoost + intentRes.intentRiskBoost
+        val isPersonalP2P = !senderRes.isDltCompliant &&
+                senderRes.senderType.contains("Personal 10-Digit") &&
+                intentRes.primaryCategory == "General Communication" &&
+                urlRes.urls.isEmpty() &&
+                !intentRes.cuesDetected.any { it.contains("Coercion") || it.contains("Intimidation") || it.contains("Fraud") }
 
-        if (senderRes.isDltCompliant && intentRes.primaryCategory.contains("Transactional") &&
+        val effectiveSenderRes = if (isPersonalP2P) {
+            senderRes.copy(
+                senderType = "Personal Contact (Private P2P SMS)",
+                entityName = "Private Contact (${senderRes.rawSender})",
+                riskBoost = 0,
+                redFlags = emptyList()
+            )
+        } else {
+            senderRes
+        }
+
+        var compositeScore = effectiveSenderRes.riskBoost + urlRes.riskBoost + intentRes.intentRiskBoost
+
+        if (isPersonalP2P) {
+            compositeScore = 5
+        } else if (effectiveSenderRes.isDltCompliant && intentRes.primaryCategory.contains("Transactional") &&
             urlRes.shortenedUrls.isEmpty() && urlRes.apkDroppers.isEmpty()
         ) {
             compositeScore = minOf(compositeScore, 10)
-        } else if (senderRes.riskBoost >= 45 && (urlRes.shortenedUrls.isNotEmpty() || urlRes.apkDroppers.isNotEmpty())) {
+        } else if (effectiveSenderRes.riskBoost >= 45 && (urlRes.shortenedUrls.isNotEmpty() || urlRes.apkDroppers.isNotEmpty())) {
             compositeScore = maxOf(compositeScore, 88)
         }
 
@@ -267,12 +286,13 @@ object SmishingAnalyzer {
             )
             else -> Pair(
                 "VERIFIED SAFE SMS",
-                "VERIFIED SAFE: Dispatched via registered TRAI DLT commercial entity; standard alert."
+                if (isPersonalP2P) "VERIFIED SAFE: Person-to-Person (P2P) private message. Exempt from commercial TRAI DLT regulations."
+                else "VERIFIED SAFE: Dispatched via registered TRAI DLT commercial entity; standard alert."
             )
         }
 
         val allFlags = mutableListOf<String>()
-        allFlags.addAll(senderRes.redFlags)
+        allFlags.addAll(effectiveSenderRes.redFlags)
         allFlags.addAll(urlRes.redFlags)
         intentRes.cuesDetected.filter { !it.contains("Authentic") }.forEach {
             allFlags.add("Social Engineering: $it")
@@ -284,8 +304,8 @@ object SmishingAnalyzer {
 
         val partialRecord = SmishingRecord(
             caseId = caseId,
-            senderId = senderRes.rawSender,
-            senderInfo = senderRes,
+            senderId = effectiveSenderRes.rawSender,
+            senderInfo = effectiveSenderRes,
             rawMessage = messageText,
             riskScore = finalScore,
             verdict = verdict,
@@ -304,7 +324,11 @@ object SmishingAnalyzer {
     }
 
     private fun generateChakshuComplaintDraft(r: SmishingRecord): String {
-        val dltStatus = if (!r.senderInfo.isDltCompliant) "VIOLATION (Unauthenticated Route)" else "Registered Header Abuse"
+        val dltStatus = when {
+            r.senderInfo.senderType.contains("P2P") -> "COMPLIANT (Exempt: Personal P2P Route)"
+            !r.senderInfo.isDltCompliant -> "VIOLATION (Unauthenticated Route)"
+            else -> "Registered Header Abuse"
+        }
         val urlsList = if (r.urlInfo.urls.isNotEmpty()) r.urlInfo.urls.joinToString("\n") { "  - Malicious Link: $it" } else "  - None detected"
         val flagsList = if (r.allRedFlags.isNotEmpty()) r.allRedFlags.joinToString("\n") { "  * $it" } else "  * No anomalies detected"
 

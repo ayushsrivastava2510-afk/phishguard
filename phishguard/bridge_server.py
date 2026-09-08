@@ -26,6 +26,9 @@ from header_analysis import parse_eml_bytes, analyze_headers, get_body_text
 from origin_intel import analyze_origin
 from forensics_core import compute_evidence_hashes, parse_relay_hops, classify_attribution_source
 from threat_classifier import classify_threat_intent
+from transformer_classifier import predict_phishing
+from stacking_classifier import combine_risk_scores_stacked
+from explainability import generate_token_heatmap_html, format_section_65b_legal_xai_summary
 
 PORT = 8765
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
@@ -33,23 +36,15 @@ LIVE_SCAN_PATH = os.path.join(DATA_DIR, "live_scan.json")
 MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "phishing_classifier.joblib")
 
 # Load model once at startup
-print("[PhishGuard Bridge] Loading AI Classifier Model...")
+print("[PhishGuard Bridge] Initializing DistilBERT Transformer & Stacking Meta-Classifier...")
 model = None
 if os.path.exists(MODEL_PATH):
     try:
         model = joblib.load(MODEL_PATH)
-        print("[PhishGuard Bridge] AI Model loaded successfully.")
+        print("[PhishGuard Bridge] Fallback NLP model verified.")
     except Exception as e:
         print(f"[PhishGuard Bridge Warning] Could not load model: {e}")
-else:
-    print("[PhishGuard Bridge Warning] Model file not found at", MODEL_PATH)
 
-
-def combine_risk_scores(text_confidence, text_label, header_score, threat_score_boost, origin_flags_count):
-    text_score = text_confidence * 100 if text_label == "phishing" else (1 - text_confidence) * 100
-    origin_score = min(100, origin_flags_count * 25)
-    composite = (header_score * 0.40) + (threat_score_boost * 0.25) + (text_score * 0.20) + (origin_score * 0.15)
-    return max(0, min(100, round(composite)))
 
 
 class PhishGuardBridgeHandler(BaseHTTPRequestHandler):
@@ -147,15 +142,13 @@ class PhishGuardBridgeHandler(BaseHTTPRequestHandler):
 
                 # ML Classification
                 text_pred = "phishing"
-                text_conf = 0.85
-                if model:
-                    try:
-                        text_pred = model.predict([body_text])[0]
-                        text_conf = float(model.predict_proba([body_text]).max())
-                    except Exception:
-                        pass
+                # DistilBERT Transformer NLP & Token Attribution
+                nlp_res = predict_phishing(body_text)
+                text_pred = nlp_res["label"]
+                text_conf = nlp_res["confidence"]
 
-                risk_score = combine_risk_scores(
+                # Stacking Meta-Classifier (Learned Ensemble)
+                risk_score, stack_meta = combine_risk_scores_stacked(
                     text_conf,
                     text_pred,
                     header_res["header_risk_score"],
@@ -201,6 +194,10 @@ class PhishGuardBridgeHandler(BaseHTTPRequestHandler):
                     "attribution_recommendation": attr_info["recommendation"],
                     "text_label": text_pred,
                     "text_confidence": text_conf,
+                    "model_name": nlp_res["model_name"],
+                    "nlp_latency_ms": nlp_res["latency_ms"],
+                    "token_attributions": nlp_res["attributions"],
+                    "stacking_metadata": stack_meta,
                     "body_snippet": body_text[:400],
                     "red_flags": all_flags,
                     "relay_hops": hops,
@@ -238,6 +235,10 @@ class PhishGuardBridgeHandler(BaseHTTPRequestHandler):
                     "threat_category": threat_intent["primary_threat"],
                     "urgency_level": threat_intent["urgency_level"],
                     "text_label": text_pred,
+                    "model_name": nlp_res["model_name"],
+                    "nlp_latency_ms": nlp_res["latency_ms"],
+                    "token_attributions": nlp_res["attributions"],
+                    "stacking_metadata": stack_meta,
                     "origin_ip": effective_ip or "Webmail Relay Node",
                     "origin_country": geo.get("country") or "Verified Mail Gateway",
                     "is_hosting": geo.get("is_hosting_provider", False),

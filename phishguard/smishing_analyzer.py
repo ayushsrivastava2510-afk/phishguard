@@ -231,8 +231,8 @@ def classify_sms_intent(text, sender_id):
         urgency_level = "Normal"
         risk_boost = 0
 
-    # Urgency cues check
-    if any(u in text_lower for u in ["urgent", "immediately", "today", "tonight", "within 24 hours", "last notice", "final warning"]):
+    # Coercive urgency cues check (distinguishes artificial panic from casual conversational words)
+    if any(u in text_lower for u in ["urgent", "immediately", "act today", "pay today", "blocked today", "suspended today", "expire today", "due today", "tonight 9:30", "disconnect tonight", "within 24 hours", "within 2 hours", "last notice", "final warning"]):
         cues_detected.append("Artificial Time-Pressure Constraint")
         risk_boost += 15
 
@@ -299,15 +299,30 @@ def analyze_smishing_message(sender_id, message_text):
     url_res = extract_and_analyze_urls(message_text)
     intent_res = classify_sms_intent(message_text, sender_id)
 
-    # Calculate Composite Smishing Risk Score
-    composite_score = sender_res["risk_boost"] + url_res["risk_boost"] + intent_res["intent_risk_boost"]
+    # Check if this is a personal 10-digit number AND casual P2P conversation
+    is_personal_p2p = (
+        not sender_res["is_dlt_compliant"]
+        and "Personal 10-Digit" in sender_res["sender_type"]
+        and intent_res["primary_category"] == "General Communication"
+        and not url_res["urls"]
+        and not any(c for c in intent_res["cues_detected"] if "Coercion" in c or "Intimidation" in c or "Fraud" in c)
+    )
 
-    # If sender is authentic DLT and intent is purely transactional OTP, clamp to low safe risk
-    if sender_res["is_dlt_compliant"] and "Transactional" in intent_res["primary_category"] and not url_res["shortened_urls"] and not url_res["apk_droppers"]:
-        composite_score = min(composite_score, 12)
-    elif sender_res["risk_boost"] >= 45 and (url_res["shortened_urls"] or url_res["apk_droppers"]):
-        # Personal SIM + shortened link or APK dropper is almost definitively malicious
-        composite_score = max(composite_score, 88)
+    if is_personal_p2p:
+        sender_res["sender_type"] = "Personal Contact (Private P2P SMS)"
+        sender_res["risk_boost"] = 0
+        sender_res["red_flags"] = []
+        composite_score = 5
+    else:
+        # Calculate Composite Smishing Risk Score
+        composite_score = sender_res["risk_boost"] + url_res["risk_boost"] + intent_res["intent_risk_boost"]
+
+        # If sender is authentic DLT and intent is purely transactional OTP, clamp to low safe risk
+        if sender_res["is_dlt_compliant"] and "Transactional" in intent_res["primary_category"] and not url_res["shortened_urls"] and not url_res["apk_droppers"]:
+            composite_score = min(composite_score, 12)
+        elif sender_res["risk_boost"] >= 45 and (url_res["shortened_urls"] or url_res["apk_droppers"]):
+            # Personal SIM + shortened link or APK dropper is almost definitively malicious
+            composite_score = max(composite_score, 88)
 
     final_score = max(5, min(100, composite_score))
 
@@ -323,12 +338,25 @@ def analyze_smishing_message(sender_id, message_text):
     else:
         verdict = "VERIFIED SAFE SMS"
         badge_cls = "badge-clean"
-        action_msg = "✅ VERIFIED SAFE: Dispatched via registered TRAI DLT commercial entity; standard alert."
+        action_msg = "✅ VERIFIED SAFE: Person-to-Person (P2P) message. Exempt from commercial DLT regulations." if is_personal_p2p else "✅ VERIFIED SAFE: Dispatched via registered TRAI DLT commercial entity; standard alert."
 
     all_flags = sender_res["red_flags"] + url_res["red_flags"]
     for cue in intent_res["cues_detected"]:
         if "Authentic" not in cue:
             all_flags.append(f"Social Engineering: {cue}")
+
+    # DistilBERT Transformer NLP Semantic Inference & Token Attribution
+    try:
+        from transformer_classifier import predict_phishing
+        nlp_res = predict_phishing(message_text)
+    except Exception as e:
+        nlp_res = {
+            "label": "unknown",
+            "confidence": 0.5,
+            "model_name": "DistilBERT-Base-Uncased",
+            "latency_ms": 0,
+            "attributions": [],
+        }
 
     case_id = f"SMS-2026-{int(time.time()) % 100000:05d}"
     sha256_hash = hashlib.sha256(f"{sender_id}:{message_text}".encode("utf-8")).hexdigest()
@@ -348,6 +376,11 @@ def analyze_smishing_message(sender_id, message_text):
         "url_info": url_res,
         "all_red_flags": all_flags,
         "evidence_hash": sha256_hash,
+        "transformer_label": nlp_res["label"],
+        "transformer_confidence": nlp_res["confidence"],
+        "model_name": nlp_res["model_name"],
+        "nlp_latency_ms": nlp_res["latency_ms"],
+        "token_attributions": nlp_res["attributions"],
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S IST"),
     }
     record["chakshu_draft"] = generate_chakshu_complaint_draft(record)

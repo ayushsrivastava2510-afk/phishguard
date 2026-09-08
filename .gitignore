@@ -46,3 +46,6 @@ scratch/
 /*.pdf
 !/presentations/*.pptx
 !/presentations/*.pdf
+
+# Android APK binaries (built locally)
+*.apk
