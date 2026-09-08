@@ -133,6 +133,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     intelInfra.innerText = res.is_hosting ? "Cloud Hosting" : "Standard Relay";
     intelHash.innerText = res.sha256 ? res.sha256.substring(0, 8) + "..." : "Generated";
 
+    latestScanResult = res;
     if (score >= 70) {
       scoreCircle.style.borderColor = "#ef4444";
       scoreCircle.style.color = "#ef4444";
@@ -152,7 +153,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // 5. Open Full SOC Dashboard
+  let latestScanResult = null;
   openSocBtn.addEventListener("click", async () => {
-    await chrome.tabs.create({ url: "https://phishguard-soc.streamlit.app" });
+    let targetUrl = "https://phishguard-soc.streamlit.app/?live=1";
+    if (latestScanResult) {
+      targetUrl += `&payload=${encodeURIComponent(JSON.stringify(latestScanResult))}`;
+    }
+    await chrome.tabs.create({ url: targetUrl });
   });
 });

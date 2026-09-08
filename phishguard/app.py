@@ -309,23 +309,43 @@ if "last_analysis" not in st.session_state:
 if "active_scenario_path" not in st.session_state:
     st.session_state.active_scenario_path = "sample_emails/phishing_sample.eml"
 
-# Auto-load when redirected from Chrome Extension (?live=1)
-if st.query_params.get("live") == "1" and os.path.exists(LIVE_SCAN_PATH):
+# Auto-load when redirected from Chrome Extension (?live=1 or ?payload=...)
+payload_raw = st.query_params.get("payload")
+if payload_raw:
+    try:
+        import urllib.parse
+        decoded = json.loads(urllib.parse.unquote(payload_raw))
+        if decoded and isinstance(decoded, dict):
+            st.session_state.last_analysis = decoded
+            cid = decoded.get("case_id", "EXT-LIVE")
+            if not any(item["id"] == cid for item in st.session_state.email_history):
+                st.session_state.email_history.append({
+                    "id": cid,
+                    "subject": decoded.get("subject", "Live Extension Audit"),
+                    "from_domain": decoded.get("from_domain") or (decoded.get("from_email", "").split("@")[-1] if "@" in decoded.get("from_email", "") else "webmail.local"),
+                    "originating_ip": decoded.get("originating_ip") or decoded.get("origin_ip", "Webmail Client"),
+                    "risk_score": decoded.get("risk_score", 0),
+                    "threat": decoded.get("threat_category", "Live Audit"),
+                })
+    except Exception as e:
+        print("[Payload Parse Error]", e)
+
+elif os.path.exists(LIVE_SCAN_PATH):
     try:
         with open(LIVE_SCAN_PATH, "r", encoding="utf-8") as f:
             live_data = json.load(f)
         if live_data:
-            current_id = st.session_state.last_analysis.get("case_id") if st.session_state.last_analysis else None
-            if current_id != live_data.get("case_id"):
+            if st.query_params.get("live") == "1" or st.session_state.last_analysis is None:
                 st.session_state.last_analysis = live_data
-                if not any(item["id"] == live_data["case_id"] for item in st.session_state.email_history):
-                    st.session_state.email_history.append({
-                        "id": live_data["case_id"],
-                        "subject": live_data.get("subject", "Live Extension Audit"),
-                        "from_domain": live_data.get("from_domain"),
-                        "originating_ip": live_data.get("originating_ip"),
-                        "risk_score": live_data.get("risk_score", 0),
-                    })
+            if not any(item["id"] == live_data["case_id"] for item in st.session_state.email_history):
+                st.session_state.email_history.append({
+                    "id": live_data["case_id"],
+                    "subject": live_data.get("subject", "Live Extension Audit"),
+                    "from_domain": live_data.get("from_domain"),
+                    "originating_ip": live_data.get("originating_ip"),
+                    "risk_score": live_data.get("risk_score", 0),
+                    "threat": live_data.get("threat_category", "Live Audit"),
+                })
     except Exception:
         pass
 
@@ -492,6 +512,7 @@ if os.path.exists(LIVE_SCAN_PATH):
         with col_ext2:
             if st.button("⚡ Inspect Chrome Scan", type="primary", use_container_width=True, key="btn_inspect_ext"):
                 st.session_state.last_analysis = ext_record
+                selected_file_to_run = None
                 if not any(item["id"] == ext_record["case_id"] for item in st.session_state.email_history):
                     st.session_state.email_history.append({
                         "id": ext_record["case_id"],
@@ -499,6 +520,7 @@ if os.path.exists(LIVE_SCAN_PATH):
                         "from_domain": ext_record.get("from_domain"),
                         "originating_ip": ext_record.get("originating_ip"),
                         "risk_score": ext_record.get("risk_score", 0),
+                        "threat": ext_record.get("threat_category", "Live Audit"),
                     })
                 st.rerun()
     except Exception:
@@ -581,9 +603,10 @@ with st.expander("🧩 PhishGuard Chrome Extension — 1-Click Download & Setup 
             """
         )
 
-# Auto-run initial demo scenario on first launch if empty
+# Auto-run initial demo scenario on first launch ONLY if no analysis exists AND not redirected from extension
 if st.session_state.last_analysis is None and selected_file_to_run is None:
-    selected_file_to_run = "sample_emails/sbi_kyc_fraud.eml"
+    if st.query_params.get("live") != "1" and not st.query_params.get("payload"):
+        selected_file_to_run = "sample_emails/sbi_kyc_fraud.eml"
 
 
 # -------------------------------------------------------------
