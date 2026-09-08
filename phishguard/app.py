@@ -404,7 +404,9 @@ def resolve_email_telemetry_display(data):
 
 
 # Session State
-if "threat_vector" not in st.session_state:
+if "vector" in st.query_params and st.query_params.get("vector") in ["email", "sms"]:
+    st.session_state.threat_vector = st.query_params.get("vector")
+elif "threat_vector" not in st.session_state:
     st.session_state.threat_vector = "email"
 if "email_history" not in st.session_state:
     st.session_state.email_history = []
@@ -525,19 +527,19 @@ with st.sidebar:
     st.markdown("---")
 
     st.subheader("🛡️ Threat Vector Ingress")
-    vector_opts = ["📧 Email Threat Sentinel", "📱 Mobile SMS / Smishing Sentinel"]
-    cur_v_idx = 0 if st.session_state.get("threat_vector", "email") == "email" else 1
-    selected_vec = st.radio(
-        "Active Sentinel Vector",
-        options=vector_opts,
-        index=cur_v_idx,
-        key="sidebar_vector_radio",
-        label_visibility="collapsed",
-    )
-    new_v = "email" if "Email" in selected_vec else "sms"
-    if new_v != st.session_state.get("threat_vector", "email"):
-        st.session_state.threat_vector = new_v
-        st.rerun()
+    side_c1, side_c2 = st.columns(2)
+    with side_c1:
+        s_email_cls = "primary" if st.session_state.get("threat_vector", "email") == "email" else "secondary"
+        if st.button("📧 Email", type=s_email_cls, use_container_width=True, key="side_vec_email"):
+            st.session_state.threat_vector = "email"
+            st.query_params["vector"] = "email"
+            st.rerun()
+    with side_c2:
+        s_sms_cls = "primary" if st.session_state.get("threat_vector", "email") == "sms" else "secondary"
+        if st.button("📱 SMS", type=s_sms_cls, use_container_width=True, key="side_vec_sms"):
+            st.session_state.threat_vector = "sms"
+            st.query_params["vector"] = "sms"
+            st.rerun()
 
     st.markdown("---")
     st.subheader("⚙️ Live Controls")
@@ -1933,12 +1935,14 @@ with col_v1:
     v1_style = "primary" if is_email_active else "secondary"
     if st.button("📧 Email Threat Sentinel" + ("  (Active)" if is_email_active else ""), type=v1_style, use_container_width=True, key="top_vec_email"):
         st.session_state.threat_vector = "email"
+        st.query_params["vector"] = "email"
         st.rerun()
 
 with col_v2:
     v2_style = "primary" if not is_email_active else "secondary"
     if st.button("📱 Mobile SMS / Smishing Sentinel" + ("  (Active)" if not is_email_active else ""), type=v2_style, use_container_width=True, key="top_vec_sms"):
         st.session_state.threat_vector = "sms"
+        st.query_params["vector"] = "sms"
         st.rerun()
 
 st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
