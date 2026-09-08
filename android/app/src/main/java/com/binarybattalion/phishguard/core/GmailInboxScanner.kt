@@ -28,20 +28,18 @@ object GmailInboxScanner {
     ): EmailInboxScanSummary = withContext(Dispatchers.IO) {
         val items = mutableListOf<ScannedInboxEmail>()
         val trimmedKey = tokenOrPassword.trim()
+        val cleanEmail = accountEmail.trim()
+        var errorMsg: String? = null
 
         if (trimmedKey.isNotBlank()) {
-            val cleanEmail = accountEmail.trim()
-
-            // Mode 1: App Password -> IMAP over SSL (imap.gmail.com:993)
-            val isLikelyAppPassword = !trimmedKey.startsWith("ya29") && (trimmedKey.replace(" ", "").length in 8..30)
+            // Mode 1: Google App Password -> IMAP over SSL (imap.gmail.com:993)
+            val isLikelyAppPassword = !trimmedKey.startsWith("ya29") && (trimmedKey.replace(" ", "").length in 8..32)
             if (isLikelyAppPassword && cleanEmail.contains("@")) {
-                try {
-                    val imapItems = fetchViaImap(cleanEmail, trimmedKey, limit)
-                    if (imapItems.isNotEmpty()) {
-                        items.addAll(imapItems)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                val (imapItems, imapErr) = fetchViaImap(cleanEmail, trimmedKey, limit)
+                if (imapItems.isNotEmpty()) {
+                    items.addAll(imapItems)
+                } else {
+                    errorMsg = imapErr
                 }
             }
 
@@ -51,40 +49,62 @@ object GmailInboxScanner {
                     val restItems = fetchViaRestApi(trimmedKey, limit)
                     if (restItems.isNotEmpty()) {
                         items.addAll(restItems)
+                    } else if (errorMsg == null) {
+                        errorMsg = "Google API token expired or invalid scope (need gmail.readonly)."
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    errorMsg = e.message ?: "Network error connecting to Gmail API"
                 }
             }
         }
 
-        // Fall back to representative multi-threat live sample feed if authentication fails or credentials blank
-        if (items.isEmpty()) {
-            return@withContext getSampleGmailInbox(accountEmail)
+        // If real emails were successfully fetched
+        if (items.isNotEmpty()) {
+            val critical = items.count { it.record.riskScore >= 70 }
+            val suspicious = items.count { it.record.riskScore in 35..69 }
+            val safe = items.count { it.record.riskScore < 35 }
+
+            return@withContext EmailInboxScanSummary(
+                accountEmail = cleanEmail,
+                totalScanned = items.size,
+                criticalThreats = critical,
+                suspiciousCount = suspicious,
+                safeCount = safe,
+                items = items,
+                statusMessage = "Live Gmail Sync Active: ${items.size} messages audited from your personal inbox.",
+                isLiveSync = true
+            )
         }
 
-        val critical = items.count { it.record.riskScore >= 70 }
-        val suspicious = items.count { it.record.riskScore in 35..69 }
-        val safe = items.count { it.record.riskScore < 35 }
+        // Fallback to sample threat benchmark feed with informative status
+        val fallback = getSampleGmailInbox(cleanEmail)
+        val finalStatus = when {
+            trimmedKey.isBlank() -> "Simulated Live Feed: Enter your 16-letter Google App Password above to audit your personal inbox."
+            errorMsg != null -> "Auth Error ($errorMsg). Showing benchmark threat cases below."
+            else -> "Could not connect to Gmail. Ensure IMAP is enabled in Gmail settings. Showing benchmark threat cases."
+        }
 
         EmailInboxScanSummary(
-            accountEmail = accountEmail,
-            totalScanned = items.size,
-            criticalThreats = critical,
-            suspiciousCount = suspicious,
-            safeCount = safe,
-            items = items
+            accountEmail = cleanEmail,
+            totalScanned = fallback.totalScanned,
+            criticalThreats = fallback.criticalThreats,
+            suspiciousCount = fallback.suspiciousCount,
+            safeCount = fallback.safeCount,
+            items = fallback.items,
+            statusMessage = finalStatus,
+            isLiveSync = false
         )
     }
 
     /**
      * Direct IMAP over SSL (port 993) engine for Google App Passwords
      */
-    private fun fetchViaImap(accountEmail: String, appPassword: String, limit: Int): List<ScannedInboxEmail> {
+    private fun fetchViaImap(accountEmail: String, appPassword: String, limit: Int): Pair<List<ScannedInboxEmail>, String?> {
         val items = mutableListOf<ScannedInboxEmail>()
         val cleanPass = appPassword.replace(" ", "").trim()
         val cleanEmail = accountEmail.trim()
         val dateFormat = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
+        var errorDetail: String? = null
 
         var socket: Socket? = null
         try {
@@ -103,15 +123,23 @@ object GmailInboxScanner {
             var loginSuccess = false
             while (true) {
                 val line = reader.readLine() ?: break
-                if (line.startsWith("A01 OK")) {
+                if (line.startsWith("A01 OK", ignoreCase = true)) {
                     loginSuccess = true
                     break
-                } else if (line.startsWith("A01 NO") || line.startsWith("A01 BAD")) {
+                } else if (line.startsWith("A01 NO", ignoreCase = true) || line.startsWith("A01 BAD", ignoreCase = true)) {
+                    errorDetail = if (line.contains("AUTHENTICATIONFAILED", ignoreCase = true)) {
+                        "Invalid App Password. Please generate a new 16-letter code at myaccount.google.com/apppasswords"
+                    } else if (line.contains("ALERT", ignoreCase = true)) {
+                        "IMAP is disabled in your Gmail settings. Open Gmail on web -> Settings -> Forwarding and POP/IMAP -> Enable IMAP."
+                    } else {
+                        "Gmail IMAP rejected login: ${line.substringAfter("A01 NO").trim()}"
+                    }
                     break
                 }
             }
+
             if (!loginSuccess) {
-                return emptyList()
+                return Pair(emptyList(), errorDetail ?: "Authentication failed")
             }
 
             // 3. Select Inbox
@@ -125,7 +153,7 @@ object GmailInboxScanner {
                         existsCount = parts[1].toIntOrNull() ?: existsCount
                     }
                 }
-                if (line.startsWith("A02 OK") || line.startsWith("A02 NO") || line.startsWith("A02 BAD")) {
+                if (line.startsWith("A02 OK", ignoreCase = true) || line.startsWith("A02 NO", ignoreCase = true) || line.startsWith("A02 BAD", ignoreCase = true)) {
                     break
                 }
             }
@@ -134,18 +162,18 @@ object GmailInboxScanner {
                 val startMsg = maxOf(1, existsCount - limit + 1)
                 val endMsg = existsCount
 
-                // 4. Fetch headers and text preview for recent messages
+                // 4. Fetch headers for recent messages
                 for (msgNum in endMsg downTo startMsg) {
-                    writer.println("A03 FETCH $msgNum (BODY.PEEK[HEADER.FIELDS (SUBJECT FROM DATE)] BODY.PEEK[TEXT]<0.400>)")
+                    val tag = "F$msgNum"
+                    writer.println("$tag FETCH $msgNum (BODY.PEEK[HEADER.FIELDS (SUBJECT FROM DATE)])")
                     var subject = "No Subject"
                     var fromSender = cleanEmail
-                    val bodyBuilder = StringBuilder()
+                    var dateStr = ""
                     var readingHeaders = false
-                    var readingBody = false
 
                     while (true) {
                         val line = reader.readLine() ?: break
-                        if (line.startsWith("A03 OK") || line.startsWith("A03 NO") || line.startsWith("A03 BAD")) {
+                        if (line.startsWith("$tag OK", ignoreCase = true) || line.startsWith("$tag NO", ignoreCase = true) || line.startsWith("$tag BAD", ignoreCase = true)) {
                             break
                         }
                         if (line.startsWith("* $msgNum FETCH") && line.contains("HEADER.FIELDS")) {
@@ -153,44 +181,34 @@ object GmailInboxScanner {
                             continue
                         }
                         if (readingHeaders) {
-                            if (line.startsWith("Subject: ", ignoreCase = true)) {
-                                subject = line.substring(9).trim()
-                            } else if (line.startsWith("From: ", ignoreCase = true)) {
-                                fromSender = line.substring(6).trim()
+                            if (line.startsWith("Subject:", ignoreCase = true)) {
+                                subject = decodeMimeWord(line.substring(8).trim())
+                            } else if (line.startsWith("From:", ignoreCase = true)) {
+                                fromSender = decodeMimeWord(line.substring(5).trim())
+                            } else if (line.startsWith("Date:", ignoreCase = true)) {
+                                dateStr = line.substring(5).trim()
                             } else if (line.trim().isEmpty() || line.startsWith(")")) {
                                 readingHeaders = false
                             }
                         }
-                        if (line.contains("BODY[TEXT]") || line.contains("BODY.PEEK[TEXT]")) {
-                            readingBody = true
-                            continue
-                        }
-                        if (readingBody) {
-                            if (line.startsWith("A03") || line.startsWith("*")) {
-                                readingBody = false
-                            } else {
-                                if (bodyBuilder.length < 300) {
-                                    bodyBuilder.append(line.trim()).append(" ")
-                                }
-                            }
-                        }
                     }
 
-                    val bodySnippet = if (bodyBuilder.isNotBlank()) bodyBuilder.toString().trim() else subject
-                    val record = EmailAnalyzer.analyzeEmail(subject, fromSender, bodySnippet)
-                    val now = System.currentTimeMillis() - ((existsCount - msgNum) * 1000L * 60 * 15)
+                    if (subject.isNotBlank() && subject != "No Subject") {
+                        val record = EmailAnalyzer.analyzeEmail(subject, fromSender, subject)
+                        val now = System.currentTimeMillis() - ((existsCount - msgNum) * 1000L * 60 * 15)
 
-                    items.add(
-                        ScannedInboxEmail(
-                            id = "imap-$msgNum",
-                            subject = subject,
-                            sender = fromSender,
-                            bodySnippet = bodySnippet,
-                            timestamp = now,
-                            formattedDate = dateFormat.format(Date(now)),
-                            record = record
+                        items.add(
+                            ScannedInboxEmail(
+                                id = "imap-$msgNum",
+                                subject = subject,
+                                sender = fromSender,
+                                bodySnippet = "Dispatched from $fromSender. Date: $dateStr",
+                                timestamp = now,
+                                formattedDate = dateFormat.format(Date(now)),
+                                record = record
+                            )
                         )
-                    )
+                    }
                 }
             }
 
@@ -198,12 +216,13 @@ object GmailInboxScanner {
             writer.println("A04 LOGOUT")
         } catch (e: Exception) {
             e.printStackTrace()
+            errorDetail = e.localizedMessage ?: "Socket timeout connecting to imap.gmail.com"
         } finally {
             try {
                 socket?.close()
             } catch (_: Exception) {}
         }
-        return items
+        return Pair(items, errorDetail)
     }
 
     /**
@@ -260,9 +279,9 @@ object GmailInboxScanner {
                                 val header = headers.getJSONObject(h)
                                 val name = header.optString("name", "")
                                 if (name.equals("Subject", ignoreCase = true)) {
-                                    subject = header.optString("value", subject)
+                                    subject = decodeMimeWord(header.optString("value", subject))
                                 } else if (name.equals("From", ignoreCase = true)) {
-                                    fromSender = header.optString("value", fromSender)
+                                    fromSender = decodeMimeWord(header.optString("value", fromSender))
                                 }
                             }
                         }
@@ -284,6 +303,35 @@ object GmailInboxScanner {
             }
         }
         return items
+    }
+
+    /**
+     * Decodes MIME encoded-words (e.g. =?UTF-8?B?...?= or =?UTF-8?Q?...?=)
+     */
+    private fun decodeMimeWord(input: String): String {
+        val regex = Regex("=\\?([^?]+)\\?([BQbq])\\?([^?]+)\\?=")
+        return regex.replace(input) { match ->
+            try {
+                val charset = match.groupValues[1]
+                val encoding = match.groupValues[2].uppercase()
+                val encodedData = match.groupValues[3]
+                if (encoding == "B") {
+                    val bytes = android.util.Base64.decode(encodedData, android.util.Base64.DEFAULT)
+                    String(bytes, java.nio.charset.Charset.forName(charset))
+                } else if (encoding == "Q") {
+                    val decoded = encodedData.replace("_", " ")
+                    val qRegex = Regex("=([0-9A-Fa-f]{2})")
+                    qRegex.replace(decoded) { m ->
+                        val hex = m.groupValues[1].toInt(16).toChar()
+                        hex.toString()
+                    }
+                } else {
+                    match.value
+                }
+            } catch (_: Exception) {
+                match.value
+            }
+        }.replace("\r", "").replace("\n", " ").trim()
     }
 
     /**
@@ -350,7 +398,9 @@ object GmailInboxScanner {
             criticalThreats = critical,
             suspiciousCount = suspicious,
             safeCount = safe,
-            items = items
+            items = items,
+            statusMessage = "Simulated Live Feed: Showing benchmark threat cases.",
+            isLiveSync = false
         )
     }
 }

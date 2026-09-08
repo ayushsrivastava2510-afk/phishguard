@@ -175,12 +175,15 @@ fun EmailScreen(modifier: Modifier = Modifier) {
 
                     Box(
                         modifier = Modifier
-                            .background(Color(0x2610B981), RoundedCornerShape(4.dp))
+                            .background(
+                                if (inboxScanSummary?.isLiveSync == true) Color(0x2610B981) else Color(0x2638BDF8),
+                                RoundedCornerShape(4.dp)
+                            )
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
                         Text(
-                            text = "AUTONOMOUS READY",
-                            color = RiskCleanLight,
+                            text = if (inboxScanSummary?.isLiveSync == true) "LIVE GMAIL SYNCED" else "AUTONOMOUS READY",
+                            color = if (inboxScanSummary?.isLiveSync == true) RiskCleanLight else AccentCyan,
                             fontSize = 8.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -250,7 +253,8 @@ fun EmailScreen(modifier: Modifier = Modifier) {
                     OutlinedTextField(
                         value = gmailAccessToken,
                         onValueChange = { gmailAccessToken = it },
-                        label = { Text("OAuth2 Token / App Password (optional)", fontSize = 11.sp) },
+                        label = { Text("Google 16-Letter App Password or Token", fontSize = 11.sp) },
+                        placeholder = { Text("e.g. abcd efgh ijkl mnop", fontSize = 10.sp, color = TextTertiary) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = PrimaryCobalt,
@@ -278,7 +282,7 @@ fun EmailScreen(modifier: Modifier = Modifier) {
                             strokeWidth = 2.dp
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Scanning Gmail Inbox...", fontSize = 12.sp, color = Color.White)
+                        Text("Connecting & Auditing Gmail...", fontSize = 12.sp, color = Color.White)
                     } else {
                         Icon(
                             Icons.Default.Refresh,
@@ -296,9 +300,44 @@ fun EmailScreen(modifier: Modifier = Modifier) {
                     }
                 }
 
-                // Scanned Gmail Summary Feed
+                // Scanned Gmail Summary Feed & Status Banner
                 inboxScanSummary?.let { summary ->
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    if (summary.statusMessage.isNotBlank()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    if (summary.isLiveSync) Color(0x2610B981) else Color(0x22F59E0B),
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .border(
+                                    1.dp,
+                                    if (summary.isLiveSync) RiskClean.copy(alpha = 0.5f) else RiskWarning.copy(alpha = 0.4f),
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .padding(horizontal = 10.dp, vertical = 7.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    if (summary.isLiveSync) Icons.Default.CheckCircle else Icons.Default.Info,
+                                    contentDescription = null,
+                                    tint = if (summary.isLiveSync) RiskClean else RiskWarning,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = summary.statusMessage,
+                                    color = if (summary.isLiveSync) RiskCleanLight else Color(0xFFFBBF24),
+                                    fontSize = 10.sp,
+                                    lineHeight = 14.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),

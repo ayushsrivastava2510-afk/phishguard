@@ -82,6 +82,8 @@ data class EmailInboxScanSummary(
     val criticalThreats: Int,
     val suspiciousCount: Int,
     val safeCount: Int,
-    val items: List<ScannedInboxEmail>
+    val items: List<ScannedInboxEmail>,
+    val statusMessage: String = "",
+    val isLiveSync: Boolean = false
 )
 
