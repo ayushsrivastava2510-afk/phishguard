@@ -6,6 +6,7 @@ Reconstructs shared attacker infrastructure across multiple forensic cases:
   - Correlates shared originating IP subnets, ASN providers, and sender domains
   - Detects coordinated Advanced Persistent Threat (APT) / Phishing campaigns
   - Generates interactive Vis.js physical topological graph maps and static clusters
+Supports dynamic light (pastel blue) and dark (cyber night) visual themes.
 """
 
 import networkx as nx
@@ -17,22 +18,7 @@ import io
 
 def build_attribution_graph(email_records):
     """
-    email_records: list of dicts, each like:
-        {
-            "id": "email_1",
-            "subject": "...",
-            "from_domain": "paypa1-support.com",
-            "originating_ip": "45.155.204.12",
-            "risk_score": 88,
-        }
-
-    Builds a graph where:
-      - Each email is a node
-      - Each unique domain is a node
-      - Each unique IP is a node
-      - Edges connect an email to its domain and its IP
-    If two emails share a domain or IP, they end up connected through
-    that shared node -- visually revealing a campaign cluster.
+    Builds an infrastructure attribution graph connecting emails to their domains and IPs.
     """
     G = nx.Graph()
 
@@ -109,15 +95,16 @@ def render_graph_image(G):
     return buf
 
 
-def generate_interactive_graph_html(G):
+def generate_interactive_graph_html(G, theme="light"):
     """
     Generates a dynamic, physics-enabled HTML5 network visualization using Vis.js.
-    Allows user to drag nodes, zoom, pan, and click to inspect shared campaign infrastructure.
+    Supports both 'light' (pastel blue & white) and 'dark' (cyber night) modes.
     """
     if G.number_of_nodes() == 0:
-        return "<div style='color:#64748b; padding:20px;'>No graph nodes to display.</div>"
+        return f"<div style='color:{'#94a3b8' if theme == 'dark' else '#64748b'}; padding:20px;'>No graph nodes to display.</div>"
 
     import json
+    is_dark = (theme == "dark")
 
     nodes = []
     edges = []
@@ -126,26 +113,52 @@ def generate_interactive_graph_html(G):
         kind = G.nodes[n].get("kind", "unknown")
         lbl = G.nodes[n].get("label", n)
 
-        if kind == "email":
-            color = {"background": "#ffffff", "border": "#2563eb", "highlight": {"background": "#dbeafe", "border": "#1d4ed8"}}
-            shape = "dot"
-            size = 24
-            title = f"Email Incident: {lbl}"
-        elif kind == "domain":
-            color = {"background": "#fee2e2", "border": "#ef4444", "highlight": {"background": "#fecaca", "border": "#dc2626"}}
-            shape = "diamond"
-            size = 20
-            title = f"Sender Domain: {lbl}"
-        elif kind == "ip":
-            color = {"background": "#2563eb", "border": "#1e40af", "highlight": {"background": "#1d4ed8", "border": "#1e3a8a"}}
-            shape = "hexagon"
-            size = 28
-            title = f"Attacker Origin IP: {lbl} (Shared Threat Infrastructure)"
+        if is_dark:
+            if kind == "email":
+                color = {"background": "#1e1e24", "border": "#4d65ff", "highlight": {"background": "#4d65ff", "border": "#ffffff"}}
+                shape = "dot"
+                size = 24
+                title = f"Email Incident: {lbl}"
+            elif kind == "domain":
+                color = {"background": "#b81d24", "border": "#ff4d58", "highlight": {"background": "#ef4444", "border": "#ffffff"}}
+                shape = "diamond"
+                size = 20
+                title = f"Sender Domain: {lbl}"
+            elif kind == "ip":
+                color = {"background": "#4d65ff", "border": "#ffffff", "highlight": {"background": "#38bdf8", "border": "#ffffff"}}
+                shape = "hexagon"
+                size = 28
+                title = f"Attacker Origin IP: {lbl} (Shared Threat Infrastructure)"
+            else:
+                color = {"background": "#2a2a32", "border": "#737373", "highlight": {"background": "#4d65ff", "border": "#ffffff"}}
+                shape = "dot"
+                size = 18
+                title = lbl
+            font_color = "#ffffff"
+            edge_color = {"color": "#40404a", "highlight": "#4d65ff", "opacity": 0.85}
         else:
-            color = {"background": "#f1f5f9", "border": "#94a3b8", "highlight": {"background": "#e2e8f0", "border": "#64748b"}}
-            shape = "dot"
-            size = 18
-            title = lbl
+            if kind == "email":
+                color = {"background": "#ffffff", "border": "#2563eb", "highlight": {"background": "#dbeafe", "border": "#1d4ed8"}}
+                shape = "dot"
+                size = 24
+                title = f"Email Incident: {lbl}"
+            elif kind == "domain":
+                color = {"background": "#fee2e2", "border": "#ef4444", "highlight": {"background": "#fecaca", "border": "#dc2626"}}
+                shape = "diamond"
+                size = 20
+                title = f"Sender Domain: {lbl}"
+            elif kind == "ip":
+                color = {"background": "#2563eb", "border": "#1e40af", "highlight": {"background": "#1d4ed8", "border": "#1e3a8a"}}
+                shape = "hexagon"
+                size = 28
+                title = f"Attacker Origin IP: {lbl} (Shared Threat Infrastructure)"
+            else:
+                color = {"background": "#f1f5f9", "border": "#94a3b8", "highlight": {"background": "#e2e8f0", "border": "#64748b"}}
+                shape = "dot"
+                size = 18
+                title = lbl
+            font_color = "#0f172a"
+            edge_color = {"color": "#bfdbfe", "highlight": "#2563eb", "opacity": 0.85}
 
         nodes.append({
             "id": n,
@@ -153,7 +166,7 @@ def generate_interactive_graph_html(G):
             "shape": shape,
             "size": size,
             "color": color,
-            "font": {"color": "#0f172a", "size": 11, "face": "Inter, sans-serif"},
+            "font": {"color": font_color, "size": 11, "face": "Inter, sans-serif"},
             "title": title,
         })
 
@@ -161,13 +174,23 @@ def generate_interactive_graph_html(G):
         edges.append({
             "from": u,
             "to": v,
-            "color": {"color": "#bfdbfe", "highlight": "#2563eb", "opacity": 0.85},
+            "color": edge_color,
             "width": 2,
             "smooth": {"type": "continuous"},
         })
 
     nodes_json = json.dumps(nodes)
     edges_json = json.dumps(edges)
+
+    bg_canvas = "#0b0b0e" if is_dark else "#ffffff"
+    legend_bg = "rgba(20, 20, 25, 0.9)" if is_dark else "rgba(255, 255, 255, 0.95)"
+    legend_bd = "rgba(77, 101, 255, 0.35)" if is_dark else "#bfdbfe"
+    legend_txt = "#ffffff" if is_dark else "#0f172a"
+    legend_sub = "#94a3b8" if is_dark else "#64748b"
+    legend_shadow = "0 4px 16px rgba(0, 0, 0, 0.7)" if is_dark else "0 4px 16px rgba(37, 99, 235, 0.08)"
+    hint_bg = "rgba(20, 20, 25, 0.85)" if is_dark else "rgba(255, 255, 255, 0.95)"
+    hint_bd = "rgba(255, 255, 255, 0.08)" if is_dark else "#bfdbfe"
+    hint_txt = "#737373" if is_dark else "#64748b"
 
     html = f"""
     <!DOCTYPE html>
@@ -178,7 +201,7 @@ def generate_interactive_graph_html(G):
       <style>
         body, html {{
           margin: 0; padding: 0; width: 100%; height: 100%;
-          background: #ffffff; overflow: hidden;
+          background: {bg_canvas}; overflow: hidden;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }}
         #mynetwork {{
@@ -186,27 +209,27 @@ def generate_interactive_graph_html(G):
         }}
         .legend {{
           position: absolute; top: 12px; left: 14px;
-          background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px);
-          border: 1px solid #bfdbfe; border-radius: 8px;
-          padding: 8px 14px; font-size: 11px; color: #334155; z-index: 10;
+          background: {legend_bg}; backdrop-filter: blur(8px);
+          border: 1px solid {legend_bd}; border-radius: 8px;
+          padding: 8px 14px; font-size: 11px; color: {legend_sub}; z-index: 10;
           display: flex; gap: 14px; align-items: center;
-          box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
+          box-shadow: {legend_shadow};
         }}
         .legend-item {{ display: flex; align-items: center; gap: 6px; }}
         .dot {{ width: 10px; height: 10px; border-radius: 50%; display: inline-block; }}
         .hint {{
           position: absolute; bottom: 10px; right: 14px;
-          background: rgba(255, 255, 255, 0.95); border-radius: 6px;
-          padding: 4px 10px; font-size: 10px; color: #64748b;
-          border: 1px solid #bfdbfe;
+          background: {hint_bg}; border-radius: 6px;
+          padding: 4px 10px; font-size: 10px; color: {hint_txt};
+          border: 1px solid {hint_bd};
         }}
       </style>
     </head>
     <body>
       <div class="legend">
-        <div class="legend-item"><span class="dot" style="background:#ffffff; border:2px solid #2563eb;"></span> <span style="color:#0f172a; font-weight:600;">Email Incident</span></div>
-        <div class="legend-item"><span class="dot" style="background:#fee2e2; border:1px solid #ef4444;"></span> <span style="color:#0f172a; font-weight:600;">Domain Node</span></div>
-        <div class="legend-item"><span class="dot" style="background:#2563eb; box-shadow:0 0 6px rgba(37,99,235,0.4);"></span> <span style="color:#0f172a; font-weight:600;">Origin IP (Attacker Node)</span></div>
+        <div class="legend-item"><span class="dot" style="background:{'#1e1e24' if is_dark else '#ffffff'}; border:2px solid {'#4d65ff' if is_dark else '#2563eb'};"></span> <span style="color:{legend_txt}; font-weight:600;">Email Incident</span></div>
+        <div class="legend-item"><span class="dot" style="background:{'#b81d24' if is_dark else '#fee2e2'}; border:1px solid {'#ef4444' if is_dark else '#ef4444'};"></span> <span style="color:{legend_txt}; font-weight:600;">Domain Node</span></div>
+        <div class="legend-item"><span class="dot" style="background:{'#4d65ff' if is_dark else '#2563eb'}; box-shadow:0 0 6px {'#4d65ff' if is_dark else 'rgba(37,99,235,0.4)'};"></span> <span style="color:{legend_txt}; font-weight:600;">Origin IP (Attacker Node)</span></div>
       </div>
       <div class="hint">💡 Drag nodes to interact &bull; Scroll to zoom</div>
       <div id="mynetwork"></div>
@@ -246,8 +269,6 @@ def generate_interactive_graph_html(G):
 
 
 if __name__ == "__main__":
-    # Self-test with fake records -- two emails share the same IP,
-    # simulating a real campaign.
     records = [
         {"id": "1", "subject": "Urgent Invoice", "from_domain": "bad1.com", "originating_ip": "45.155.204.12"},
         {"id": "2", "subject": "Account Suspended", "from_domain": "bad2.com", "originating_ip": "45.155.204.12"},

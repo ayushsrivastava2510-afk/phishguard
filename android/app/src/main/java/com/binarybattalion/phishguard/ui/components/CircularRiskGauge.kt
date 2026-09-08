@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -26,6 +27,7 @@ fun CircularRiskGauge(
     verdict: String,
     modifier: Modifier = Modifier
 ) {
+    val isDark = LocalIsDarkMode.current
     val animatedProgress = remember { Animatable(0f) }
 
     LaunchedEffect(score) {
@@ -36,15 +38,28 @@ fun CircularRiskGauge(
     }
 
     val (gaugeColor, verdictColor, badgeBg) = when {
-        score >= 70 -> Triple(RiskCritical, RiskCriticalLight, Color(0x33EF4444))
-        score >= 35 -> Triple(RiskWarning, RiskWarningLight, Color(0x33F59E0B))
-        else -> Triple(RiskClean, RiskCleanLight, Color(0x3310B981))
+        score >= 70 -> Triple(
+            RiskCritical,
+            if (isDark) RiskCriticalLight else Color(0xFFDC2626),
+            if (isDark) Color(0x33EF4444) else Color(0x1AEF4444)
+        )
+        score >= 35 -> Triple(
+            RiskWarning,
+            if (isDark) RiskWarningLight else Color(0xFFD97706),
+            if (isDark) Color(0x33F59E0B) else Color(0x1AF59E0B)
+        )
+        else -> Triple(
+            RiskClean,
+            if (isDark) RiskCleanLight else Color(0xFF059669),
+            if (isDark) Color(0x3310B981) else Color(0x1A10B981)
+        )
     }
 
     Column(
         modifier = modifier
             .fillMaxWidth()
             .background(CardDark, RoundedCornerShape(16.dp))
+            .border(1.dp, BorderDark, RoundedCornerShape(16.dp))
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -67,7 +82,7 @@ fun CircularRiskGauge(
 
                 // Background Track
                 drawArc(
-                    color = Color(0x1AFFFFFF),
+                    color = if (isDark) Color(0x1AFFFFFF) else Color(0x150F172A),
                     startAngle = -90f,
                     sweepAngle = 360f,
                     useCenter = false,

@@ -11,6 +11,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -50,8 +52,13 @@ class MainActivity : ComponentActivity() {
         } else null
 
         setContent {
-            PhishGuardTheme {
-                MainAppScaffold(initialRecord = initialRecord)
+            var isDarkMode by remember { mutableStateOf(false) } // Default to Day Mode / Pastel Blue & White
+            PhishGuardTheme(darkTheme = isDarkMode) {
+                MainAppScaffold(
+                    initialRecord = initialRecord,
+                    isDarkMode = isDarkMode,
+                    onToggleTheme = { isDarkMode = !isDarkMode }
+                )
             }
         }
     }
@@ -77,7 +84,11 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainAppScaffold(initialRecord: SmishingRecord? = null) {
+fun MainAppScaffold(
+    initialRecord: SmishingRecord? = null,
+    isDarkMode: Boolean = false,
+    onToggleTheme: () -> Unit = {}
+) {
     var activeVector by remember { mutableStateOf(ThreatVector.SMS) }
 
     Scaffold(
@@ -88,13 +99,13 @@ fun MainAppScaffold(initialRecord: SmishingRecord? = null) {
                         Box(
                             modifier = Modifier
                                 .size(36.dp)
-                                .background(Color(0x334D65FF), RoundedCornerShape(8.dp)),
+                                .background(if (isDarkMode) Color(0x334D65FF) else Color(0x224D65FF), RoundedCornerShape(8.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 Icons.Default.Security,
                                 contentDescription = "Shield Logo",
-                                tint = PrimaryCobaltLight,
+                                tint = if (isDarkMode) PrimaryCobaltLight else PrimaryCobalt,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -110,12 +121,12 @@ fun MainAppScaffold(initialRecord: SmishingRecord? = null) {
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Box(
                                     modifier = Modifier
-                                        .background(Color(0x3338BDF8), RoundedCornerShape(4.dp))
+                                        .background(if (isDarkMode) Color(0x3338BDF8) else Color(0x2238BDF8), RoundedCornerShape(4.dp))
                                         .padding(horizontal = 5.dp, vertical = 2.dp)
                                 ) {
                                     Text(
                                         text = "MOBILE SOC",
-                                        color = AccentCyan,
+                                        color = if (isDarkMode) AccentCyan else PrimaryCobalt,
                                         fontSize = 8.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -131,10 +142,23 @@ fun MainAppScaffold(initialRecord: SmishingRecord? = null) {
                     }
                 },
                 actions = {
+                    // 1-Tap Day / Night Mode Toggle (Sun / Moon)
+                    IconButton(
+                        onClick = onToggleTheme,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = if (isDarkMode) "Switch to Day Mode" else "Switch to Night Mode",
+                            tint = if (isDarkMode) Color(0xFFFDE047) else Color(0xFF334155),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
                     Box(
                         modifier = Modifier
                             .padding(end = 12.dp)
-                            .background(Color(0x2610B981), RoundedCornerShape(12.dp))
+                            .background(if (isDarkMode) Color(0x2610B981) else Color(0x2210B981), RoundedCornerShape(12.dp))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -146,7 +170,7 @@ fun MainAppScaffold(initialRecord: SmishingRecord? = null) {
                             Spacer(modifier = Modifier.width(5.dp))
                             Text(
                                 text = "ENGINE ONLINE",
-                                color = RiskCleanLight,
+                                color = if (isDarkMode) RiskCleanLight else Color(0xFF047857),
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -178,7 +202,7 @@ fun MainAppScaffold(initialRecord: SmishingRecord? = null) {
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (activeVector == ThreatVector.SMS) PrimaryCobalt else CardDark,
-                        contentColor = if (activeVector == ThreatVector.SMS) TextPrimary else TextSecondary
+                        contentColor = if (activeVector == ThreatVector.SMS) Color.White else TextSecondary
                     ),
                     shape = RoundedCornerShape(10.dp)
                 ) {
@@ -194,7 +218,7 @@ fun MainAppScaffold(initialRecord: SmishingRecord? = null) {
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (activeVector == ThreatVector.EMAIL) PrimaryCobalt else CardDark,
-                        contentColor = if (activeVector == ThreatVector.EMAIL) TextPrimary else TextSecondary
+                        contentColor = if (activeVector == ThreatVector.EMAIL) Color.White else TextSecondary
                     ),
                     shape = RoundedCornerShape(10.dp)
                 ) {

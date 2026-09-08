@@ -7,6 +7,7 @@ plugins {
 android {
     namespace = "com.binarybattalion.phishguard"
     compileSdk = 35
+    buildToolsVersion = "35.0.0"
 
     defaultConfig {
         applicationId = "com.binarybattalion.phishguard"

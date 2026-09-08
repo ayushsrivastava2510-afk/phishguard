@@ -82,8 +82,273 @@ _ensure_bridge_server_active()
 
 MODEL_PATH = "models/phishing_classifier.joblib"
 
-# Dynamic Cyber SOC Styling - Pastel Blue & White Enterprise Theme
-DYNAMIC_CSS = """
+# Theme Management (1-Click Night / Dark Mode Feature)
+if "theme" in st.query_params and st.query_params.get("theme") in ["light", "dark"]:
+    st.session_state.theme_mode = st.query_params.get("theme")
+elif "theme_mode" not in st.session_state:
+    st.session_state.theme_mode = "light"
+
+is_dark = (st.session_state.get("theme_mode", "light") == "dark")
+
+# Dynamic Theme Engine - Dark (Cyber Night) vs. Light (Pastel Blue & White)
+if is_dark:
+    DYNAMIC_CSS = """
+<style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    .stDeployButton {display:none;}
+    div[data-testid="stDecoration"] {display:none;}
+    header {background: transparent !important;}
+
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    
+    html, body, [class*="css"], .stApp {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: #080c16 !important;
+        color: #f1f5f9 !important;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+    
+    /* Cyber Dark Slate Canvas */
+    .stApp {
+        background-color: #080c16 !important;
+        background-image: 
+            radial-gradient(ellipse 85% 55% at 50% -15%, rgba(77, 101, 255, 0.16), transparent 70%),
+            radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.08), transparent 50%),
+            radial-gradient(circle at 0% 40%, rgba(56, 189, 248, 0.06), transparent 45%),
+            linear-gradient(180deg, #080c16 0%, #0d1424 100%) !important;
+        background-attachment: fixed !important;
+    }
+
+    /* Cyber Animated Multi-Tone Gradient Heading */
+    .text-style-gradient {
+        display: inline-block;
+        background-image: linear-gradient(-45deg, #22d3ee, #4d65ff, #818cf8, #34d399, #4d65ff) !important;
+        background-size: 300% !important;
+        background-clip: text;
+        -webkit-background-clip: text;
+        text-fill-color: transparent;
+        -webkit-text-fill-color: transparent;
+        animation: CyberGradient 9s ease infinite !important;
+    }
+    @keyframes CyberGradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .sub-head-top {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        background: rgba(77, 101, 255, 0.12);
+        color: #60a5fa;
+        border: 1px solid rgba(77, 101, 255, 0.28);
+        margin-bottom: 6px;
+    }
+
+    code, pre {
+        font-family: 'JetBrains Mono', monospace !important;
+        background-color: #0c1222 !important;
+        color: #38bdf8 !important;
+        border: 1px solid rgba(56, 189, 248, 0.22) !important;
+        border-radius: 8px;
+        padding: 2px 6px;
+    }
+
+    section[data-testid="stSidebar"] {
+        background-color: #0c1220 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5) !important;
+    }
+    section[data-testid="stSidebar"] hr {
+        border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .soc-pulse-red, .soc-pulse-cobalt {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #10b981;
+        box-shadow: 0 0 12px #10b981;
+        margin-right: 8px;
+        animation: cyberPulse 2s infinite;
+    }
+    @keyframes cyberPulse {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8); }
+        70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .metric-card {
+        background: rgba(15, 23, 42, 0.72) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 16px !important;
+        padding: 20px 22px;
+        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.45), 0 0 1px 1px rgba(255, 255, 255, 0.04);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .metric-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(77, 101, 255, 0.45) !important;
+        box-shadow: 0 16px 36px -6px rgba(77, 101, 255, 0.22), 0 0 20px rgba(77, 101, 255, 0.12);
+    }
+    .metric-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #94a3b8;
+        margin-bottom: 6px;
+    }
+    .metric-value-huge {
+        font-size: 2.2rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 6px;
+        color: #ffffff;
+    }
+
+    .metric-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 4px 12px;
+        border-radius: 999px;
+    }
+    .badge-critical {
+        background: rgba(239, 68, 68, 0.14);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.35);
+        box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+    }
+    .badge-suspicious {
+        background: rgba(245, 158, 11, 0.14);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.35);
+        box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
+    }
+    .badge-clean {
+        background: rgba(16, 185, 129, 0.14);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+    }
+
+    div.stButton > button[kind="primary"], div[data-testid="stDownloadButton"] > button[kind="primary"] {
+        background: linear-gradient(135deg, #4d65ff 0%, #3b49df 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.01em !important;
+        border-radius: 10px !important;
+        padding: 8px 20px !important;
+        box-shadow: 0 4px 16px rgba(77, 101, 255, 0.35) !important;
+        transition: all 0.2s ease !important;
+    }
+    div.stButton > button[kind="primary"]:hover, div[data-testid="stDownloadButton"] > button[kind="primary"]:hover {
+        background: linear-gradient(135deg, #5c72ff 0%, #4757ea 100%) !important;
+        box-shadow: 0 6px 24px rgba(77, 101, 255, 0.55) !important;
+        transform: translateY(-2px) !important;
+    }
+    div.stButton > button:not([kind="primary"]), div[data-testid="stDownloadButton"] > button:not([kind="primary"]) {
+        background: rgba(30, 41, 59, 0.65) !important;
+        color: #e2e8f0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 10px !important;
+        font-weight: 500 !important;
+        transition: all 0.2s ease !important;
+    }
+    div.stButton > button:not([kind="primary"]):hover, div[data-testid="stDownloadButton"] > button:not([kind="primary"]):hover {
+        border-color: #4d65ff !important;
+        color: #ffffff !important;
+        background: rgba(43, 58, 85, 0.8) !important;
+        box-shadow: 0 0 14px rgba(77, 101, 255, 0.25) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    button[data-baseweb="tab"] {
+        color: #94a3b8 !important;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        transition: all 0.2s ease !important;
+    }
+    button[data-baseweb="tab"]:hover {
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
+    button[data-baseweb="tab"][aria-selected="true"] {
+        color: #ffffff !important;
+        background: rgba(77, 101, 255, 0.16) !important;
+        border-bottom: 2px solid #4d65ff !important;
+    }
+    div[data-baseweb="tab-highlight"] {
+        background-color: #4d65ff !important;
+    }
+
+    div[data-testid="stExpander"] {
+        background: rgba(15, 23, 42, 0.65) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 14px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .hop-node {
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 12px 18px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+    .hop-node:hover {
+        border-color: #4d65ff;
+        box-shadow: 0 0 14px rgba(77, 101, 255, 0.25);
+    }
+    .hop-num {
+        background: linear-gradient(135deg, #4d65ff 0%, #3b49df 100%);
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.78rem;
+        padding: 5px 12px;
+        border-radius: 8px;
+        margin-right: 14px;
+        white-space: nowrap;
+        box-shadow: 0 2px 10px rgba(77, 101, 255, 0.3);
+    }
+    .hop-connector {
+        text-align: center;
+        color: #60a5fa;
+        font-size: 0.82rem;
+        padding: 5px 0;
+        font-family: 'JetBrains Mono', monospace;
+    }
+</style>
+"""
+else:
+    DYNAMIC_CSS = """
 <style>
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
@@ -550,6 +815,19 @@ with st.sidebar:
 
     st.markdown("---")
     st.subheader("⚙️ Live Controls")
+    theme_choice = st.radio(
+        "Appearance Mode",
+        options=["☀️ Pastel Day", "🌙 Cyber Night"],
+        index=1 if is_dark else 0,
+        horizontal=True,
+        key="side_theme_radio"
+    )
+    desired_mode = "dark" if "Night" in theme_choice else "light"
+    if desired_mode != st.session_state.get("theme_mode", "light"):
+        st.session_state.theme_mode = desired_mode
+        st.query_params["theme"] = desired_mode
+        st.rerun()
+
     sound_alert = st.checkbox("🔊 Cyber Audio Alert", value=True, help="Synthesizes an immediate audible alert when a critical threat is identified.")
     redact_enabled = st.checkbox("🔒 Redact PII (Evidence Anonymization)", value=False, help="Masks personal details for legal and regulatory compliance.")
 
@@ -613,21 +891,25 @@ with st.sidebar:
     )
     st.caption("Smart India Hackathon 2026 | Binary Battalion")
 
-# Top Brand & SOC Header - Pastel Blue & White Theme
-col_brand, col_status = st.columns([3.6, 1.4])
+# Top Brand & SOC Header with 1-Click Night/Day Mode Toggle
+col_brand, col_status = st.columns([3.2, 1.8])
 with col_brand:
+    logo_bg = "rgba(77, 101, 255, 0.25)" if is_dark else "#e0edfb"
+    logo_bd = "rgba(77, 101, 255, 0.45)" if is_dark else "#bfdbfe"
+    title_clr = "#ffffff" if is_dark else "#0f172a"
+    sub_clr = "#94a3b8" if is_dark else "#475569"
     st.markdown(
-        """
+        f"""
         <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 6px;">
-            <div style="width: 54px; height: 54px; border-radius: 14px; background: #e0edfb; border: 1px solid #bfdbfe; display: flex; align-items: center; justify-content: center; font-size: 1.85rem; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);">
+            <div style="width: 54px; height: 54px; border-radius: 14px; background: {logo_bg}; border: 1px solid {logo_bd}; display: flex; align-items: center; justify-content: center; font-size: 1.85rem; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);">
                 🛡️
             </div>
             <div>
                 <div class="sub-head-top">Autonomous SOC Platform</div>
-                <h1 style="margin: 0; font-size: 2.15rem; font-weight: 800; color: #0f172a; letter-spacing: -0.03em; line-height: 1.15;">
+                <h1 style="margin: 0; font-size: 2.15rem; font-weight: 800; color: {title_clr}; letter-spacing: -0.03em; line-height: 1.15;">
                     PhishGuard <span class="text-style-gradient">Unified Threat Sentinel</span>
                 </h1>
-                <p style="margin: 4px 0 0 0; color: #475569; font-size: 0.92rem; font-weight: 400;">
+                <p style="margin: 4px 0 0 0; color: {sub_clr}; font-size: 0.92rem; font-weight: 400;">
                     Dual-Vector Interception &bull; 3D Email Trajectory &bull; Mobile TRAI DLT Smishing Defense &bull; Section 65B Certified
                 </p>
             </div>
@@ -636,21 +918,35 @@ with col_brand:
         unsafe_allow_html=True,
     )
 with col_status:
-    st.markdown(
-        """
-        <div style="text-align: right; padding-top: 12px;">
-            <span class="metric-badge badge-clean" style="font-size: 0.8rem; padding: 6px 14px; font-weight: 700;">
-                <span class="soc-pulse-cobalt"></span> SOC ENGINE ONLINE
-            </span>
-            <div style="font-size: 0.74rem; color: #64748b; margin-top: 6px; font-weight: 500;">
-                Smart India Hackathon 2026 &bull; Binary Battalion
+    t_c1, t_c2 = st.columns([1.1, 1.3])
+    with t_c1:
+        if is_dark:
+            if st.button("☀️ Day Mode", use_container_width=True, key="top_theme_toggle", help="Switch to Pastel Blue & White Theme"):
+                st.session_state.theme_mode = "light"
+                st.query_params["theme"] = "light"
+                st.rerun()
+        else:
+            if st.button("🌙 Night Mode", use_container_width=True, key="top_theme_toggle", help="Switch to Cyber Dark Mode"):
+                st.session_state.theme_mode = "dark"
+                st.query_params["theme"] = "dark"
+                st.rerun()
+    with t_c2:
+        st.markdown(
+            """
+            <div style="text-align: right; padding-top: 4px;">
+                <span class="metric-badge badge-clean" style="font-size: 0.78rem; padding: 5px 12px; font-weight: 700;">
+                    <span class="soc-pulse-cobalt"></span> SOC ONLINE
+                </span>
+                <div style="font-size: 0.70rem; color: #64748b; margin-top: 4px; font-weight: 500;">
+                    SIH 2026 &bull; Binary Battalion
+                </div>
             </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+            """,
+            unsafe_allow_html=True,
+        )
 
-st.markdown("<hr style='margin: 10px 0 18px 0; border-color: #dbeafe;'>", unsafe_allow_html=True)
+hr_bd = "rgba(255, 255, 255, 0.08)" if is_dark else "#dbeafe"
+st.markdown(f"<hr style='margin: 10px 0 18px 0; border-color: {hr_bd};'>", unsafe_allow_html=True)
 
 def render_email_sentinel(sound_alert, redact_enabled):
     model = load_model()
@@ -1051,33 +1347,47 @@ def render_email_sentinel(sound_alert, redact_enabled):
         telemetry_info = resolve_email_telemetry_display(data)
 
         # Dedicated Active Email Identification Hero Card (GeekPay Clean High-Trust Palette)
-        currently_analyzing_html = f"""<div class="metric-card" style="margin-bottom: 20px; padding: 18px 22px; border-left: 4px solid #2563eb; background: #ffffff;">
-    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+        card_bg = "linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.92) 100%)" if is_dark else "#ffffff"
+        card_accent_border = "#4d65ff" if is_dark else "#2563eb"
+        card_divider = "rgba(255, 255, 255, 0.08)" if is_dark else "#e2e8f0"
+        title_text_color = "#ffffff" if is_dark else "#0f172a"
+        subj_color = "#f8fafc" if is_dark else "#0f172a"
+        sender_color = "#cbd5e1" if is_dark else "#334155"
+        domain_color = "#38bdf8" if is_dark else "#2563eb"
+        ip_color = "#e2e8f0" if is_dark else "#334155"
+        pipeline_bg = "rgba(148, 163, 184, 0.12)" if is_dark else "#f1f5f9"
+        pipeline_bd = "rgba(148, 163, 184, 0.2)" if is_dark else "#e2e8f0"
+        pipeline_fg = "#94a3b8" if is_dark else "#475569"
+        case_bg = "rgba(77, 101, 255, 0.15)" if is_dark else "#e0edfb"
+        case_fg = "#93c5fd" if is_dark else "#1e40af"
+
+        currently_analyzing_html = f"""<div class="metric-card" style="margin-bottom: 20px; padding: 18px 22px; border-left: 4px solid {card_accent_border}; background: {card_bg};">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; border-bottom: 1px solid {card_divider}; padding-bottom: 10px;">
     <div style="display: flex; align-items: center; gap: 10px;">
-    <span class="sub-head-top" style="margin-bottom: 0; background: #e0edfb; color: #1e40af; border: 1px solid #bfdbfe; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase;">🔍 CURRENTLY ANALYZING</span>
-    <span style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">{telemetry_info['title']}</span>
+    <span class="sub-head-top" style="margin-bottom: 0;">🔍 CURRENTLY ANALYZING</span>
+    <span style="font-size: 1.1rem; font-weight: 800; color: {title_text_color};">{telemetry_info['title']}</span>
     </div>
     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-    <span style="background: #f1f5f9; color: #475569; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; border: 1px solid #e2e8f0; font-weight: 500;">Pipeline: <b>{telemetry_info['source']}</b></span>
-    <span style="background: #e0edfb; color: #1e40af; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; font-weight: 600;">Case: <code>{data.get('case_id', 'PG-AUDIT')}</code></span>
+    <span style="background: {pipeline_bg}; color: {pipeline_fg}; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; border: 1px solid {pipeline_bd}; font-weight: 500;">Pipeline: <b>{telemetry_info['source']}</b></span>
+    <span style="background: {case_bg}; color: {case_fg}; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; font-weight: 600;">Case: <code>{data.get('case_id', 'PG-AUDIT')}</code></span>
     </div>
     </div>
     <div style="display: grid; grid-template-columns: 2.2fr 1.6fr 1.1fr 1.1fr; gap: 14px;">
     <div>
     <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Email Subject Line</div>
-    <div style="font-size: 0.90rem; color: #0f172a; font-weight: 600; line-height: 1.4; word-break: break-word;" title="{telemetry_info['subject']}">{telemetry_info['subject']}</div>
+    <div style="font-size: 0.90rem; color: {subj_color}; font-weight: 600; line-height: 1.4; word-break: break-word;" title="{telemetry_info['subject']}">{telemetry_info['subject']}</div>
     </div>
     <div>
     <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Sender Entity (From)</div>
-    <div style="font-size: 0.84rem; color: #334155; font-weight: 500; line-height: 1.4; word-break: break-all;" title="{telemetry_info['from']}"><code>{telemetry_info['from']}</code></div>
+    <div style="font-size: 0.84rem; color: {sender_color}; font-weight: 500; line-height: 1.4; word-break: break-all;" title="{telemetry_info['from']}"><code>{telemetry_info['from']}</code></div>
     </div>
     <div>
     <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Sender Domain</div>
-    <div style="font-size: 0.84rem; color: #2563eb; font-weight: 600; line-height: 1.4;"><code>{telemetry_info['domain']}</code></div>
+    <div style="font-size: 0.84rem; color: {domain_color}; font-weight: 600; line-height: 1.4;"><code>{telemetry_info['domain']}</code></div>
     </div>
     <div>
     <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Originating IP</div>
-    <div style="font-size: 0.84rem; color: #334155; font-weight: 600; line-height: 1.4;"><code>{origin_ip or '127.0.0.1'}</code></div>
+    <div style="font-size: 0.84rem; color: {ip_color}; font-weight: 600; line-height: 1.4;"><code>{origin_ip or '127.0.0.1'}</code></div>
     </div>
     </div>
     </div>"""
@@ -1095,7 +1405,7 @@ def render_email_sentinel(sound_alert, redact_enabled):
                     <div class="metric-title">Threat Score</div>
                     <div style="position: relative; width: 112px; height: 112px; margin: 4px 0;">
                         <svg width="112" height="112" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="42" stroke="#e2e8f0" stroke-width="8" fill="transparent"/>
+                            <circle cx="50" cy="50" r="42" stroke="' + ('rgba(255,255,255,0.08)' if is_dark else '#e2e8f0') + '" stroke-width="8" fill="transparent"/>
                             <circle cx="50" cy="50" r="42" stroke="{gauge_color}" stroke-width="8" fill="transparent"
                                 stroke-dasharray="{circumference}" stroke-dashoffset="{stroke_offset}"
                                 stroke-linecap="round" transform="rotate(-90 50 50)"
@@ -1136,27 +1446,32 @@ def render_email_sentinel(sound_alert, redact_enabled):
                 reason_origin = f"⚠️ <b>Server Location:</b> Dispatched via anonymized VPN/Tor node in <b>{loc_str}</b> (<code>{origin_ip}</code>)."
             else:
                 reason_origin = f"📍 <b>Server Location:</b> Dispatched via mail gateway in <b>{loc_str}</b> (<code>{origin_ip}</code>)."
+                fa_bg = "rgba(15, 23, 42, 0.72)" if is_dark else "#ffffff"
+                fa_title_clr = "#ffffff" if is_dark else "#0f172a"
+                fa_sub_clr = "#94a3b8" if is_dark else "#64748b"
+                fa_target_clr = "#60a5fa" if is_dark else "#2563eb"
+                fa_body_clr = "#e2e8f0" if is_dark else "#334155"
 
-            st.markdown(
-                f"""
-                <div class="metric-card" style="padding: 20px 24px; border-left: 4px solid {border_accent}; background: #ffffff;">
-                    <div class="sub-head-top" style="margin-bottom: 4px;">Forensic Assessment</div>
-                    <div style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">
-                        {data.get('threat_category', 'Email Security Audit')}
+                st.markdown(
+                    f"""
+                    <div class="metric-card" style="padding: 20px 24px; border-left: 4px solid {border_accent}; background: {fa_bg};">
+                        <div class="sub-head-top" style="margin-bottom: 4px;">Forensic Assessment</div>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: {fa_title_clr}; margin-bottom: 2px;">
+                            {data.get('threat_category', 'Email Security Audit')}
+                        </div>
+                        <div style="font-size: 0.82rem; color: {fa_sub_clr}; margin-bottom: 14px;">
+                            <b>Target:</b> <span style="color: {fa_target_clr}; font-weight: 600;">{telemetry_info['title']}</span><br/>
+                            <b>From:</b> {telemetry_info['from'][:38]} &bull; <b>Subject:</b> {telemetry_info['subject'][:42]}
+                        </div>
+                        <div style="font-size: 0.88rem; line-height: 1.65; color: {fa_body_clr};">
+                            <div style="margin-bottom: 8px;">{reason_identity}</div>
+                            <div style="margin-bottom: 8px;">{reason_intent}</div>
+                            <div>{reason_origin}</div>
+                        </div>
                     </div>
-                    <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 14px;">
-                        <b>Target:</b> <span style="color: #2563eb; font-weight: 600;">{telemetry_info['title']}</span><br/>
-                        <b>From:</b> {telemetry_info['from'][:38]} &bull; <b>Subject:</b> {telemetry_info['subject'][:42]}
-                    </div>
-                    <div style="font-size: 0.88rem; line-height: 1.65; color: #334155;">
-                        <div style="margin-bottom: 8px;">{reason_identity}</div>
-                        <div style="margin-bottom: 8px;">{reason_intent}</div>
-                        <div>{reason_origin}</div>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                    """,
+                    unsafe_allow_html=True,
+                )
 
         with col_action:
             pdf_report = generate_pdf_report(data)
@@ -1295,7 +1610,7 @@ def render_email_sentinel(sound_alert, redact_enabled):
             pdk.Deck(
                 layers=[arc_layer, scatter_layer],
                 initial_view_state=view_state,
-                map_style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+                map_style=("https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json" if is_dark else "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"),
                 tooltip={"text": "{label}\n{from_name} ➔ {to_name}"},
             ),
             use_container_width=True,
@@ -1423,7 +1738,7 @@ def render_email_sentinel(sound_alert, redact_enabled):
                 attributions = data.get("token_attributions", [])
                 raw_snippet = data.get("body_snippet", "")
                 if raw_snippet:
-                    heatmap_html = generate_token_heatmap_html(raw_snippet, attributions)
+                    heatmap_html = generate_token_heatmap_html(raw_snippet, attributions, theme=st.session_state.get("theme_mode", "light"))
                     st.markdown(heatmap_html, unsafe_allow_html=True)
                     st.caption(
                         "🔍 Causal Ablation Attribution: Highlights show words contributing highest mathematical probability shift "
@@ -1536,7 +1851,7 @@ def render_email_sentinel(sound_alert, redact_enabled):
                         st.success("✅ No shared infrastructure discovered across analyzed emails (isolated incidents).")
 
                     st.markdown("##### 🖱️ Interactive Network Map (Drag nodes to inspect, scroll wheel to zoom)")
-                    interactive_html = generate_interactive_graph_html(G)
+                    interactive_html = generate_interactive_graph_html(G, theme=st.session_state.get("theme_mode", "light"))
                     components.html(interactive_html, height=480, scrolling=False)
 
                     with st.expander("📷 View / Export High-Resolution Static Diagram"):
@@ -1928,25 +2243,33 @@ def render_smishing_sentinel(sound_alert):
         # Hero Banner: Currently Analyzing SMS
         dlt_badge = '<span class="metric-badge badge-clean">TRAI DLT COMPLIANT</span>' if sms_sender["is_dlt_compliant"] else '<span class="metric-badge badge-critical">DLT REGULATION VIOLATION</span>'
         
-        currently_analyzing_sms_html = f"""<div class="metric-card" style="margin-bottom: 20px; padding: 18px 22px; border-left: 4px solid #2563eb; background: #ffffff;">
-<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+        sms_card_bg = "linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.92) 100%)" if is_dark else "#ffffff"
+        sms_card_accent = "#4d65ff" if is_dark else "#2563eb"
+        sms_divider = "rgba(255, 255, 255, 0.08)" if is_dark else "#e2e8f0"
+        sms_title_clr = "#ffffff" if is_dark else "#0f172a"
+        sms_entity_clr = "#f8fafc" if is_dark else "#0f172a"
+        sms_sender_clr = "#38bdf8" if is_dark else "#2563eb"
+        sms_time_clr = "#cbd5e1" if is_dark else "#334155"
+
+        currently_analyzing_sms_html = f"""<div class="metric-card" style="margin-bottom: 20px; padding: 18px 22px; border-left: 4px solid {sms_card_accent}; background: {sms_card_bg};">
+<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; border-bottom: 1px solid {sms_divider}; padding-bottom: 10px;">
 <div style="display: flex; align-items: center; gap: 10px;">
-<span class="sub-head-top" style="margin-bottom: 0; background: #e0edfb; color: #1e40af; border: 1px solid #bfdbfe; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase;">🔍 CURRENTLY ANALYZING SMS</span>
-<span style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">{sms_data.get('scenario_title', 'Mobile SMS Ingress')}</span>
+<span class="sub-head-top" style="margin-bottom: 0;">🔍 CURRENTLY ANALYZING SMS</span>
+<span style="font-size: 1.1rem; font-weight: 800; color: {sms_title_clr};">{sms_data.get('scenario_title', 'Mobile SMS Ingress')}</span>
 </div>
 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-<span style="background: #f1f5f9; color: #475569; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; border: 1px solid #e2e8f0; font-weight: 500;">Channel: <b>GSM / LTE Carrier Ingress</b></span>
-<span style="background: #e0edfb; color: #1e40af; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; font-weight: 600;">Case: <code>{sms_data.get('case_id')}</code></span>
+<span style="background: {'rgba(148, 163, 184, 0.12)' if is_dark else '#f1f5f9'}; color: {'#94a3b8' if is_dark else '#475569'}; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; border: 1px solid {'rgba(148, 163, 184, 0.2)' if is_dark else '#e2e8f0'}; font-weight: 500;">Channel: <b>GSM / LTE Carrier Ingress</b></span>
+<span style="background: {'rgba(77, 101, 255, 0.15)' if is_dark else '#e0edfb'}; color: {'#93c5fd' if is_dark else '#1e40af'}; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; font-weight: 600;">Case: <code>{sms_data.get('case_id')}</code></span>
 </div>
 </div>
 <div style="display: grid; grid-template-columns: 1.4fr 1.6fr 1.2fr 1.4fr; gap: 14px;">
 <div>
 <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Sender Identifier</div>
-<div style="font-size: 0.92rem; color: #2563eb; font-weight: 700; line-height: 1.4;"><code>{sms_data['sender_id']}</code></div>
+<div style="font-size: 0.92rem; color: {sms_sender_clr}; font-weight: 700; line-height: 1.4;"><code>{sms_data['sender_id']}</code></div>
 </div>
 <div>
 <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Entity / Channel Type</div>
-<div style="font-size: 0.84rem; color: #0f172a; font-weight: 600; line-height: 1.4;">{sms_sender['entity_name']}</div>
+<div style="font-size: 0.84rem; color: {sms_entity_clr}; font-weight: 600; line-height: 1.4;">{sms_sender['entity_name']}</div>
 </div>
 <div>
 <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">TRAI Regulatory Status</div>
@@ -1954,7 +2277,7 @@ def render_smishing_sentinel(sound_alert):
 </div>
 <div>
 <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Ingress Timestamp</div>
-<div style="font-size: 0.84rem; color: #334155; font-weight: 500; line-height: 1.4;"><code>{sms_data['timestamp']}</code></div>
+<div style="font-size: 0.84rem; color: {sms_time_clr}; font-weight: 500; line-height: 1.4;"><code>{sms_data['timestamp']}</code></div>
 </div>
 </div>
 </div>"""
@@ -1973,7 +2296,7 @@ def render_smishing_sentinel(sound_alert):
                     <div class="metric-title">Smishing Risk Score</div>
                     <div style="position: relative; width: 112px; height: 112px; margin: 4px 0;">
                         <svg width="112" height="112" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="42" stroke="#e2e8f0" stroke-width="8" fill="transparent"/>
+                            <circle cx="50" cy="50" r="42" stroke="' + ('rgba(255,255,255,0.08)' if is_dark else '#e2e8f0') + '" stroke-width="8" fill="transparent"/>
                             <circle cx="50" cy="50" r="42" stroke="{s_gauge_color}" stroke-width="8" fill="transparent"
                                 stroke-dasharray="{s_circumference}" stroke-dashoffset="{s_stroke_offset}"
                                 stroke-linecap="round" transform="rotate(-90 50 50)"
@@ -2012,27 +2335,31 @@ def render_smishing_sentinel(sound_alert):
                 reason_s_psych = f"❌ <b>High Urgency Coercion:</b> Employs psychological panic (account freeze, bill cut-off, legal warrant)."
             else:
                 reason_s_psych = f"✅ <b>Standard Tone:</b> Routine informational or multi-factor authentication dispatch."
+                sfa_bg = "rgba(15, 23, 42, 0.72)" if is_dark else "#ffffff"
+                sfa_title = "#ffffff" if is_dark else "#0f172a"
+                sfa_sub = "#94a3b8" if is_dark else "#64748b"
+                sfa_body = "#e2e8f0" if is_dark else "#334155"
 
-            st.markdown(
-                f"""
-                <div class="metric-card" style="padding: 20px 24px; border-left: 4px solid {s_border_accent}; background: #ffffff;">
-                    <div class="sub-head-top" style="margin-bottom: 4px;">Forensic Assessment</div>
-                    <div style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">
-                        {sms_data['threat_category']}
+                st.markdown(
+                    f"""
+                    <div class="metric-card" style="padding: 20px 24px; border-left: 4px solid {s_border_accent}; background: {sfa_bg};">
+                        <div class="sub-head-top" style="margin-bottom: 4px;">Forensic Assessment</div>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: {sfa_title}; margin-bottom: 2px;">
+                            {sms_data['threat_category']}
+                        </div>
+                        <div style="font-size: 0.82rem; color: {sfa_sub}; margin-bottom: 14px;">
+                            <b>Urgency Level:</b> <span style="color: #ef4444; font-weight: 600;">{sms_data['urgency_level'].upper()}</span> &bull; 
+                            <b>Sender Route:</b> {sms_sender['sender_type']}
+                        </div>
+                        <div style="font-size: 0.88rem; line-height: 1.65; color: {sfa_body};">
+                            <div style="margin-bottom: 8px;">{reason_s_sender}</div>
+                            <div style="margin-bottom: 8px;">{reason_s_link}</div>
+                            <div>{reason_s_psych}</div>
+                        </div>
                     </div>
-                    <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 14px;">
-                        <b>Urgency Level:</b> <span style="color: #ef4444; font-weight: 600;">{sms_data['urgency_level'].upper()}</span> &bull; 
-                        <b>Sender Route:</b> {sms_sender['sender_type']}
-                    </div>
-                    <div style="font-size: 0.88rem; line-height: 1.65; color: #334155;">
-                        <div style="margin-bottom: 8px;">{reason_s_sender}</div>
-                        <div style="margin-bottom: 8px;">{reason_s_link}</div>
-                        <div>{reason_s_psych}</div>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                    """,
+                    unsafe_allow_html=True,
+                )
 
         with scol_action:
             st.markdown(
@@ -2166,7 +2493,7 @@ def render_smishing_sentinel(sound_alert):
             attributions = sms_data.get("token_attributions", [])
             if attributions:
                 st.markdown("#### 🔬 Explainable AI (XAI) — Token Attribution Heatmap (Section 65B Admissible)")
-                sms_heatmap_html = generate_token_heatmap_html(sms_data["raw_message"], attributions)
+                sms_heatmap_html = generate_token_heatmap_html(sms_data["raw_message"], attributions, theme=st.session_state.get("theme_mode", "light"))
                 st.markdown(sms_heatmap_html, unsafe_allow_html=True)
                 st.caption(
                     f"⚡ Model: <b>{sms_data.get('model_name', 'DistilBERT Transformer')}</b> ({sms_data.get('nlp_latency_ms', 0):.1f}ms latency). "

@@ -1,5 +1,6 @@
 package com.binarybattalion.phishguard.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -141,6 +142,7 @@ fun EmailScreen(modifier: Modifier = Modifier) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = CardDark),
+            border = BorderStroke(1.dp, BorderDark),
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
@@ -274,7 +276,12 @@ fun EmailScreen(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(14.dp))
 
         // 5. Findings & Section 65B Hash
-        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = CardDark)) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = CardDark),
+            border = BorderStroke(1.dp, BorderDark),
+            shape = RoundedCornerShape(12.dp)
+        ) {
             Column(modifier = Modifier.padding(14.dp)) {
                 Text("Section 65B BSA Forensic Evidence", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 Spacer(modifier = Modifier.height(6.dp))

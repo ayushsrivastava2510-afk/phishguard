@@ -421,6 +421,7 @@ fun SmishingScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = CardDark),
+            border = BorderStroke(1.dp, BorderDark),
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
@@ -629,7 +630,12 @@ fun SmishingScreen(
 
         when (selectedTab) {
             0 -> { // TRAI DLT Tab
-                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = CardDark)) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = CardDark),
+                    border = BorderStroke(1.dp, BorderDark),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Text("TRAI TCCCPR 2018 Regulatory Header Telemetry", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         Spacer(modifier = Modifier.height(8.dp))
@@ -642,7 +648,12 @@ fun SmishingScreen(
                 }
             }
             1 -> { // Links & APKs Tab
-                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = CardDark)) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = CardDark),
+                    border = BorderStroke(1.dp, BorderDark),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Text("Payload & Malicious Link Interception", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         Spacer(modifier = Modifier.height(8.dp))
@@ -663,7 +674,12 @@ fun SmishingScreen(
                 }
             }
             2 -> { // Social Engineering / Urgency Cues Tab
-                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = CardDark)) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = CardDark),
+                    border = BorderStroke(1.dp, BorderDark),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Text("Social Engineering & Panic Vector Analysis", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         Spacer(modifier = Modifier.height(8.dp))
@@ -688,7 +704,12 @@ fun SmishingScreen(
                 }
             }
             3 -> { // DoT Chakshu Tab
-                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = CardDark)) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = CardDark),
+                    border = BorderStroke(1.dp, BorderDark),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
