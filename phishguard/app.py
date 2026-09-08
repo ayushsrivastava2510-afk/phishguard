@@ -66,7 +66,7 @@ _ensure_bridge_server_active()
 
 MODEL_PATH = "models/phishing_classifier.joblib"
 
-# Dynamic Cyber SOC Styling
+# Dynamic Cyber SOC Styling - GeekPay Inspired Enterprise Design System
 DYNAMIC_CSS = """
 <style>
     #MainMenu {visibility: hidden;}
@@ -75,66 +75,107 @@ DYNAMIC_CSS = """
     div[data-testid="stDecoration"] {display:none;}
     header {background: transparent !important;}
 
-    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
     
     html, body, [class*="css"], .stApp {
-        font-family: 'Inter', -apple-system, sans-serif;
-        background-color: #0c0c0e !important;
-        color: #ffffff;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: #080c16 !important;
+        color: #f1f5f9;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
     }
     
-    /* Netflix Subtle Ambient Vignette */
+    /* GeekPay Ambient Fintech Slate Canvas */
     .stApp {
+        background-color: #080c16 !important;
         background-image: 
-            radial-gradient(ellipse 80% 50% at 50% -20%, rgba(229, 9, 20, 0.18), transparent 70%),
-            radial-gradient(circle at 100% 100%, rgba(20, 20, 24, 0.8), transparent 50%),
-            linear-gradient(180deg, #0b0b0e 0%, #0e0e12 100%) !important;
+            radial-gradient(ellipse 85% 55% at 50% -15%, rgba(77, 101, 255, 0.16), transparent 70%),
+            radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.08), transparent 50%),
+            radial-gradient(circle at 0% 40%, rgba(56, 189, 248, 0.06), transparent 45%),
+            linear-gradient(180deg, #080c16 0%, #0d1424 100%) !important;
         background-attachment: fixed !important;
+    }
+
+    /* GeekPay Signature Animated Multi-Tone Gradient Heading */
+    .text-style-gradient {
+        display: inline-block;
+        background-image: linear-gradient(-45deg, #22d3ee, #4d65ff, #818cf8, #34d399, #4d65ff) !important;
+        background-size: 300% !important;
+        background-clip: text;
+        -webkit-background-clip: text;
+        text-fill-color: transparent;
+        -webkit-text-fill-color: transparent;
+        animation: GeekPayGradient 9s ease infinite !important;
+    }
+    @keyframes GeekPayGradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* GeekPay Sub-Head Pill Badge */
+    .sub-head-top {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        background: rgba(77, 101, 255, 0.12);
+        color: #60a5fa;
+        border: 1px solid rgba(77, 101, 255, 0.28);
+        margin-bottom: 6px;
     }
 
     code, pre {
         font-family: 'JetBrains Mono', monospace !important;
-        background-color: #17171c !important;
-        color: #ff4d58 !important;
-        border: 1px solid rgba(229, 9, 20, 0.25) !important;
-        border-radius: 4px;
-        padding: 2px 5px;
+        background-color: #0c1222 !important;
+        color: #38bdf8 !important;
+        border: 1px solid rgba(56, 189, 248, 0.22) !important;
+        border-radius: 8px;
+        padding: 2px 6px;
     }
 
-    /* Sidebar - Deep Obsidian with Crimson Accents */
+    /* Sidebar - Sleek Slate Navy with Micro-Borders */
     section[data-testid="stSidebar"] {
-        background-color: #111115 !important;
-        border-right: 1px solid rgba(229, 9, 20, 0.25) !important;
-        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.8) !important;
+        background-color: #0c1220 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5) !important;
     }
     section[data-testid="stSidebar"] hr {
-        border-color: rgba(229, 9, 20, 0.2) !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
     }
 
     /* Pulse Beacons */
-    .soc-pulse-red {
+    .soc-pulse-red, .soc-pulse-cobalt {
         display: inline-block;
-        width: 9px;
-        height: 9px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
-        background-color: #E50914;
-        box-shadow: 0 0 12px #E50914;
+        background-color: #10b981;
+        box-shadow: 0 0 12px #10b981;
         margin-right: 8px;
-        animation: netflixPulse 1.8s infinite;
+        animation: geekpayPulse 2s infinite;
     }
-    @keyframes netflixPulse {
-        0% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0.8); }
-        70% { box-shadow: 0 0 0 10px rgba(229, 9, 20, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(229, 9, 20, 0); }
+    @keyframes geekpayPulse {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8); }
+        70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
-    /* Netflix Cinematic Glass Cards */
+    /* GeekPay Glassmorphic Elevated Cards */
     .metric-card {
-        background: linear-gradient(145deg, rgba(24, 24, 28, 0.94) 0%, rgba(14, 14, 17, 0.98) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-radius: 12px;
-        padding: 18px 22px;
-        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+        background: rgba(15, 23, 42, 0.72) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 16px !important;
+        padding: 20px 22px;
+        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.45), 0 0 1px 1px rgba(255, 255, 255, 0.04);
         height: 100%;
         display: flex;
         flex-direction: column;
@@ -143,141 +184,149 @@ DYNAMIC_CSS = """
     }
     .metric-card:hover {
         transform: translateY(-3px);
-        border-color: rgba(229, 9, 20, 0.5);
-        box-shadow: 0 14px 35px -5px rgba(229, 9, 20, 0.2), 0 0 20px rgba(229, 9, 20, 0.15);
+        border-color: rgba(77, 101, 255, 0.45) !important;
+        box-shadow: 0 16px 36px -6px rgba(77, 101, 255, 0.22), 0 0 20px rgba(77, 101, 255, 0.12);
     }
     .metric-title {
-        font-size: 0.76rem;
+        font-size: 0.75rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: #a3a3a3;
+        color: #94a3b8;
         margin-bottom: 6px;
     }
     .metric-value-huge {
         font-size: 2.2rem;
-        font-weight: 900;
+        font-weight: 800;
         line-height: 1.1;
         margin-bottom: 6px;
         color: #ffffff;
     }
 
-    /* Badges */
+    /* GeekPay Modern Pill Badges */
     .metric-badge {
-        display: inline-block;
-        font-size: 0.75rem;
-        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.74rem;
+        font-weight: 700;
         letter-spacing: 0.04em;
         text-transform: uppercase;
-        padding: 4px 10px;
-        border-radius: 6px;
+        padding: 4px 12px;
+        border-radius: 999px;
     }
     .badge-critical {
-        background: rgba(229, 9, 20, 0.22);
-        color: #ff4d58;
-        border: 1px solid rgba(229, 9, 20, 0.6);
-        box-shadow: 0 0 12px rgba(229, 9, 20, 0.35);
+        background: rgba(239, 68, 68, 0.14);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.35);
+        box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
     }
     .badge-suspicious {
-        background: rgba(245, 158, 11, 0.18);
+        background: rgba(245, 158, 11, 0.14);
         color: #fbbf24;
-        border: 1px solid rgba(245, 158, 11, 0.45);
+        border: 1px solid rgba(245, 158, 11, 0.35);
+        box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
     }
     .badge-clean {
-        background: rgba(34, 197, 94, 0.18);
-        color: #4ade80;
-        border: 1px solid rgba(34, 197, 94, 0.45);
+        background: rgba(16, 185, 129, 0.14);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
     }
 
-    /* Buttons: Netflix Red Gradient */
+    /* GeekPay Buttons: Electric Cobalt & Slate Squircle */
     div.stButton > button[kind="primary"], div[data-testid="stDownloadButton"] > button[kind="primary"] {
-        background: linear-gradient(135deg, #E50914 0%, #B81D24 100%) !important;
+        background: linear-gradient(135deg, #4d65ff 0%, #3b49df 100%) !important;
         color: #ffffff !important;
-        border: none !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.02em !important;
-        border-radius: 8px !important;
-        padding: 8px 18px !important;
-        box-shadow: 0 4px 18px rgba(229, 9, 20, 0.45) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.01em !important;
+        border-radius: 10px !important;
+        padding: 8px 20px !important;
+        box-shadow: 0 4px 16px rgba(77, 101, 255, 0.35) !important;
         transition: all 0.2s ease !important;
     }
     div.stButton > button[kind="primary"]:hover, div[data-testid="stDownloadButton"] > button[kind="primary"]:hover {
-        background: linear-gradient(135deg, #FF1E27 0%, #E50914 100%) !important;
-        box-shadow: 0 6px 26px rgba(229, 9, 20, 0.7) !important;
+        background: linear-gradient(135deg, #5c72ff 0%, #4757ea 100%) !important;
+        box-shadow: 0 6px 24px rgba(77, 101, 255, 0.55) !important;
         transform: translateY(-2px) !important;
     }
     div.stButton > button:not([kind="primary"]), div[data-testid="stDownloadButton"] > button:not([kind="primary"]) {
-        background: rgba(24, 24, 29, 0.95) !important;
-        color: #e5e5e5 !important;
+        background: rgba(30, 41, 59, 0.65) !important;
+        color: #e2e8f0 !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 8px !important;
-        font-weight: 600 !important;
+        border-radius: 10px !important;
+        font-weight: 500 !important;
         transition: all 0.2s ease !important;
     }
     div.stButton > button:not([kind="primary"]):hover, div[data-testid="stDownloadButton"] > button:not([kind="primary"]):hover {
-        border-color: #E50914 !important;
+        border-color: #4d65ff !important;
         color: #ffffff !important;
-        box-shadow: 0 0 14px rgba(229, 9, 20, 0.35) !important;
+        background: rgba(43, 58, 85, 0.8) !important;
+        box-shadow: 0 0 14px rgba(77, 101, 255, 0.25) !important;
         transform: translateY(-1px) !important;
     }
 
-    /* Streamlit Tabs */
+    /* GeekPay Segmented Modern Tabs */
     button[data-baseweb="tab"] {
-        color: #a3a3a3 !important;
+        color: #94a3b8 !important;
         font-weight: 600 !important;
-        border-radius: 6px !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
         transition: all 0.2s ease !important;
     }
     button[data-baseweb="tab"]:hover {
         color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.05) !important;
     }
     button[data-baseweb="tab"][aria-selected="true"] {
         color: #ffffff !important;
-        background: rgba(229, 9, 20, 0.15) !important;
-        border-bottom: 2px solid #E50914 !important;
+        background: rgba(77, 101, 255, 0.16) !important;
+        border-bottom: 2px solid #4d65ff !important;
     }
     div[data-baseweb="tab-highlight"] {
-        background-color: #E50914 !important;
+        background-color: #4d65ff !important;
     }
 
-    /* Expanders */
+    /* GeekPay Styled Expanders */
     div[data-testid="stExpander"] {
-        background: rgba(18, 18, 22, 0.85) !important;
-        border: 1px solid rgba(229, 9, 20, 0.3) !important;
-        border-radius: 10px !important;
-        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5) !important;
+        background: rgba(15, 23, 42, 0.65) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 14px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
     }
 
     /* Relay Hop Flight Path */
     .hop-node {
-        background: rgba(22, 22, 26, 0.9);
-        border: 1px solid rgba(229, 9, 20, 0.25);
-        border-radius: 8px;
-        padding: 12px 16px;
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 12px 18px;
         margin-bottom: 8px;
         display: flex;
         align-items: center;
-        transition: border-color 0.2s ease;
+        transition: all 0.2s ease;
     }
     .hop-node:hover {
-        border-color: #E50914;
+        border-color: #4d65ff;
+        box-shadow: 0 0 14px rgba(77, 101, 255, 0.25);
     }
     .hop-num {
-        background: linear-gradient(135deg, #E50914 0%, #B81D24 100%);
+        background: linear-gradient(135deg, #4d65ff 0%, #3b49df 100%);
         color: #ffffff;
-        font-weight: 800;
+        font-weight: 700;
         font-size: 0.78rem;
-        padding: 4px 10px;
-        border-radius: 6px;
+        padding: 5px 12px;
+        border-radius: 8px;
         margin-right: 14px;
         white-space: nowrap;
-        box-shadow: 0 2px 8px rgba(229, 9, 20, 0.4);
+        box-shadow: 0 2px 10px rgba(77, 101, 255, 0.3);
     }
     .hop-connector {
         text-align: center;
-        color: #E50914;
-        font-size: 0.8rem;
-        padding: 4px 0;
+        color: #60a5fa;
+        font-size: 0.82rem;
+        padding: 5px 0;
         font-family: 'JetBrains Mono', monospace;
     }
 </style>
@@ -442,19 +491,22 @@ with st.sidebar:
     )
     st.caption("Smart India Hackathon 2026 | Binary Battalion")
 
-# Top Brand & SOC Header
-col_brand, col_status = st.columns([3.5, 1.5])
+# Top Brand & SOC Header - GeekPay Inspired Enterprise Layout
+col_brand, col_status = st.columns([3.6, 1.4])
 with col_brand:
     st.markdown(
         """
-        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 4px;">
-            <span style="font-size: 2.6rem; line-height: 1; filter: drop-shadow(0 0 10px rgba(229, 9, 20, 0.6));">🛡️</span>
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 6px;">
+            <div style="width: 54px; height: 54px; border-radius: 14px; background: linear-gradient(135deg, rgba(77, 101, 255, 0.25) 0%, rgba(16, 185, 129, 0.12) 100%); border: 1px solid rgba(77, 101, 255, 0.35); display: flex; align-items: center; justify-content: center; font-size: 1.85rem; box-shadow: 0 4px 18px rgba(77, 101, 255, 0.25);">
+                🛡️
+            </div>
             <div>
-                <h1 style="margin: 0; font-size: 2.1rem; font-weight: 900; color: #ffffff; letter-spacing: -0.03em; text-transform: uppercase;">
-                    PhishGuard <span style="color: #E50914; font-weight: 900; text-shadow: 0 0 25px rgba(229, 9, 20, 0.65);">Mail Sentinel</span>
+                <div class="sub-head-top">Autonomous SOC Platform</div>
+                <h1 style="margin: 0; font-size: 2.15rem; font-weight: 800; color: #ffffff; letter-spacing: -0.03em; line-height: 1.15;">
+                    PhishGuard <span class="text-style-gradient">Mail Sentinel</span>
                 </h1>
-                <p style="margin: 2px 0 0 0; color: #a3a3a3; font-size: 0.93rem;">
-                    Autonomous Threat Interception &bull; 3D Origin Trajectory &bull; Section 65B Digital Evidence
+                <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 0.92rem; font-weight: 400;">
+                    Enterprise Threat Interception &bull; 3D Origin Trajectory &bull; Section 65B Digital Evidence
                 </p>
             </div>
         </div>
@@ -464,11 +516,11 @@ with col_brand:
 with col_status:
     st.markdown(
         """
-        <div style="text-align: right; padding-top: 8px;">
-            <span class="metric-badge" style="font-size: 0.82rem; padding: 6px 14px; font-weight: 800; background: rgba(229, 9, 20, 0.15); color: #ffffff; border: 1px solid rgba(229, 9, 20, 0.55); box-shadow: 0 0 14px rgba(229, 9, 20, 0.3);">
-                <span class="soc-pulse-red"></span> SOC ENGINE ONLINE
+        <div style="text-align: right; padding-top: 12px;">
+            <span class="metric-badge badge-clean" style="font-size: 0.8rem; padding: 6px 14px; font-weight: 700;">
+                <span class="soc-pulse-cobalt"></span> SOC ENGINE ONLINE
             </span>
-            <div style="font-size: 0.72rem; color: #737373; margin-top: 4px;">
+            <div style="font-size: 0.74rem; color: #64748b; margin-top: 6px; font-weight: 500;">
                 Smart India Hackathon 2026 &bull; Binary Battalion
             </div>
         </div>
@@ -476,7 +528,7 @@ with col_status:
         unsafe_allow_html=True,
     )
 
-st.markdown("<hr style='margin: 8px 0 16px 0; border-color: rgba(229, 9, 20, 0.25);'>", unsafe_allow_html=True)
+st.markdown("<hr style='margin: 10px 0 18px 0; border-color: rgba(255, 255, 255, 0.08);'>", unsafe_allow_html=True)
 
 model = load_model()
 if model is None:
@@ -499,10 +551,10 @@ if os.path.exists(LIVE_SCAN_PATH):
         with col_ext1:
             st.markdown(
                 f"""
-                <div style="background: linear-gradient(90deg, rgba(229, 9, 20, 0.26) 0%, rgba(20, 20, 24, 0.95) 100%); border: 1px solid #E50914; border-radius: 8px; padding: 10px 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 20px rgba(229, 9, 20, 0.25);">
+                <div style="background: linear-gradient(90deg, rgba(77, 101, 255, 0.16) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(77, 101, 255, 0.4); border-radius: 12px; padding: 12px 18px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 20px rgba(77, 101, 255, 0.15);">
                     <div>
-                        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #E50914; box-shadow: 0 0 10px #E50914; margin-right: 8px;"></span>
-                        <b style="color: #ff4d58;">LIVE INGESTION FROM {ext_src.upper()}:</b> {ext_subj[:45]} &bull; <i style="color: #a3a3a3;">{ext_time}</i>
+                        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #4d65ff; box-shadow: 0 0 10px #4d65ff; margin-right: 8px;"></span>
+                        <b style="color: #60a5fa;">LIVE INGESTION FROM {ext_src.upper()}:</b> {ext_subj[:45]} &bull; <i style="color: #94a3b8;">{ext_time}</i>
                         <span class="metric-badge {b_cls}" style="margin-left: 10px;">{ext_cat} (Risk: {ext_score}/100)</span>
                     </div>
                 </div>
@@ -527,7 +579,18 @@ if os.path.exists(LIVE_SCAN_PATH):
         pass
 
 # -------------------------------------------------------------
-st.markdown("<div style='font-size: 0.92rem; font-weight: 600; color: #cbd5e1; margin-bottom: 8px;'>⚡ 1-Click Threat Scenarios (Quick Forensic Telemetry):</div>", unsafe_allow_html=True)
+st.markdown(
+    """
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; margin-top: 4px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="sub-head-top" style="margin-bottom: 0;">1-Click Telemetry</span>
+            <span style="font-size: 0.95rem; font-weight: 700; color: #f8fafc;">Benchmark Forensic Scenarios</span>
+        </div>
+        <span style="font-size: 0.78rem; color: #64748b; font-weight: 500;">Simulate real-time cyber attacks or legitimate traffic</span>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 q_col1, q_col2, q_col3, q_col4, q_col5 = st.columns(5)
 selected_file_to_run = None
@@ -728,11 +791,11 @@ if st.session_state.last_analysis is not None:
     if "source" in data and ("Chrome" in str(data.get("source")) or "Web" in str(data.get("source"))):
         st.markdown(
             f"""
-            <div style="background: rgba(229, 9, 20, 0.16); border: 1px solid #E50914; border-radius: 8px; padding: 8px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 0 15px rgba(229, 9, 20, 0.2);">
-                <div style="color: #ff4d58; font-weight: 700; font-size: 0.88rem;">
+            <div style="background: rgba(77, 101, 255, 0.12); border: 1px solid rgba(77, 101, 255, 0.35); border-radius: 12px; padding: 10px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 20px rgba(77, 101, 255, 0.12);">
+                <div style="color: #60a5fa; font-weight: 700; font-size: 0.88rem;">
                     🛰️ <b>LIVE SENTINEL AUDIT:</b> Ingested via Chrome Browser Extension ({data.get('source')})
                 </div>
-                <div style="font-size: 0.78rem; color: #a3a3a3;">
+                <div style="font-size: 0.78rem; color: #94a3b8;">
                     Case ID: <code>{data.get('case_id')}</code> &bull; Verified Section 65B Digital Evidence
                 </div>
             </div>
@@ -766,37 +829,40 @@ if st.session_state.last_analysis is not None:
             unsafe_allow_html=True,
         )
 
-    # Dynamic Status Parameters (Netflix Red / Amber / Clean Green)
+    # Dynamic Status Parameters (GeekPay Clean High-Trust Palette)
     if score >= 70:
-        gauge_color = "#E50914"
+        gauge_color = "#f87171"
         verdict_text = "CRITICAL THREAT DETECTED"
         badge_cls = "badge-critical"
         action_msg = "⛔ DANGER: DO NOT CLICK LINKS, OPEN ATTACHMENTS, OR ENTER PASSWORDS / OTPS."
-        action_border = "rgba(229, 9, 20, 0.6)"
-        action_bg = "rgba(229, 9, 20, 0.18)"
-        action_color = "#ff4d58"
+        action_border = "rgba(239, 68, 68, 0.4)"
+        action_bg = "rgba(239, 68, 68, 0.12)"
+        action_color = "#fca5a5"
+        border_accent = "#f87171"
     elif score >= 35:
-        gauge_color = "#f59e0b"
+        gauge_color = "#fbbf24"
         verdict_text = "SUSPICIOUS / ELEVATED RISK"
         badge_cls = "badge-suspicious"
         action_msg = "⚠️ PROCEED WITH CAUTION: Verify sender identity via secondary official channel."
-        action_border = "rgba(245, 158, 11, 0.45)"
-        action_bg = "rgba(245, 158, 11, 0.14)"
+        action_border = "rgba(245, 158, 11, 0.4)"
+        action_bg = "rgba(245, 158, 11, 0.12)"
         action_color = "#fde68a"
+        border_accent = "#fbbf24"
     else:
-        gauge_color = "#22c55e"
+        gauge_color = "#34d399"
         verdict_text = "VERIFIED SECURE EMAIL"
         badge_cls = "badge-clean"
         action_msg = "✅ VERIFIED SAFE: Cryptographically authentic sender; no threats detected."
-        action_border = "rgba(34, 197, 94, 0.45)"
-        action_bg = "rgba(34, 197, 94, 0.14)"
+        action_border = "rgba(16, 185, 129, 0.4)"
+        action_bg = "rgba(16, 185, 129, 0.12)"
         action_color = "#86efac"
+        border_accent = "#34d399"
 
     circumference = 263.89
     stroke_offset = circumference * (1 - (score / 100))
 
     # -------------------------------------------------------------
-    # 1. EXECUTIVE VERDICT HERO CARD (Netflix Cinematic Theme)
+    # 1. EXECUTIVE VERDICT HERO CARD (GeekPay Enterprise Fintech Theme)
     # -------------------------------------------------------------
     geo = data.get("geolocation", {})
     origin_ip = data.get("originating_ip") or geo.get("resolved_ip")
@@ -808,23 +874,23 @@ if st.session_state.last_analysis is not None:
     with col_gauge:
         st.markdown(
             f"""
-            <div class="metric-card" style="align-items: center; text-align: center; padding: 16px; border: 1px solid rgba(229, 9, 20, 0.35);">
+            <div class="metric-card" style="align-items: center; text-align: center; padding: 18px 16px;">
                 <div class="metric-title">Threat Score</div>
-                <div style="position: relative; width: 108px; height: 108px; margin: 4px 0;">
-                    <svg width="108" height="108" viewBox="0 0 100 100">
+                <div style="position: relative; width: 112px; height: 112px; margin: 4px 0;">
+                    <svg width="112" height="112" viewBox="0 0 100 100">
                         <circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,0.06)" stroke-width="8" fill="transparent"/>
                         <circle cx="50" cy="50" r="42" stroke="{gauge_color}" stroke-width="8" fill="transparent"
                             stroke-dasharray="{circumference}" stroke-dashoffset="{stroke_offset}"
                             stroke-linecap="round" transform="rotate(-90 50 50)"
-                            style="transition: stroke-dashoffset 0.8s ease; filter: drop-shadow(0 0 8px {gauge_color});" />
+                            style="transition: stroke-dashoffset 0.8s ease; filter: drop-shadow(0 0 10px {gauge_color});" />
                     </svg>
                     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                        <div style="font-size: 1.6rem; font-weight: 900; color: {gauge_color}; line-height: 1;">{score}</div>
-                        <div style="font-size: 0.65rem; color: #a3a3a3;">/ 100</div>
+                        <div style="font-size: 1.65rem; font-weight: 800; color: {gauge_color}; line-height: 1;">{score}</div>
+                        <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 600;">/ 100</div>
                     </div>
                 </div>
                 <div><span class="metric-badge {badge_cls}">{verdict_text}</span></div>
-                <div style="font-size: 0.72rem; color: #737373; margin-top: 8px;">Case: <code>{data.get('case_id')}</code></div>
+                <div style="font-size: 0.72rem; color: #64748b; margin-top: 8px;">Case: <code>{data.get('case_id')}</code></div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -856,16 +922,17 @@ if st.session_state.last_analysis is not None:
 
         st.markdown(
             f"""
-            <div class="metric-card" style="padding: 18px 22px; border-left: 3px solid #E50914;">
-                <div style="font-size: 1.2rem; font-weight: 800; color: #ffffff; margin-bottom: 2px;">
+            <div class="metric-card" style="padding: 20px 24px; border-left: 4px solid {border_accent};">
+                <div class="sub-head-top" style="margin-bottom: 4px;">Forensic Assessment</div>
+                <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 2px;">
                     {data.get('threat_category', 'Email Security Audit')}
                 </div>
-                <div style="font-size: 0.8rem; color: #a3a3a3; margin-bottom: 14px;">
+                <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 14px;">
                     <b>From:</b> {data.get('from', 'N/A')[:40]} &bull; <b>Subject:</b> {data.get('subject', 'N/A')[:45]}
                 </div>
-                <div style="font-size: 0.86rem; line-height: 1.65; color: #e5e5e5;">
-                    <div style="margin-bottom: 7px;">{reason_identity}</div>
-                    <div style="margin-bottom: 7px;">{reason_intent}</div>
+                <div style="font-size: 0.88rem; line-height: 1.65; color: #e2e8f0;">
+                    <div style="margin-bottom: 8px;">{reason_identity}</div>
+                    <div style="margin-bottom: 8px;">{reason_intent}</div>
                     <div>{reason_origin}</div>
                 </div>
             </div>
@@ -878,10 +945,10 @@ if st.session_state.last_analysis is not None:
         json_report = generate_json_report(data)
         st.markdown(
             f"""
-            <div class="metric-card" style="padding: 16px; justify-content: space-between;">
+            <div class="metric-card" style="padding: 18px 20px; justify-content: space-between;">
                 <div>
                     <div class="metric-title">Recommended Action</div>
-                    <div style="background: {action_bg}; border: 1px solid {action_border}; color: {action_color}; border-radius: 8px; padding: 10px 12px; font-size: 0.8rem; font-weight: 700; line-height: 1.4; margin-bottom: 12px;">
+                    <div style="background: {action_bg}; border: 1px solid {action_border}; color: {action_color}; border-radius: 10px; padding: 12px 14px; font-size: 0.82rem; font-weight: 600; line-height: 1.45; margin-bottom: 12px;">
                         {action_msg}
                     </div>
                 </div>
@@ -907,12 +974,19 @@ if st.session_state.last_analysis is not None:
         )
 
     # -------------------------------------------------------------
-    # 2. 3D GLOBAL FLIGHT ARC MAP (Netflix Obsidian Basemap)
+    # 2. 3D GLOBAL FLIGHT ARC MAP (GeekPay Clean Dark Basemap)
     # -------------------------------------------------------------
     if geo.get("latitude") and geo.get("longitude"):
         st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
         st.markdown(
-            f"#### 🌐 3D Global Transmission Trajectory (Origin: {geo.get('city', 'Origin')}, {geo.get('country', '')} ➔ Recipient MX)"
+            f"""
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 14px; margin-bottom: 4px;">
+                <span class="sub-head-top" style="margin-bottom: 0;">Global Transmission Map</span>
+                <span style="font-size: 1.05rem; font-weight: 700; color: #ffffff;">3D Origin Trajectory Arc</span>
+                <span style="font-size: 0.8rem; color: #94a3b8;">({geo.get('city', 'Origin')}, {geo.get('country', '')} ➔ Recipient MX)</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
         origin_lat = float(geo.get("latitude", 50.1109))
@@ -928,8 +1002,8 @@ if st.session_state.last_analysis is not None:
         }])
 
         point_df = pd.DataFrame([
-            {"pos": [origin_lon, origin_lat], "color": [229, 9, 20, 245], "radius": 160000, "label": f"Origin: {origin_ip} ({geo.get('city', '')})"},
-            {"pos": [dest_lon, dest_lat], "color": [255, 255, 255, 230], "radius": 160000, "label": "Target Organization MX (New Delhi)"},
+            {"pos": [origin_lon, origin_lat], "color": [77, 101, 255, 245], "radius": 160000, "label": f"Origin: {origin_ip} ({geo.get('city', '')})"},
+            {"pos": [dest_lon, dest_lat], "color": [16, 185, 129, 235], "radius": 160000, "label": "Target Organization MX (New Delhi)"},
         ])
 
         arc_layer = pdk.Layer(
@@ -937,8 +1011,8 @@ if st.session_state.last_analysis is not None:
             data=arc_df,
             get_source_position="from_coord",
             get_target_position="to_coord",
-            get_source_color=[229, 9, 20, 240],
-            get_target_color=[255, 75, 75, 220],
+            get_source_color=[77, 101, 255, 240],
+            get_target_color=[34, 211, 238, 220],
             get_width=4.5,
             get_tilt=20,
         )
@@ -1031,14 +1105,14 @@ if st.session_state.last_analysis is not None:
                 st.markdown(f"Reconstructed **{len(hops)} mail transmission hops** across relay infrastructure:")
 
                 for idx, h in enumerate(hops):
-                    role_color = "#E50914" if "Originating" in h["role"] else ("#22c55e" if "Final" in h["role"] else "#b81d24")
+                    role_color = "#f87171" if "Originating" in h["role"] else ("#34d399" if "Final" in h["role"] else "#4d65ff")
                     st.markdown(
                         f"""
                         <div class="hop-node">
                             <div class="hop-num" style="background: {role_color};">Hop {h['hop_number']} &bull; {h['role']}</div>
                             <div style="flex-grow: 1;">
-                                <div><b>Host:</b> <code>{h['from_host']}</code> &bull; <b>IP:</b> <code style="color: #ff4d58;">{h['ip'] or 'Internal / Hidden'}</code></div>
-                                <div style="font-size: 0.78rem; color: #a3a3a3;"><b>Received By:</b> {h['by_host']} (Protocol: {h['protocol']}) &bull; <b>Timestamp:</b> {h['timestamp']}</div>
+                                <div><b>Host:</b> <code>{h['from_host']}</code> &bull; <b>IP:</b> <code style="color: #38bdf8;">{h['ip'] or 'Internal / Hidden'}</code></div>
+                                <div style="font-size: 0.78rem; color: #94a3b8;"><b>Received By:</b> {h['by_host']} (Protocol: {h['protocol']}) &bull; <b>Timestamp:</b> {h['timestamp']}</div>
                             </div>
                         </div>
                         """,
@@ -1190,3 +1264,36 @@ if st.session_state.last_analysis is not None:
                 "Legal Evidentiary Notice: The cryptographic hashes recorded above establish the mathematical authenticity "
                 "of the evidence at the instant of ingestion, preventing repudiation or tampering during institutional review and legal proceedings."
             )
+
+# -------------------------------------------------------------
+# GEEKPAY-INSPIRED CLEAN ENTERPRISE FOOTER
+# -------------------------------------------------------------
+st.markdown("<div style='height: 36px;'></div>", unsafe_allow_html=True)
+st.markdown(
+    """
+    <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding: 24px 0 16px 0; margin-top: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.25rem;">🛡️</span>
+                    <span style="font-weight: 800; font-size: 1.05rem; color: #ffffff;">PhishGuard</span>
+                    <span class="sub-head-top" style="margin-bottom: 0; font-size: 0.65rem; padding: 2px 8px;">Mail Sentinel</span>
+                </div>
+                <div style="font-size: 0.78rem; color: #64748b; margin-top: 4px;">
+                    Next-Generation Autonomous Threat Defense &bull; Section 65B Certified Forensic Chain of Custody
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <span style="font-size: 0.74rem; color: #94a3b8; background: rgba(255, 255, 255, 0.04); padding: 5px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06);">ISO/IEC 27037</span>
+                <span style="font-size: 0.74rem; color: #94a3b8; background: rgba(255, 255, 255, 0.04); padding: 5px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06);">RFC 5322 / 7489</span>
+                <span style="font-size: 0.74rem; color: #94a3b8; background: rgba(255, 255, 255, 0.04); padding: 5px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06);">CERT-In Directive</span>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.04); font-size: 0.75rem; color: #64748b; flex-wrap: wrap; gap: 8px;">
+            <div>&copy; 2026 PhishGuard Sentinel &bull; Smart India Hackathon &bull; Binary Battalion</div>
+            <div>Bank-Grade Cryptographic Telemetry &bull; Real-Time Email Protection</div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
