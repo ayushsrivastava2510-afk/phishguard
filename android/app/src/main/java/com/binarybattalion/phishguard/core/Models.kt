@@ -65,3 +65,23 @@ data class EmailAuditRecord(
     val evidenceHash: String,
     val timestamp: String
 )
+
+data class ScannedInboxEmail(
+    val id: String,
+    val subject: String,
+    val sender: String,
+    val bodySnippet: String,
+    val timestamp: Long,
+    val formattedDate: String,
+    val record: EmailAuditRecord
+)
+
+data class EmailInboxScanSummary(
+    val accountEmail: String,
+    val totalScanned: Int,
+    val criticalThreats: Int,
+    val suspiciousCount: Int,
+    val safeCount: Int,
+    val items: List<ScannedInboxEmail>
+)
+
