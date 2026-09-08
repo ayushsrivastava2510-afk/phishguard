@@ -22,6 +22,8 @@ __pycache__/
 # Streamlit local credentials & cache
 .streamlit/secrets.toml
 data/live_scan.json
+phishguard/data/live_scan.json
+**/live_scan.json
 
 # Operating System & IDE metadata
 .DS_Store
