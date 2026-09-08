@@ -84,11 +84,32 @@ MODEL_PATH = "models/phishing_classifier.joblib"
 
 # Theme Management (1-Click Night / Dark Mode Feature)
 if "theme" in st.query_params and st.query_params.get("theme") in ["light", "dark"]:
-    st.session_state.theme_mode = st.query_params.get("theme")
-elif "theme_mode" not in st.session_state:
-    st.session_state.theme_mode = "light"
+    active_theme = st.query_params.get("theme")
+elif "theme_mode" in st.session_state:
+    active_theme = st.session_state.theme_mode
+else:
+    active_theme = "light"
 
-is_dark = (st.session_state.get("theme_mode", "light") == "dark")
+st.session_state.theme_mode = active_theme
+is_dark = (active_theme == "dark")
+
+# Synchronize radio button selection key safely before widget instantiation
+expected_radio = "🌙 Cyber Night" if is_dark else "☀️ Pastel Day"
+if "side_theme_radio" not in st.session_state or st.session_state.side_theme_radio != expected_radio:
+    st.session_state.side_theme_radio = expected_radio
+
+def toggle_theme_callback():
+    curr = st.session_state.get("theme_mode", "light")
+    target = "light" if curr == "dark" else "dark"
+    st.session_state.theme_mode = target
+    st.session_state.side_theme_radio = "🌙 Cyber Night" if target == "dark" else "☀️ Pastel Day"
+    st.query_params["theme"] = target
+
+def on_sidebar_theme_change():
+    chosen = st.session_state.get("side_theme_radio", "☀️ Pastel Day")
+    target = "dark" if "Night" in chosen else "light"
+    st.session_state.theme_mode = target
+    st.query_params["theme"] = target
 
 # Dynamic Theme Engine - Dark (Cyber Night) vs. Light (Pastel Blue & White)
 if is_dark:
@@ -102,6 +123,13 @@ if is_dark:
 
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
     
+    :root, .stApp {
+        --text-color: #f1f5f9 !important;
+        --background-color: #080c16 !important;
+        --secondary-background-color: #0f172a !important;
+        --primary-color: #4d65ff !important;
+    }
+
     html, body, [class*="css"], .stApp {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background-color: #080c16 !important;
@@ -120,6 +148,28 @@ if is_dark:
             radial-gradient(circle at 0% 40%, rgba(56, 189, 248, 0.06), transparent 45%),
             linear-gradient(180deg, #080c16 0%, #0d1424 100%) !important;
         background-attachment: fixed !important;
+    }
+
+    /* All Standard Streamlit Typography in Dark Mode */
+    div[data-testid="stMarkdownContainer"] p,
+    div[data-testid="stMarkdownContainer"] span:not([class*="badge"]):not([class*="hop"]):not([class*="metric"]):not([class*="sub-head"]),
+    div[data-testid="stMarkdownContainer"] li,
+    div[data-testid="stMarkdownContainer"] label,
+    label[data-testid="stWidgetLabel"] p,
+    label[data-testid="stWidgetLabel"] span,
+    div[data-testid="stCaptionContainer"] p,
+    div[data-testid="stRadio"] label p,
+    div[data-testid="stCheckbox"] label p {
+        color: #cbd5e1 !important;
+    }
+
+    div[data-testid="stMarkdownContainer"] h1,
+    div[data-testid="stMarkdownContainer"] h2,
+    div[data-testid="stMarkdownContainer"] h3,
+    div[data-testid="stMarkdownContainer"] h4,
+    div[data-testid="stMarkdownContainer"] h5,
+    div[data-testid="stMarkdownContainer"] h6 {
+        color: #f8fafc !important;
     }
 
     /* Cyber Animated Multi-Tone Gradient Heading */
@@ -149,9 +199,9 @@ if is_dark:
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.09em;
-        background: rgba(77, 101, 255, 0.12);
+        background: rgba(77, 101, 255, 0.16);
         color: #60a5fa;
-        border: 1px solid rgba(77, 101, 255, 0.28);
+        border: 1px solid rgba(77, 101, 255, 0.35);
         margin-bottom: 6px;
     }
 
@@ -189,14 +239,15 @@ if is_dark:
         100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
+    /* Cyber Glass Elevated Cards */
     .metric-card {
-        background: rgba(15, 23, 42, 0.72) !important;
+        background: rgba(15, 23, 42, 0.75) !important;
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
         border-radius: 16px !important;
         padding: 20px 22px;
-        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.45), 0 0 1px 1px rgba(255, 255, 255, 0.04);
+        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), 0 0 1px 1px rgba(255, 255, 255, 0.05);
         height: 100%;
         display: flex;
         flex-direction: column;
@@ -205,8 +256,8 @@ if is_dark:
     }
     .metric-card:hover {
         transform: translateY(-3px);
-        border-color: rgba(77, 101, 255, 0.45) !important;
-        box-shadow: 0 16px 36px -6px rgba(77, 101, 255, 0.22), 0 0 20px rgba(77, 101, 255, 0.12);
+        border-color: rgba(77, 101, 255, 0.5) !important;
+        box-shadow: 0 16px 36px -6px rgba(77, 101, 255, 0.25), 0 0 20px rgba(77, 101, 255, 0.15);
     }
     .metric-title {
         font-size: 0.75rem;
@@ -236,28 +287,28 @@ if is_dark:
         border-radius: 999px;
     }
     .badge-critical {
-        background: rgba(239, 68, 68, 0.14);
+        background: rgba(239, 68, 68, 0.16);
         color: #f87171;
-        border: 1px solid rgba(239, 68, 68, 0.35);
-        box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
     }
     .badge-suspicious {
-        background: rgba(245, 158, 11, 0.14);
+        background: rgba(245, 158, 11, 0.16);
         color: #fbbf24;
-        border: 1px solid rgba(245, 158, 11, 0.35);
-        box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
+        border: 1px solid rgba(245, 158, 11, 0.4);
+        box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
     }
     .badge-clean {
-        background: rgba(16, 185, 129, 0.14);
+        background: rgba(16, 185, 129, 0.16);
         color: #34d399;
-        border: 1px solid rgba(16, 185, 129, 0.35);
-        box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
     }
 
     div.stButton > button[kind="primary"], div[data-testid="stDownloadButton"] > button[kind="primary"] {
         background: linear-gradient(135deg, #4d65ff 0%, #3b49df 100%) !important;
         color: #ffffff !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
         font-weight: 600 !important;
         letter-spacing: 0.01em !important;
         border-radius: 10px !important;
@@ -271,9 +322,9 @@ if is_dark:
         transform: translateY(-2px) !important;
     }
     div.stButton > button:not([kind="primary"]), div[data-testid="stDownloadButton"] > button:not([kind="primary"]) {
-        background: rgba(30, 41, 59, 0.65) !important;
+        background: rgba(30, 41, 59, 0.75) !important;
         color: #e2e8f0 !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
         border-radius: 10px !important;
         font-weight: 500 !important;
         transition: all 0.2s ease !important;
@@ -281,8 +332,8 @@ if is_dark:
     div.stButton > button:not([kind="primary"]):hover, div[data-testid="stDownloadButton"] > button:not([kind="primary"]):hover {
         border-color: #4d65ff !important;
         color: #ffffff !important;
-        background: rgba(43, 58, 85, 0.8) !important;
-        box-shadow: 0 0 14px rgba(77, 101, 255, 0.25) !important;
+        background: rgba(43, 58, 85, 0.9) !important;
+        box-shadow: 0 0 14px rgba(77, 101, 255, 0.3) !important;
         transform: translateY(-1px) !important;
     }
 
@@ -295,27 +346,114 @@ if is_dark:
     }
     button[data-baseweb="tab"]:hover {
         color: #ffffff !important;
-        background: rgba(255, 255, 255, 0.05) !important;
+        background: rgba(255, 255, 255, 0.07) !important;
     }
     button[data-baseweb="tab"][aria-selected="true"] {
         color: #ffffff !important;
-        background: rgba(77, 101, 255, 0.16) !important;
+        background: rgba(77, 101, 255, 0.2) !important;
         border-bottom: 2px solid #4d65ff !important;
     }
     div[data-baseweb="tab-highlight"] {
         background-color: #4d65ff !important;
     }
 
+    /* Expanders in Dark Mode */
     div[data-testid="stExpander"] {
-        background: rgba(15, 23, 42, 0.65) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: rgba(15, 23, 42, 0.75) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
         border-radius: 14px !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+    div[data-testid="stExpander"] details summary {
+        color: #f1f5f9 !important;
+    }
+    div[data-testid="stExpander"] details summary p {
+        color: #f1f5f9 !important;
+        font-weight: 600 !important;
+    }
+    div[data-testid="stExpander"] details summary svg {
+        fill: #60a5fa !important;
+    }
+    div[data-testid="stExpander"] div[data-testid="stExpanderDetails"] {
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+
+    /* Streamlit Native Inputs in Dark Mode */
+    div[data-baseweb="input"], div[data-baseweb="base-input"] {
+        background-color: #0f172a !important;
+        border-color: rgba(255, 255, 255, 0.14) !important;
+        border-radius: 8px !important;
+        color: #f1f5f9 !important;
+    }
+    div[data-baseweb="input"] input, div[data-baseweb="base-input"] input, textarea {
+        background-color: transparent !important;
+        color: #f1f5f9 !important;
+        font-size: 0.9rem !important;
+    }
+    div[data-baseweb="input"] input::placeholder, textarea::placeholder {
+        color: #64748b !important;
+    }
+    div[data-baseweb="select"] > div {
+        background-color: #0f172a !important;
+        border-color: rgba(255, 255, 255, 0.14) !important;
+        color: #f1f5f9 !important;
+    }
+    div[data-baseweb="select"] * {
+        color: #f1f5f9 !important;
+    }
+    ul[data-baseweb="menu"] {
+        background-color: #0c1220 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    li[role="option"] {
+        background-color: #0c1220 !important;
+        color: #f1f5f9 !important;
+    }
+    li[role="option"]:hover, li[role="option"][aria-selected="true"] {
+        background-color: #1e293b !important;
+        color: #38bdf8 !important;
+    }
+
+    /* File Uploader in Dark Mode */
+    div[data-testid="stFileUploader"] {
+        background: rgba(15, 23, 42, 0.7) !important;
+        border: 1px dashed rgba(77, 101, 255, 0.35) !important;
+        border-radius: 12px !important;
+    }
+    div[data-testid="stFileUploader"] section {
+        background: rgba(15, 23, 42, 0.5) !important;
+    }
+    div[data-testid="stFileUploader"] * {
+        color: #cbd5e1 !important;
+    }
+
+    /* Metrics in Dark Mode */
+    div[data-testid="stMetric"] {
+        background: rgba(15, 23, 42, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 12px !important;
+        padding: 10px 14px !important;
+    }
+    div[data-testid="stMetricValue"] {
+        color: #ffffff !important;
+    }
+    div[data-testid="stMetricLabel"] p {
+        color: #94a3b8 !important;
+    }
+
+    /* Alert Boxes in Dark Mode */
+    div[data-testid="stAlert"] {
+        background: rgba(15, 23, 42, 0.85) !important;
+        border-radius: 10px !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    div[data-testid="stAlert"] p {
+        color: #f1f5f9 !important;
     }
 
     .hop-node {
         background: rgba(15, 23, 42, 0.85);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
         padding: 12px 18px;
         margin-bottom: 8px;
@@ -358,6 +496,13 @@ else:
 
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
     
+    :root, .stApp {
+        --text-color: #0f172a !important;
+        --background-color: #f0f6fc !important;
+        --secondary-background-color: #e2edf9 !important;
+        --primary-color: #2563eb !important;
+    }
+
     html, body, [class*="css"], .stApp {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background-color: #f0f6fc !important;
@@ -376,6 +521,28 @@ else:
             radial-gradient(circle at 0% 40%, #eff6ff 0%, transparent 45%),
             linear-gradient(180deg, #f0f6fc 0%, #eaf2fb 100%) !important;
         background-attachment: fixed !important;
+    }
+
+    /* All Standard Streamlit Typography in Light Mode */
+    div[data-testid="stMarkdownContainer"] p,
+    div[data-testid="stMarkdownContainer"] span:not([class*="badge"]):not([class*="hop"]):not([class*="metric"]):not([class*="sub-head"]),
+    div[data-testid="stMarkdownContainer"] li,
+    div[data-testid="stMarkdownContainer"] label,
+    label[data-testid="stWidgetLabel"] p,
+    label[data-testid="stWidgetLabel"] span,
+    div[data-testid="stCaptionContainer"] p,
+    div[data-testid="stRadio"] label p,
+    div[data-testid="stCheckbox"] label p {
+        color: #334155 !important;
+    }
+
+    div[data-testid="stMarkdownContainer"] h1,
+    div[data-testid="stMarkdownContainer"] h2,
+    div[data-testid="stMarkdownContainer"] h3,
+    div[data-testid="stMarkdownContainer"] h4,
+    div[data-testid="stMarkdownContainer"] h5,
+    div[data-testid="stMarkdownContainer"] h6 {
+        color: #0f172a !important;
     }
 
     /* Pastel & Royal Blue Gradient Heading */
@@ -562,12 +729,88 @@ else:
         background-color: #2563eb !important;
     }
 
-    /* White Card Expanders with Pastel Blue Border */
+    /* Expanders in Light Mode */
     div[data-testid="stExpander"] {
         background: #ffffff !important;
         border: 1px solid #dbeafe !important;
         border-radius: 14px !important;
         box-shadow: 0 3px 14px rgba(37, 99, 235, 0.05) !important;
+    }
+    div[data-testid="stExpander"] details summary {
+        color: #0f172a !important;
+    }
+    div[data-testid="stExpander"] details summary p {
+        color: #0f172a !important;
+        font-weight: 600 !important;
+    }
+    div[data-testid="stExpander"] details summary svg {
+        fill: #2563eb !important;
+    }
+    div[data-testid="stExpander"] div[data-testid="stExpanderDetails"] {
+        border-top: 1px solid #e2e8f0 !important;
+    }
+
+    /* Streamlit Native Inputs in Light Mode */
+    div[data-baseweb="input"], div[data-baseweb="base-input"] {
+        background-color: #ffffff !important;
+        border-color: #bfdbfe !important;
+        border-radius: 8px !important;
+        color: #0f172a !important;
+    }
+    div[data-baseweb="input"] input, div[data-baseweb="base-input"] input, textarea {
+        background-color: transparent !important;
+        color: #0f172a !important;
+        font-size: 0.9rem !important;
+    }
+    div[data-baseweb="input"] input::placeholder, textarea::placeholder {
+        color: #94a3b8 !important;
+    }
+    div[data-baseweb="select"] > div {
+        background-color: #ffffff !important;
+        border-color: #bfdbfe !important;
+        color: #0f172a !important;
+    }
+    div[data-baseweb="select"] * {
+        color: #0f172a !important;
+    }
+    ul[data-baseweb="menu"] {
+        background-color: #ffffff !important;
+        border: 1px solid #dbeafe !important;
+    }
+    li[role="option"] {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+    }
+    li[role="option"]:hover, li[role="option"][aria-selected="true"] {
+        background-color: #eff6ff !important;
+        color: #1d4ed8 !important;
+    }
+
+    /* File Uploader in Light Mode */
+    div[data-testid="stFileUploader"] {
+        background: #ffffff !important;
+        border: 1px dashed #93c5fd !important;
+        border-radius: 12px !important;
+    }
+    div[data-testid="stFileUploader"] section {
+        background: #f8fafc !important;
+    }
+    div[data-testid="stFileUploader"] * {
+        color: #334155 !important;
+    }
+
+    /* Metrics in Light Mode */
+    div[data-testid="stMetric"] {
+        background: #ffffff !important;
+        border: 1px solid #dbeafe !important;
+        border-radius: 12px !important;
+        padding: 10px 14px !important;
+    }
+    div[data-testid="stMetricValue"] {
+        color: #0f172a !important;
+    }
+    div[data-testid="stMetricLabel"] p {
+        color: #64748b !important;
     }
 
     /* Relay Hop Flight Path */
@@ -818,15 +1061,10 @@ with st.sidebar:
     theme_choice = st.radio(
         "Appearance Mode",
         options=["☀️ Pastel Day", "🌙 Cyber Night"],
-        index=1 if is_dark else 0,
+        key="side_theme_radio",
         horizontal=True,
-        key="side_theme_radio"
+        on_change=on_sidebar_theme_change
     )
-    desired_mode = "dark" if "Night" in theme_choice else "light"
-    if desired_mode != st.session_state.get("theme_mode", "light"):
-        st.session_state.theme_mode = desired_mode
-        st.query_params["theme"] = desired_mode
-        st.rerun()
 
     sound_alert = st.checkbox("🔊 Cyber Audio Alert", value=True, help="Synthesizes an immediate audible alert when a critical threat is identified.")
     redact_enabled = st.checkbox("🔒 Redact PII (Evidence Anonymization)", value=False, help="Masks personal details for legal and regulatory compliance.")
@@ -921,15 +1159,9 @@ with col_status:
     t_c1, t_c2 = st.columns([1.1, 1.3])
     with t_c1:
         if is_dark:
-            if st.button("☀️ Day Mode", use_container_width=True, key="top_theme_toggle", help="Switch to Pastel Blue & White Theme"):
-                st.session_state.theme_mode = "light"
-                st.query_params["theme"] = "light"
-                st.rerun()
+            st.button("☀️ Day Mode", use_container_width=True, key="top_theme_toggle", on_click=toggle_theme_callback, help="Switch to Pastel Blue & White Theme")
         else:
-            if st.button("🌙 Night Mode", use_container_width=True, key="top_theme_toggle", help="Switch to Cyber Dark Mode"):
-                st.session_state.theme_mode = "dark"
-                st.query_params["theme"] = "dark"
-                st.rerun()
+            st.button("🌙 Night Mode", use_container_width=True, key="top_theme_toggle", on_click=toggle_theme_callback, help="Switch to Cyber Dark Mode")
     with t_c2:
         st.markdown(
             """
@@ -970,10 +1202,10 @@ def render_email_sentinel(sound_alert, redact_enabled):
             with col_ext1:
                 st.markdown(
                     f"""
-                    <div style="background: linear-gradient(90deg, #dbeafe 0%, #ffffff 100%); border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px 18px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);">
+                    <div style="background: {'linear-gradient(90deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%)' if is_dark else 'linear-gradient(90deg, #dbeafe 0%, #ffffff 100%)'}; border: 1px solid {'rgba(77, 101, 255, 0.35)' if is_dark else '#bfdbfe'}; border-radius: 12px; padding: 12px 18px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: {'0 4px 20px rgba(0, 0, 0, 0.4)' if is_dark else '0 4px 16px rgba(37, 99, 235, 0.08)'};">
                         <div>
-                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2563eb; box-shadow: 0 0 10px rgba(37,99,235,0.6); margin-right: 8px;"></span>
-                            <b style="color: #1e40af;">LIVE INGESTION FROM {ext_src.upper()}:</b> <span style="color: #0f172a;">{ext_subj[:45]}</span> &bull; <i style="color: #64748b;">{ext_time}</i>
+                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: {'#38bdf8' if is_dark else '#2563eb'}; box-shadow: 0 0 10px {'rgba(56,189,248,0.8)' if is_dark else 'rgba(37,99,235,0.6)'}; margin-right: 8px;"></span>
+                            <b style="color: {'#60a5fa' if is_dark else '#1e40af'};">LIVE INGESTION FROM {ext_src.upper()}:</b> <span style="color: {'#f8fafc' if is_dark else '#0f172a'};">{ext_subj[:45]}</span> &bull; <i style="color: {'#94a3b8' if is_dark else '#64748b'};">{ext_time}</i>
                             <span class="metric-badge {b_cls}" style="margin-left: 10px;">{ext_cat} (Risk: {ext_score}/100)</span>
                         </div>
                     </div>
@@ -1004,11 +1236,11 @@ def render_email_sentinel(sound_alert, redact_enabled):
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; margin-top: 4px; flex-wrap: wrap; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <span class="sub-head-top" style="margin-bottom: 0;">1-Click Telemetry</span>
-                <span style="font-size: 0.95rem; font-weight: 700; color: #0f172a;">Benchmark Forensic Scenarios</span>
+                <span style="font-size: 0.95rem; font-weight: 700; color: ' + ('#f8fafc' if is_dark else '#0f172a') + ';">Benchmark Forensic Scenarios</span>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 0.75rem; color: #64748b; font-weight: 500;">Active Target:</span>
-                <span style="font-size: 0.76rem; color: #1e40af; font-weight: 700; background: #e0edfb; padding: 3px 10px; border-radius: 6px; border: 1px solid #bfdbfe;">
+                <span style="font-size: 0.76rem; color: ' + ('#93c5fd' if is_dark else '#1e40af') + '; font-weight: 700; background: ' + ('rgba(77, 101, 255, 0.16)' if is_dark else '#e0edfb') + '; padding: 3px 10px; border-radius: 6px; border: 1px solid ' + ('rgba(77, 101, 255, 0.35)' if is_dark else '#bfdbfe') + ';">
                     🎯 {curr_active_title}
                 </span>
             </div>
@@ -1311,27 +1543,27 @@ def render_email_sentinel(sound_alert, redact_enabled):
             verdict_text = "CRITICAL THREAT DETECTED"
             badge_cls = "badge-critical"
             action_msg = "⛔ DANGER: DO NOT CLICK LINKS, OPEN ATTACHMENTS, OR ENTER PASSWORDS / OTPS."
-            action_border = "#fca5a5"
-            action_bg = "#fef2f2"
-            action_color = "#991b1b"
+            action_border = "rgba(239, 68, 68, 0.45)" if is_dark else "#fca5a5"
+            action_bg = "rgba(239, 68, 68, 0.16)" if is_dark else "#fee2e2"
+            action_color = "#f87171" if is_dark else "#991b1b"
             border_accent = "#ef4444"
         elif score >= 35:
             gauge_color = "#f59e0b"
             verdict_text = "SUSPICIOUS / ELEVATED RISK"
             badge_cls = "badge-suspicious"
             action_msg = "⚠️ PROCEED WITH CAUTION: Verify sender identity via secondary official channel."
-            action_border = "#fde68a"
-            action_bg = "#fffbeb"
-            action_color = "#92400e"
+            action_border = "rgba(245, 158, 11, 0.45)" if is_dark else "#fde68a"
+            action_bg = "rgba(245, 158, 11, 0.16)" if is_dark else "#fef3c7"
+            action_color = "#fbbf24" if is_dark else "#92400e"
             border_accent = "#f59e0b"
         else:
             gauge_color = "#10b981"
             verdict_text = "VERIFIED SECURE EMAIL"
             badge_cls = "badge-clean"
             action_msg = "✅ VERIFIED SAFE: Cryptographically authentic sender; no threats detected."
-            action_border = "#a7f3d0"
-            action_bg = "#f0fdf4"
-            action_color = "#065f46"
+            action_border = "rgba(16, 185, 129, 0.45)" if is_dark else "#a7f3d0"
+            action_bg = "rgba(16, 185, 129, 0.16)" if is_dark else "#d1fae5"
+            action_color = "#34d399" if is_dark else "#065f46"
             border_accent = "#10b981"
 
         circumference = 263.89
@@ -1551,12 +1783,17 @@ def render_email_sentinel(sound_alert, redact_enabled):
         dest_name = "Target Organization MX (New Delhi, India)"
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+        map_title_clr = "#ffffff" if is_dark else "#0f172a"
+        map_route_bg = "rgba(77, 101, 255, 0.16)" if is_dark else "#e0edfb"
+        map_route_bd = "rgba(77, 101, 255, 0.35)" if is_dark else "#bfdbfe"
+        map_route_fg = "#93c5fd" if is_dark else "#1e40af"
+
         map_head_html = f"""<div style="display: flex; align-items: center; justify-content: space-between; margin-top: 16px; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
     <div style="display: flex; align-items: center; gap: 10px;">
     <span class="sub-head-top" style="margin-bottom: 0;">Global Transmission Map</span>
-    <span style="font-size: 1.05rem; font-weight: 700; color: #0f172a;">3D Origin Trajectory Flight Arc</span>
+    <span style="font-size: 1.05rem; font-weight: 700; color: {map_title_clr};">3D Origin Trajectory Flight Arc</span>
     </div>
-    <span style="font-size: 0.8rem; color: #1e40af; font-weight: 600; background: #e0edfb; padding: 4px 12px; border-radius: 6px; border: 1px solid #bfdbfe;">
+    <span style="font-size: 0.8rem; color: {map_route_fg}; font-weight: 600; background: {map_route_bg}; padding: 4px 12px; border-radius: 6px; border: 1px solid {map_route_bd};">
     ✈️ {origin_city}, {origin_country} ➔ Recipient MX (New Delhi, India)
     </span>
     </div>"""
@@ -1659,17 +1896,23 @@ def render_email_sentinel(sound_alert, redact_enabled):
                     st.info(f"**Recommended Analyst Action:** {data.get('attribution_recommendation', 'Standard security monitoring.')}")
 
                 with col_t2:
+                    nlp_card_bg = "rgba(15, 23, 42, 0.75)" if is_dark else "#ffffff"
+                    nlp_badge_bg = "rgba(77, 101, 255, 0.18)" if is_dark else "#e0edfb"
+                    nlp_badge_fg = "#93c5fd" if is_dark else "#1e40af"
+                    nlp_title_clr = "#ffffff" if is_dark else "#0f172a"
+                    nlp_sub_clr = "#94a3b8" if is_dark else "#64748b"
+
                     st.markdown(
                         f"""
-                        <div class="metric-card" style="padding: 14px 18px; border-left: 3px solid #2563eb; background: #ffffff;">
+                        <div class="metric-card" style="padding: 14px 18px; border-left: 3px solid #2563eb; background: {nlp_card_bg};">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                                 <span class="metric-title" style="margin-bottom: 0;">Contextual NLP Model</span>
-                                <span style="font-size: 0.72rem; color: #1e40af; background: #e0edfb; padding: 2px 8px; border-radius: 4px; font-weight: 700;">⚡ {latency_ms:.1f}ms latency</span>
+                                <span style="font-size: 0.72rem; color: {nlp_badge_fg}; background: {nlp_badge_bg}; padding: 2px 8px; border-radius: 4px; font-weight: 700;">⚡ {latency_ms:.1f}ms latency</span>
                             </div>
-                            <div style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">
+                            <div style="font-size: 0.95rem; font-weight: 800; color: {nlp_title_clr}; margin-bottom: 4px;">
                                 {model_title}
                             </div>
-                            <div style="font-size: 0.8rem; color: #64748b; line-height: 1.45;">
+                            <div style="font-size: 0.8rem; color: {nlp_sub_clr}; line-height: 1.45;">
                                 <b>Classification Verdict:</b> <span style="color: {'#dc2626' if text_label == 'PHISHING' else '#16a34a'}; font-weight: 700;">{text_label}{conf_str}</span><br/>
                                 <b>Architecture:</b> 6 Layers &bull; 66M Parameters &bull; 12 Attention Heads<br/>
                                 <b>Benchmark:</b> ~98.6% BEC detection rate (outperforming legacy TF-IDF 54% baseline)
@@ -2212,29 +2455,29 @@ def render_smishing_sentinel(sound_alert):
         if sms_score >= 70:
             s_gauge_color = "#ef4444"
             s_verdict = "CRITICAL SMISHING THREAT"
-            s_badge = "badge-critical"
-            s_action_msg = "⛔ DANGER: DO NOT CLICK LINKS, DO NOT CALL NUMBERS, AND NEVER INSTALL SUGGESTED APKS."
-            s_action_border = "#fca5a5"
-            s_action_bg = "#fef2f2"
-            s_action_color = "#991b1b"
+            s_badge_cls = "badge-critical"
+            s_action_msg = "⛔ COERCIVE FRAUD: DO NOT CLICK LINKS, CALL SENDER, OR SHARE BANK/UPI OTPs."
+            s_action_border = "rgba(239, 68, 68, 0.45)" if is_dark else "#fca5a5"
+            s_action_bg = "rgba(239, 68, 68, 0.16)" if is_dark else "#fee2e2"
+            s_action_color = "#f87171" if is_dark else "#991b1b"
             s_border_accent = "#ef4444"
         elif sms_score >= 35:
             s_gauge_color = "#f59e0b"
-            s_verdict = "SUSPICIOUS / ELEVATED RISK"
-            s_badge = "badge-suspicious"
-            s_action_msg = "⚠️ PROCEED WITH CAUTION: Unverified communication route; verify via official bank app."
-            s_action_border = "#fde68a"
-            s_action_bg = "#fffbeb"
-            s_action_color = "#92400e"
+            s_verdict = "SUSPICIOUS UNVERIFIED SENDER"
+            s_badge_cls = "badge-suspicious"
+            s_action_msg = "⚠️ CAUTION: Unregistered entity header or unverified shortlink detected."
+            s_action_border = "rgba(245, 158, 11, 0.45)" if is_dark else "#fde68a"
+            s_action_bg = "rgba(245, 158, 11, 0.16)" if is_dark else "#fef3c7"
+            s_action_color = "#fbbf24" if is_dark else "#92400e"
             s_border_accent = "#f59e0b"
         else:
             s_gauge_color = "#10b981"
-            s_verdict = "VERIFIED SAFE SMS"
-            s_badge = "badge-clean"
-            s_action_msg = "✅ VERIFIED SAFE: Dispatched via registered TRAI DLT commercial entity; standard alert."
-            s_action_border = "#a7f3d0"
-            s_action_bg = "#f0fdf4"
-            s_action_color = "#065f46"
+            s_verdict = "VERIFIED DLT ENTITY"
+            s_badge_cls = "badge-clean"
+            s_action_msg = "✅ SAFE: Registered enterprise sender hash; no malicious payloads."
+            s_action_border = "rgba(16, 185, 129, 0.45)" if is_dark else "#a7f3d0"
+            s_action_bg = "rgba(16, 185, 129, 0.16)" if is_dark else "#d1fae5"
+            s_action_color = "#34d399" if is_dark else "#065f46"
             s_border_accent = "#10b981"
 
         s_circumference = 263.89
@@ -2477,11 +2720,14 @@ def render_smishing_sentinel(sound_alert):
 
         with tab_psych:
             st.subheader("🧠 Social Engineering, Urgency Signals & Panic Cues")
+            raw_box_bg = "#0c1222" if is_dark else "#f8fafc"
+            raw_box_fg = "#38bdf8" if is_dark else "#0f172a"
+            raw_box_bd = "rgba(56, 189, 248, 0.22)" if is_dark else "#cbd5e1"
             st.markdown(
                 f"""
                 <div class="metric-card" style="padding: 16px 20px; margin-bottom: 14px;">
                     <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 4px;">RAW INTERCEPTED MESSAGE TEXT</div>
-                    <div style="font-size: 1rem; color: #0f172a; font-family: monospace; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                    <div style="font-size: 1rem; color: {raw_box_fg}; font-family: monospace; background: {raw_box_bg}; padding: 12px; border-radius: 8px; border: 1px solid {raw_box_bd};">
                         "{sms_data['raw_message']}"
                     </div>
                 </div>
@@ -2563,29 +2809,37 @@ else:
     render_smishing_sentinel(sound_alert)
 
 # -------------------------------------------------------------
-# PASTEL BLUE & WHITE ENTERPRISE FOOTER
+# Theme-Adaptive Enterprise Footer
 st.markdown("<div style='height: 36px;'></div>", unsafe_allow_html=True)
+footer_top_bd = "rgba(255, 255, 255, 0.08)" if is_dark else "#dbeafe"
+footer_sub_bd = "rgba(255, 255, 255, 0.08)" if is_dark else "#e2e8f0"
+footer_title_clr = "#ffffff" if is_dark else "#0f172a"
+footer_sub_clr = "#94a3b8" if is_dark else "#64748b"
+footer_pill_bg = "rgba(77, 101, 255, 0.16)" if is_dark else "#e0edfb"
+footer_pill_bd = "rgba(77, 101, 255, 0.35)" if is_dark else "#bfdbfe"
+footer_pill_fg = "#93c5fd" if is_dark else "#1e40af"
+
 st.markdown(
-    """
-    <div style="border-top: 1px solid #dbeafe; padding: 24px 0 16px 0; margin-top: 24px;">
+    f"""
+    <div style="border-top: 1px solid {footer_top_bd}; padding: 24px 0 16px 0; margin-top: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
             <div>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 1.25rem;">🛡️</span>
-                    <span style="font-weight: 800; font-size: 1.05rem; color: #0f172a;">PhishGuard</span>
+                    <span style="font-weight: 800; font-size: 1.05rem; color: {footer_title_clr};">PhishGuard</span>
                     <span class="sub-head-top" style="margin-bottom: 0; font-size: 0.65rem; padding: 2px 8px;">Unified Sentinel</span>
                 </div>
-                <div style="font-size: 0.78rem; color: #64748b; margin-top: 4px;">
+                <div style="font-size: 0.78rem; color: {footer_sub_clr}; margin-top: 4px;">
                     Next-Generation Autonomous Threat Defense &bull; Email & Mobile SMS Smishing Forensic Telemetry
                 </div>
             </div>
             <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                <span style="font-size: 0.74rem; color: #1e40af; background: #e0edfb; padding: 5px 12px; border-radius: 8px; border: 1px solid #bfdbfe;">ISO/IEC 27037</span>
-                <span style="font-size: 0.74rem; color: #1e40af; background: #e0edfb; padding: 5px 12px; border-radius: 8px; border: 1px solid #bfdbfe;">TRAI DLT TCCCPR</span>
-                <span style="font-size: 0.74rem; color: #1e40af; background: #e0edfb; padding: 5px 12px; border-radius: 8px; border: 1px solid #bfdbfe;">Section 65B BSA</span>
+                <span style="font-size: 0.74rem; color: {footer_pill_fg}; background: {footer_pill_bg}; padding: 5px 12px; border-radius: 8px; border: 1px solid {footer_pill_bd};">ISO/IEC 27037</span>
+                <span style="font-size: 0.74rem; color: {footer_pill_fg}; background: {footer_pill_bg}; padding: 5px 12px; border-radius: 8px; border: 1px solid {footer_pill_bd};">TRAI DLT TCCCPR</span>
+                <span style="font-size: 0.74rem; color: {footer_pill_fg}; background: {footer_pill_bg}; padding: 5px 12px; border-radius: 8px; border: 1px solid {footer_pill_bd};">Section 65B BSA</span>
             </div>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid #e2e8f0; font-size: 0.75rem; color: #64748b; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid {footer_sub_bd}; font-size: 0.75rem; color: {footer_sub_clr}; flex-wrap: wrap; gap: 8px;">
             <div>&copy; 2026 PhishGuard Sentinel &bull; Smart India Hackathon &bull; Binary Battalion</div>
             <div>Bank-Grade Cryptographic Telemetry &bull; Real-Time Email & Smishing Protection</div>
         </div>
