@@ -1,27 +1,42 @@
 """
-app.py (Root Entrypoint)
-------------------------
-Primary entry point for Streamlit Community Cloud deployment.
-Configures directory paths and launches phishguard/app.py.
+app.py (Root Entrypoint for Streamlit Community Cloud)
+------------------------------------------------------
+Resolves the inner 'phishguard' application package cleanly and executes it.
+Contains explicit recursion guards to prevent self-invocation on Streamlit Cloud.
 """
 import os
 import sys
 import runpy
 
-current_file = os.path.abspath(__file__)
-current_dir = os.path.dirname(current_file)
+def get_target_app():
+    cwd = os.getcwd()
+    # 1. If cwd has a child phishguard/app.py, target that
+    child = os.path.normpath(os.path.join(cwd, "phishguard", "app.py"))
+    if os.path.isfile(child):
+        return child, os.path.dirname(child)
 
-if os.path.basename(current_dir) == "phishguard":
-    PHISHGUARD_DIR = current_dir
-elif os.path.isdir(os.path.join(current_dir, "phishguard")):
-    PHISHGUARD_DIR = os.path.join(current_dir, "phishguard")
-else:
-    PHISHGUARD_DIR = current_dir
+    # 2. If cwd is already the inner phishguard directory
+    curr = os.path.normpath(os.path.join(cwd, "app.py"))
+    parent_child = os.path.normpath(os.path.join(os.path.dirname(cwd), "phishguard", "app.py"))
+    if os.path.isfile(curr) and os.path.isfile(parent_child) and curr == parent_child:
+        return curr, cwd
 
-if PHISHGUARD_DIR not in sys.path:
-    sys.path.insert(0, PHISHGUARD_DIR)
+    # 3. Fallback from __file__ location
+    this_file = os.path.abspath(__file__)
+    this_dir = os.path.dirname(this_file)
+    candidate = os.path.normpath(os.path.join(this_dir, "phishguard", "app.py"))
+    if os.path.isfile(candidate) and candidate != this_file:
+        return candidate, os.path.dirname(candidate)
 
-# Switch working directory to phishguard so relative paths (models/, sample_emails/, data/) resolve cleanly
-os.chdir(PHISHGUARD_DIR)
-target_app = os.path.join(PHISHGUARD_DIR, "app.py")
+    if os.path.isfile(curr) and curr != this_file:
+        return curr, cwd
+
+    raise RuntimeError(f"Cannot resolve inner phishguard/app.py from CWD={cwd}")
+
+target_app, target_dir = get_target_app()
+
+if target_dir not in sys.path:
+    sys.path.insert(0, target_dir)
+
+os.chdir(target_dir)
 runpy.run_path(target_app, run_name="__main__")
