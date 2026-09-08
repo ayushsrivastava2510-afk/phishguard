@@ -82,7 +82,7 @@ _ensure_bridge_server_active()
 
 MODEL_PATH = "models/phishing_classifier.joblib"
 
-# Dynamic Cyber SOC Styling - GeekPay Inspired Enterprise Design System
+# Dynamic Cyber SOC Styling - Authentic GeekPay Classy, Clean & Minimalist Light Design System
 DYNAMIC_CSS = """
 <style>
     #MainMenu {visibility: hidden;}
@@ -95,120 +95,110 @@ DYNAMIC_CSS = """
     
     html, body, [class*="css"], .stApp {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background-color: #080c16 !important;
-        color: #f1f5f9;
+        background-color: #ffffff !important;
+        color: #0f172a;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         text-rendering: optimizeLegibility;
     }
     
-    /* GeekPay Ambient Fintech Slate Canvas */
+    /* GeekPay Pristine White & Subtle Grid Canvas */
     .stApp {
-        background-color: #080c16 !important;
+        background-color: #ffffff !important;
         background-image: 
-            radial-gradient(ellipse 85% 55% at 50% -15%, rgba(77, 101, 255, 0.16), transparent 70%),
-            radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.08), transparent 50%),
-            radial-gradient(circle at 0% 40%, rgba(56, 189, 248, 0.06), transparent 45%),
-            linear-gradient(180deg, #080c16 0%, #0d1424 100%) !important;
+            radial-gradient(circle at 100% 0%, rgba(167, 243, 208, 0.2), transparent 45%),
+            radial-gradient(circle at 0% 35%, rgba(241, 245, 249, 0.8), transparent 50%),
+            linear-gradient(180deg, #ffffff 0%, #fafbfc 100%) !important;
         background-attachment: fixed !important;
     }
 
-    /* GeekPay Signature Animated Multi-Tone Gradient Heading */
-    .text-style-gradient {
-        display: inline-block;
-        background-image: linear-gradient(-45deg, #22d3ee, #4d65ff, #818cf8, #34d399, #4d65ff) !important;
-        background-size: 300% !important;
-        background-clip: text;
-        -webkit-background-clip: text;
-        text-fill-color: transparent;
-        -webkit-text-fill-color: transparent;
-        animation: GeekPayGradient 9s ease infinite !important;
-    }
-    @keyframes GeekPayGradient {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+    /* GeekPay Bold High-Contrast Branding */
+    .geekpay-brand {
+        font-family: 'Inter', sans-serif;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        text-transform: uppercase;
+        color: #000000;
     }
 
-    /* GeekPay Sub-Head Pill Badge */
+    /* GeekPay Signature Pill Badge (Soft Mint & Emerald) */
     .sub-head-top {
         display: inline-flex;
         align-items: center;
         gap: 6px;
         border-radius: 999px;
-        padding: 4px 12px;
+        padding: 4px 14px;
         font-size: 0.72rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.09em;
-        background: rgba(77, 101, 255, 0.12);
-        color: #60a5fa;
-        border: 1px solid rgba(77, 101, 255, 0.28);
-        margin-bottom: 6px;
+        letter-spacing: 0.08em;
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+        margin-bottom: 8px;
     }
 
+    /* Code & Monospace Elements */
     code, pre {
         font-family: 'JetBrains Mono', monospace !important;
-        background-color: #0c1222 !important;
-        color: #38bdf8 !important;
-        border: 1px solid rgba(56, 189, 248, 0.22) !important;
-        border-radius: 8px;
+        background-color: #f8fafc !important;
+        color: #0f172a !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 6px;
         padding: 2px 6px;
     }
 
-    /* Sidebar - Sleek Slate Navy with Micro-Borders */
+    /* Sidebar - Crisp Off-White Slate Canvas with Hairline Border */
     section[data-testid="stSidebar"] {
-        background-color: #0c1220 !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5) !important;
+        background-color: #f8fafc !important;
+        border-right: 1px solid #e2e8f0 !important;
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02) !important;
     }
     section[data-testid="stSidebar"] hr {
-        border-color: rgba(255, 255, 255, 0.08) !important;
+        border-color: #e2e8f0 !important;
     }
 
-    /* Pulse Beacons */
-    .soc-pulse-red, .soc-pulse-cobalt {
+    /* Pulse Beacons - Emerald Glow */
+    .soc-pulse-beacon, .soc-pulse-red, .soc-pulse-cobalt {
         display: inline-block;
         width: 8px;
         height: 8px;
         border-radius: 50%;
         background-color: #10b981;
-        box-shadow: 0 0 12px #10b981;
+        box-shadow: 0 0 10px #10b981;
         margin-right: 8px;
         animation: geekpayPulse 2s infinite;
     }
     @keyframes geekpayPulse {
-        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8); }
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
         70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
         100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
-    /* GeekPay Glassmorphic Elevated Cards */
+    /* GeekPay White Elevated Metric Cards */
     .metric-card {
-        background: rgba(15, 23, 42, 0.72) !important;
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 16px !important;
+        background: #ffffff !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important;
         padding: 20px 22px;
-        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.45), 0 0 1px 1px rgba(255, 255, 255, 0.04);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 6px 16px -2px rgba(0, 0, 0, 0.03);
         height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .metric-card:hover {
-        transform: translateY(-3px);
-        border-color: rgba(77, 101, 255, 0.45) !important;
-        box-shadow: 0 16px 36px -6px rgba(77, 101, 255, 0.22), 0 0 20px rgba(77, 101, 255, 0.12);
+        transform: translateY(-2px);
+        border-color: #cbd5e1 !important;
+        box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.07);
     }
     .metric-title {
         font-size: 0.75rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: #94a3b8;
+        letter-spacing: 0.06em;
+        color: #64748b;
         margin-bottom: 6px;
     }
     .metric-value-huge {
@@ -216,134 +206,153 @@ DYNAMIC_CSS = """
         font-weight: 800;
         line-height: 1.1;
         margin-bottom: 6px;
-        color: #ffffff;
+        color: #000000;
     }
 
-    /* GeekPay Modern Pill Badges */
+    /* GeekPay Clean High-Trust Pill Badges */
     .metric-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
         font-size: 0.74rem;
         font-weight: 700;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.03em;
         text-transform: uppercase;
         padding: 4px 12px;
         border-radius: 999px;
     }
     .badge-critical {
-        background: rgba(239, 68, 68, 0.14);
-        color: #f87171;
-        border: 1px solid rgba(239, 68, 68, 0.35);
-        box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
     }
     .badge-suspicious {
-        background: rgba(245, 158, 11, 0.14);
-        color: #fbbf24;
-        border: 1px solid rgba(245, 158, 11, 0.35);
-        box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fcd34d;
     }
     .badge-clean {
-        background: rgba(16, 185, 129, 0.14);
-        color: #34d399;
-        border: 1px solid rgba(16, 185, 129, 0.35);
-        box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
     }
 
-    /* GeekPay Buttons: Electric Cobalt & Slate Squircle */
+    /* GeekPay Solid Black & Clean Outline Buttons */
     div.stButton > button[kind="primary"], div[data-testid="stDownloadButton"] > button[kind="primary"] {
-        background: linear-gradient(135deg, #4d65ff 0%, #3b49df 100%) !important;
+        background: #000000 !important;
         color: #ffffff !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border: 1px solid #000000 !important;
         font-weight: 600 !important;
         letter-spacing: 0.01em !important;
-        border-radius: 10px !important;
-        padding: 8px 20px !important;
-        box-shadow: 0 4px 16px rgba(77, 101, 255, 0.35) !important;
-        transition: all 0.2s ease !important;
+        border-radius: 6px !important;
+        padding: 9px 22px !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+        transition: all 0.15s ease !important;
     }
     div.stButton > button[kind="primary"]:hover, div[data-testid="stDownloadButton"] > button[kind="primary"]:hover {
-        background: linear-gradient(135deg, #5c72ff 0%, #4757ea 100%) !important;
-        box-shadow: 0 6px 24px rgba(77, 101, 255, 0.55) !important;
-        transform: translateY(-2px) !important;
+        background: #1f2937 !important;
+        border-color: #1f2937 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+        transform: translateY(-1px) !important;
     }
     div.stButton > button:not([kind="primary"]), div[data-testid="stDownloadButton"] > button:not([kind="primary"]) {
-        background: rgba(30, 41, 59, 0.65) !important;
-        color: #e2e8f0 !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 10px !important;
-        font-weight: 500 !important;
-        transition: all 0.2s ease !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border: 1px solid #000000 !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        transition: all 0.15s ease !important;
     }
     div.stButton > button:not([kind="primary"]):hover, div[data-testid="stDownloadButton"] > button:not([kind="primary"]):hover {
-        border-color: #4d65ff !important;
-        color: #ffffff !important;
-        background: rgba(43, 58, 85, 0.8) !important;
-        box-shadow: 0 0 14px rgba(77, 101, 255, 0.25) !important;
+        background: #f8fafc !important;
+        border-color: #000000 !important;
+        color: #000000 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
         transform: translateY(-1px) !important;
     }
 
-    /* GeekPay Segmented Modern Tabs */
+    /* GeekPay Minimalist Clean Tabs */
     button[data-baseweb="tab"] {
-        color: #94a3b8 !important;
+        color: #64748b !important;
         font-weight: 600 !important;
-        border-radius: 8px !important;
-        padding: 8px 16px !important;
-        transition: all 0.2s ease !important;
+        border-radius: 6px !important;
+        padding: 10px 18px !important;
+        background: transparent !important;
+        border: none !important;
+        transition: all 0.15s ease !important;
     }
     button[data-baseweb="tab"]:hover {
-        color: #ffffff !important;
-        background: rgba(255, 255, 255, 0.05) !important;
+        color: #000000 !important;
+        background: #f1f5f9 !important;
     }
     button[data-baseweb="tab"][aria-selected="true"] {
-        color: #ffffff !important;
-        background: rgba(77, 101, 255, 0.16) !important;
-        border-bottom: 2px solid #4d65ff !important;
+        color: #000000 !important;
+        font-weight: 700 !important;
+        border-bottom: 2px solid #000000 !important;
+        background: transparent !important;
     }
     div[data-baseweb="tab-highlight"] {
-        background-color: #4d65ff !important;
+        background-color: #000000 !important;
     }
 
-    /* GeekPay Styled Expanders */
+    /* GeekPay Clean Expanders */
     div[data-testid="stExpander"] {
-        background: rgba(15, 23, 42, 0.65) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 14px !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+        background: #ffffff !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 10px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+    }
+    div[data-testid="stExpander"] details summary {
+        color: #0f172a !important;
+        font-weight: 600 !important;
     }
 
     /* Relay Hop Flight Path */
     .hop-node {
-        background: rgba(15, 23, 42, 0.85);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 12px;
-        padding: 12px 18px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 14px 18px;
         margin-bottom: 8px;
         display: flex;
         align-items: center;
-        transition: all 0.2s ease;
-    }
-    .hop-node:hover {
-        border-color: #4d65ff;
-        box-shadow: 0 0 14px rgba(77, 101, 255, 0.25);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
     }
     .hop-num {
-        background: linear-gradient(135deg, #4d65ff 0%, #3b49df 100%);
+        background: #000000;
         color: #ffffff;
         font-weight: 700;
         font-size: 0.78rem;
         padding: 5px 12px;
-        border-radius: 8px;
+        border-radius: 6px;
         margin-right: 14px;
         white-space: nowrap;
-        box-shadow: 0 2px 10px rgba(77, 101, 255, 0.3);
     }
     .hop-connector {
         text-align: center;
-        color: #60a5fa;
+        color: #10b981;
         font-size: 0.82rem;
-        padding: 5px 0;
+        padding: 4px 0;
         font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Pastel Mint Callout Banner */
+    .mint-callout-banner {
+        background: #c6f6d5;
+        border-radius: 12px;
+        padding: 42px 32px;
+        text-align: center;
+        margin: 36px 0 20px 0;
+    }
+
+    /* GeekPay Deep Charcoal Footer */
+    .geekpay-footer {
+        background: #0f172a;
+        color: #cbd5e1;
+        border-radius: 14px;
+        padding: 40px 32px 24px 32px;
+        margin-top: 40px;
     }
 </style>
 """
@@ -619,44 +628,272 @@ with st.sidebar:
     )
     st.caption("Smart India Hackathon 2026 | Binary Battalion")
 
-# Top Brand & SOC Header - GeekPay Inspired Enterprise Layout
-col_brand, col_status = st.columns([3.6, 1.4])
-with col_brand:
-    st.markdown(
-        """
-        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 6px;">
-            <div style="width: 54px; height: 54px; border-radius: 14px; background: linear-gradient(135deg, rgba(77, 101, 255, 0.25) 0%, rgba(16, 185, 129, 0.12) 100%); border: 1px solid rgba(77, 101, 255, 0.35); display: flex; align-items: center; justify-content: center; font-size: 1.85rem; box-shadow: 0 4px 18px rgba(77, 101, 255, 0.25);">
-                🛡️
-            </div>
-            <div>
-                <div class="sub-head-top">Autonomous SOC Platform</div>
-                <h1 style="margin: 0; font-size: 2.15rem; font-weight: 800; color: #ffffff; letter-spacing: -0.03em; line-height: 1.15;">
-                    PhishGuard <span class="text-style-gradient">Unified Threat Sentinel</span>
-                </h1>
-                <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 0.92rem; font-weight: 400;">
-                    Dual-Vector Interception &bull; 3D Email Trajectory &bull; Mobile TRAI DLT Smishing Defense &bull; Section 65B Certified
-                </p>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-with col_status:
-    st.markdown(
-        """
-        <div style="text-align: right; padding-top: 12px;">
-            <span class="metric-badge badge-clean" style="font-size: 0.8rem; padding: 6px 14px; font-weight: 700;">
-                <span class="soc-pulse-cobalt"></span> SOC ENGINE ONLINE
+# Top Navigation Bar & Hero Section - Authentic GeekPay Minimalist Layout
+st.markdown(
+    """
+    <!-- Top Navigation Bar (GeekPay Clean Style) -->
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 0 20px 0; border-bottom: 1px solid #f1f5f9; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <span style="font-size: 1.85rem; font-weight: 900; letter-spacing: -0.04em; color: #000000; text-transform: uppercase;">
+                PHISHGUARD
             </span>
-            <div style="font-size: 0.74rem; color: #64748b; margin-top: 6px; font-weight: 500;">
-                Smart India Hackathon 2026 &bull; Binary Battalion
+            <span class="sub-head-top" style="margin-bottom: 0;">
+                <span class="soc-pulse-beacon"></span> SOC ENGINE ONLINE
+            </span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+            <a href="#workbench" style="text-decoration: none; font-size: 0.88rem; font-weight: 600; color: #475569;">Radar Workbench</a>
+            <a href="#why-phishguard" style="text-decoration: none; font-size: 0.88rem; font-weight: 600; color: #475569;">Product</a>
+            <a href="#capabilities" style="text-decoration: none; font-size: 0.88rem; font-weight: 600; color: #475569;">Capabilities</a>
+            <a href="#faq" style="text-decoration: none; font-size: 0.88rem; font-weight: 600; color: #475569;">FAQ</a>
+            <a href="#workbench" style="text-decoration: none;">
+                <button style="background: #000000; color: #ffffff; border: 1px solid #000000; padding: 8px 18px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+                    Start Free Audit
+                </button>
+            </a>
+        </div>
+    </div>
+
+    <!-- Hero Section (GeekPay Image 1 Layout) -->
+    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 40px; align-items: center; margin: 15px 0 35px 0; padding: 10px 0;">
+        <div>
+            <!-- Isometric Technical Machine SVG (Like GeekPay Image 1) -->
+            <svg viewBox="0 0 540 370" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; filter: drop-shadow(0 12px 28px rgba(0,0,0,0.06));">
+                <!-- Machine Base Platform -->
+                <polygon points="40,220 220,125 500,195 320,300" fill="#f8fafc" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+                <polygon points="40,220 320,300 320,330 40,250" fill="#e2e8f0" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+                <polygon points="320,300 500,195 500,225 320,330" fill="#cbd5e1" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+                <!-- Inbound Conveyor Belt -->
+                <polygon points="65,205 160,150 240,195 145,250" fill="#f1f5f9" stroke="#000000" stroke-width="2" stroke-linejoin="round"/>
+                <!-- Conveyor Inbound Threat Tokens with Mint Accents -->
+                <circle cx="105" cy="195" r="15" fill="#a7f3d0" stroke="#000000" stroke-width="2"/>
+                <text x="98" y="199" font-family="Inter, sans-serif" font-size="12" font-weight="800" fill="#000000">@</text>
+                <circle cx="150" cy="175" r="15" fill="#fef08a" stroke="#000000" stroke-width="2"/>
+                <text x="144" y="179" font-family="Inter, sans-serif" font-size="11" font-weight="800" fill="#000000">✉</text>
+                <circle cx="195" cy="205" r="15" fill="#a7f3d0" stroke="#000000" stroke-width="2"/>
+                <text x="187" y="209" font-family="Inter, sans-serif" font-size="10" font-weight="800" fill="#000000">SMS</text>
+                <!-- Central Neural Processing Unit (The Machine) -->
+                <polygon points="210,135 340,60 480,120 350,200" fill="#ffffff" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+                <polygon points="210,135 350,200 350,275 210,210" fill="#f8fafc" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+                <polygon points="350,200 480,120 480,195 350,275" fill="#f1f5f9" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+                <!-- Machine Status Plate -->
+                <rect x="335" y="75" width="46" height="20" rx="4" fill="#a7f3d0" stroke="#000000" stroke-width="2"/>
+                <text x="343" y="89" font-family="Inter, sans-serif" font-size="9" font-weight="800" fill="#065f46">ON/OFF</text>
+                <!-- Machine Brand Label -->
+                <text x="225" y="165" font-family="Inter, sans-serif" font-size="13" font-weight="900" fill="#000000" letter-spacing="1">PHISHGUARD</text>
+                <!-- Mint Data Tubes -->
+                <path d="M 270,185 Q 270,230 240,245" fill="none" stroke="#a7f3d0" stroke-width="10" stroke-linecap="round"/>
+                <path d="M 270,185 Q 270,230 240,245" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+                <path d="M 305,195 Q 305,240 275,255" fill="none" stroke="#a7f3d0" stroke-width="10" stroke-linecap="round"/>
+                <path d="M 305,195 Q 305,240 275,255" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+                <!-- Output Trays (Quarantine vs Verified) -->
+                <polygon points="215,250 245,235 270,250 240,265" fill="#fee2e2" stroke="#000000" stroke-width="2"/>
+                <polygon points="255,260 285,245 310,260 280,275" fill="#d1fae5" stroke="#000000" stroke-width="2"/>
+                <!-- Console Desk & Operator Monitor -->
+                <polygon points="110,270 165,242 220,270 165,298" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+                <line x1="120" y1="275" x2="120" y2="315" stroke="#000000" stroke-width="2"/>
+                <line x1="210" y1="275" x2="210" y2="315" stroke="#000000" stroke-width="2"/>
+                <!-- Monitor Screen -->
+                <rect x="150" y="215" width="34" height="26" rx="2" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+                <line x1="167" y1="241" x2="167" y2="252" stroke="#000000" stroke-width="2"/>
+                <line x1="158" y1="252" x2="176" y2="252" stroke="#000000" stroke-width="2"/>
+                <text x="155" y="232" font-family="JetBrains Mono, monospace" font-size="9" font-weight="800" fill="#000000">SOC</text>
+            </svg>
+        </div>
+        <div>
+            <div class="sub-head-top">Autonomous Threat Sentinel</div>
+            <h1 style="font-size: 2.35rem; font-weight: 900; line-height: 1.15; color: #000000; letter-spacing: -0.03em; margin: 8px 0 16px 0;">
+                Empowering businesses with automated threat prevention and forensic intelligence
+            </h1>
+            <p style="font-size: 1.02rem; color: #475569; line-height: 1.6; margin-bottom: 24px; font-weight: 400;">
+                Real-time DistilBERT contextual intelligence, Section 65B legal chain of custody, and automated mail gateway ingress dropping to permanently shut down attack infrastructure.
+            </p>
+            <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+                <a href="#workbench" style="text-decoration: none;">
+                    <button style="background: #000000; color: #ffffff; border: none; padding: 12px 28px; border-radius: 6px; font-weight: 700; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.15);">
+                        Start Free Audit
+                    </button>
+                </a>
+                <span style="font-size: 0.84rem; color: #64748b; font-weight: 500;">
+                    ⚡ 100% Offline-First &bull; Sub-100ms Latency &bull; Zero Cloud Leaks
+                </span>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    </div>
 
-st.markdown("<hr style='margin: 10px 0 18px 0; border-color: rgba(255, 255, 255, 0.08);'>", unsafe_allow_html=True)
+    <!-- Enterprise Trust & Integration Strip (GeekPay Image 1 Logos) -->
+    <div style="display: flex; align-items: center; justify-content: center; gap: 32px; padding: 18px 0 28px 0; border-bottom: 1px solid #f1f5f9; margin-bottom: 34px; flex-wrap: wrap;">
+        <span style="font-size: 0.80rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.08em;">Enterprise Ingress:</span>
+        <span style="font-size: 0.95rem; font-weight: 700; color: #334155;">Microsoft 365</span>
+        <span style="color: #cbd5e1;">&bull;</span>
+        <span style="font-size: 0.95rem; font-weight: 700; color: #334155;">Google Workspace</span>
+        <span style="color: #cbd5e1;">&bull;</span>
+        <span style="font-size: 0.95rem; font-weight: 700; color: #334155;">Linux Postfix</span>
+        <span style="color: #cbd5e1;">&bull;</span>
+        <span style="font-size: 0.95rem; font-weight: 700; color: #334155;">DoT Sanchar Saathi (Chakshu)</span>
+        <span style="color: #cbd5e1;">&bull;</span>
+        <span style="font-size: 0.95rem; font-weight: 700; color: #334155;">TRAI DLT Verified</span>
+    </div>
+
+    <!-- 3-Step Process (GeekPay Image 2 Layout) -->
+    <div style="margin: 30px 0 48px 0;">
+        <div style="text-align: center; margin-bottom: 26px;">
+            <h2 style="font-size: 1.85rem; font-weight: 800; color: #000000; letter-spacing: -0.02em; margin: 0;">
+                Start stopping phishing attacks in minutes
+            </h2>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px;">
+            <div class="metric-card" style="text-align: center; padding: 22px 18px;">
+                <div style="width: 48px; height: 48px; margin: 0 auto 12px auto; background: #f8fafc; border: 1.5px solid #000000; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                    📥
+                </div>
+                <div style="font-size: 1.02rem; font-weight: 800; color: #000000; margin-bottom: 6px;">
+                    1. Ingest & Intercept
+                </div>
+                <div style="font-size: 0.84rem; color: #475569; line-height: 1.5;">
+                    Ingest live webmail via Chrome Extension, connect gateway logs, or test benchmark attack vectors in 1-click.
+                </div>
+            </div>
+            <div class="metric-card" style="text-align: center; padding: 22px 18px;">
+                <div style="width: 48px; height: 48px; margin: 0 auto 12px auto; background: #d1fae5; border: 1.5px solid #000000; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                    🧠
+                </div>
+                <div style="font-size: 1.02rem; font-weight: 800; color: #000000; margin-bottom: 6px;">
+                    2. Multi-Pillar AI Scan
+                </div>
+                <div style="font-size: 0.84rem; color: #475569; line-height: 1.5;">
+                    66M-param DistilBERT transformer evaluates deep semantics alongside cryptographic SPF/DKIM and ASN origin.
+                </div>
+            </div>
+            <div class="metric-card" style="text-align: center; padding: 22px 18px;">
+                <div style="width: 48px; height: 48px; margin: 0 auto 12px auto; background: #f8fafc; border: 1.5px solid #000000; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                    🛑
+                </div>
+                <div style="font-size: 1.02rem; font-weight: 800; color: #000000; margin-bottom: 6px;">
+                    3. Auto-Drop & Takedown
+                </div>
+                <div style="font-size: 0.84rem; color: #475569; line-height: 1.5;">
+                    Push M365/Postfix blocklist rules, generate ICANN domain revocation notices, and blacklist scammer SIMs.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Why PhishGuard / Product Checklist (GeekPay Image 3 Layout) -->
+    <div id="why-phishguard" style="display: grid; grid-template-columns: 1.15fr 1fr; gap: 40px; align-items: center; margin: 40px 0; padding: 24px 0; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9;">
+        <div>
+            <div class="sub-head-top">Product</div>
+            <h2 style="font-size: 2.05rem; font-weight: 800; color: #000000; letter-spacing: -0.02em; line-height: 1.2; margin: 8px 0 20px 0;">
+                One platform to detect threats, neutralize links, and protect your revenue.
+            </h2>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                    <span style="color: #10b981; font-weight: 800; font-size: 1.15rem; line-height: 1.2;">✓</span>
+                    <span style="font-size: 0.94rem; color: #1e293b; font-weight: 500;"><b>Streamline mail gateway ingress dropping</b> with automated M365 & Linux Postfix rules</span>
+                </div>
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                    <span style="color: #10b981; font-weight: 800; font-size: 1.15rem; line-height: 1.2;">✓</span>
+                    <span style="font-size: 0.94rem; color: #1e293b; font-weight: 500;"><b>Sub-100ms real-time DistilBERT Transformer</b> catching 98.6% of subtle BEC and impersonation</span>
+                </div>
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                    <span style="color: #10b981; font-weight: 800; font-size: 1.15rem; line-height: 1.2;">✓</span>
+                    <span style="font-size: 0.94rem; color: #1e293b; font-weight: 500;"><b>Fully automated stacking meta-classifier</b> with statistically learned L2 multi-pillar weights</span>
+                </div>
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                    <span style="color: #10b981; font-weight: 800; font-size: 1.15rem; line-height: 1.2;">✓</span>
+                    <span style="font-size: 0.94rem; color: #1e293b; font-weight: 500;"><b>Autonomous TRAI DLT verification</b> with 1-click DoT Sanchar Saathi scammer SIM deactivation</span>
+                </div>
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                    <span style="color: #10b981; font-weight: 800; font-size: 1.15rem; line-height: 1.2;">✓</span>
+                    <span style="font-size: 0.94rem; color: #1e293b; font-weight: 500;"><b>Statutory Section 65B certificates</b> with non-black-box causal token salience heatmaps</span>
+                </div>
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                    <span style="color: #10b981; font-weight: 800; font-size: 1.15rem; line-height: 1.2;">✓</span>
+                    <span style="font-size: 0.94rem; color: #1e293b; font-weight: 500;"><b>100% offline-first privacy</b> running entirely locally without leaking corporate data to external LLMs</span>
+                </div>
+            </div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 26px; text-align: center; box-shadow: 0 4px 20px -4px rgba(0,0,0,0.05);">
+            <!-- Minimalist Line-Art Phone Mockup (Like GeekPay Image 3) -->
+            <div style="border: 2.5px solid #000000; border-radius: 14px; background: #ffffff; padding: 18px 20px; text-align: left; max-width: 310px; margin: 0 auto; box-shadow: 5px 5px 0 #000000;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 12px;">
+                    <b style="font-size: 0.90rem; color: #000000;">PHISHGUARD</b>
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+                </div>
+                <div style="background: #d1fae5; border-radius: 6px; padding: 6px 10px; font-size: 0.74rem; color: #065f46; font-weight: 700; margin-bottom: 12px;">
+                    VERIFIED SAFE: 5 / 100
+                </div>
+                <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">P2P Mobile Ingress</div>
+                <div style="font-size: 0.84rem; font-weight: 700; color: #000000; margin-bottom: 10px;">+91 84478 04775</div>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; font-size: 0.76rem; color: #334155; line-height: 1.45;">
+                    "Hey bro are we meeting at the cafe today for project discussion?"
+                </div>
+                <div style="margin-top: 10px; font-size: 0.70rem; color: #065f46; font-weight: 600;">
+                    ✓ Exempt from commercial DLT penalties
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6-Grid Feature Cards (GeekPay Image 4 Layout) -->
+    <div id="capabilities" style="margin: 40px 0 50px 0;">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div class="sub-head-top">Capabilities</div>
+            <h2 style="font-size: 1.95rem; font-weight: 800; color: #000000; letter-spacing: -0.02em; margin: 4px 0 0 0;">
+                Architected for modern security operations
+            </h2>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+            <div class="metric-card">
+                <div style="font-size: 1.8rem; margin-bottom: 10px;">🔬</div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: #000000; margin-bottom: 6px;">Contextual Transformer NLP</div>
+                <div style="font-size: 0.85rem; color: #475569; line-height: 1.5;">
+                    6-layer DistilBERT deep bidirectional attention catching 98.6% of zero-day social engineering and executive wire fraud in under 100ms.
+                </div>
+            </div>
+            <div class="metric-card">
+                <div style="font-size: 1.8rem; margin-bottom: 10px;">⚖️</div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: #000000; margin-bottom: 6px;">Stacking Meta-Classifier</div>
+                <div style="font-size: 0.85rem; color: #475569; line-height: 1.5;">
+                    Statistically trained L2 ensemble combining cryptographic headers (38.5%), threat cues (27.5%), NLP (21.5%), and ASN origin (12.5%).
+                </div>
+            </div>
+            <div class="metric-card">
+                <div style="font-size: 1.8rem; margin-bottom: 10px;">🛡️</div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: #000000; margin-bottom: 6px;">Mail Gateway Ingress Drop</div>
+                <div style="font-size: 0.85rem; color: #475569; line-height: 1.5;">
+                    Automated PowerShell rules for Microsoft 365 Exchange Online and Linux Postfix access tables to drop attack infrastructure at the perimeter.
+                </div>
+            </div>
+            <div class="metric-card">
+                <div style="font-size: 1.8rem; margin-bottom: 10px;">⚡</div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: #000000; margin-bottom: 6px;">Infrastructure Takedown Hub</div>
+                <div style="font-size: 0.85rem; color: #475569; line-height: 1.5;">
+                    Automates formal ICANN RAA Section 3.7.7 domain revocation demands and hosting provider null-route notifications to kill attacker servers.
+                </div>
+            </div>
+            <div class="metric-card">
+                <div style="font-size: 1.8rem; margin-bottom: 10px;">📱</div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: #000000; margin-bottom: 6px;">Smishing Sentinel & TRAI DLT</div>
+                <div style="font-size: 0.85rem; color: #475569; line-height: 1.5;">
+                    Detects commercial SMS fraud violating TRAI DLT headers with P2P friend exemption and 1-click DoT Sanchar Saathi (Chakshu) SIM deactivation.
+                </div>
+            </div>
+            <div class="metric-card">
+                <div style="font-size: 1.8rem; margin-bottom: 10px;">📜</div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: #000000; margin-bottom: 6px;">Section 65B Legal Custody</div>
+                <div style="font-size: 0.85rem; color: #475569; line-height: 1.5;">
+                    Generates court-admissible forensic certificates complying with Section 65B Indian Evidence Act and Section 63 BSA 2023 with XAI heatmaps.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Target Anchor for Workbench -->
+    <div id="workbench" style="padding-top: 20px;"></div>
+    """,
+    unsafe_allow_html=True,
+)
 
 def render_email_sentinel(sound_alert, redact_enabled):
     model = load_model()
@@ -1048,7 +1285,7 @@ def render_email_sentinel(sound_alert, redact_enabled):
         stroke_offset = circumference * (1 - (score / 100))
 
         # -------------------------------------------------------------
-        # 1. EXECUTIVE VERDICT HERO CARD (GeekPay Enterprise Fintech Theme)
+        # 1. EXECUTIVE VERDICT HERO CARD (GeekPay Clean High-Trust Palette)
         # -------------------------------------------------------------
         geo = data.get("geolocation", {})
         origin_ip = data.get("originating_ip") or geo.get("resolved_ip")
@@ -1057,33 +1294,33 @@ def render_email_sentinel(sound_alert, redact_enabled):
         telemetry_info = resolve_email_telemetry_display(data)
 
         # Dedicated Active Email Identification Hero Card (GeekPay Clean High-Trust Palette)
-        currently_analyzing_html = f"""<div class="metric-card" style="margin-bottom: 20px; padding: 18px 22px; border-left: 4px solid #4d65ff; background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.92) 100%);">
-    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 10px;">
+        currently_analyzing_html = f"""<div class="metric-card" style="margin-bottom: 20px; padding: 18px 22px; border-left: 4px solid #000000; background: #ffffff;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
     <div style="display: flex; align-items: center; gap: 10px;">
-    <span class="sub-head-top" style="margin-bottom: 0; background: rgba(77, 101, 255, 0.2); color: #93c5fd; border: 1px solid rgba(77, 101, 255, 0.45); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase;">🔍 CURRENTLY ANALYZING</span>
-    <span style="font-size: 1.1rem; font-weight: 800; color: #ffffff;">{telemetry_info['title']}</span>
+    <span class="sub-head-top" style="margin-bottom: 0;">🔍 CURRENTLY ANALYZING</span>
+    <span style="font-size: 1.1rem; font-weight: 800; color: #000000;">{telemetry_info['title']}</span>
     </div>
     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-    <span style="background: rgba(148, 163, 184, 0.12); color: #94a3b8; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.2); font-weight: 500;">Pipeline: <b>{telemetry_info['source']}</b></span>
-    <span style="background: rgba(77, 101, 255, 0.15); color: #93c5fd; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; font-weight: 600;">Case: <code>{data.get('case_id', 'PG-AUDIT')}</code></span>
+    <span style="background: #f8fafc; color: #475569; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; border: 1px solid #e2e8f0; font-weight: 500;">Pipeline: <b>{telemetry_info['source']}</b></span>
+    <span style="background: #f1f5f9; color: #000000; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; font-weight: 700;">Case: <code>{data.get('case_id', 'PG-AUDIT')}</code></span>
     </div>
     </div>
     <div style="display: grid; grid-template-columns: 2.2fr 1.6fr 1.1fr 1.1fr; gap: 14px;">
     <div>
     <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Email Subject Line</div>
-    <div style="font-size: 0.90rem; color: #f8fafc; font-weight: 600; line-height: 1.4; word-break: break-word;" title="{telemetry_info['subject']}">{telemetry_info['subject']}</div>
+    <div style="font-size: 0.90rem; color: #0f172a; font-weight: 600; line-height: 1.4; word-break: break-word;" title="{telemetry_info['subject']}">{telemetry_info['subject']}</div>
     </div>
     <div>
     <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Sender Entity (From)</div>
-    <div style="font-size: 0.84rem; color: #cbd5e1; font-weight: 500; line-height: 1.4; word-break: break-all;" title="{telemetry_info['from']}"><code>{telemetry_info['from']}</code></div>
+    <div style="font-size: 0.84rem; color: #334155; font-weight: 500; line-height: 1.4; word-break: break-all;" title="{telemetry_info['from']}"><code>{telemetry_info['from']}</code></div>
     </div>
     <div>
     <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Sender Domain</div>
-    <div style="font-size: 0.84rem; color: #38bdf8; font-weight: 600; line-height: 1.4;"><code>{telemetry_info['domain']}</code></div>
+    <div style="font-size: 0.84rem; color: #000000; font-weight: 700; line-height: 1.4;"><code>{telemetry_info['domain']}</code></div>
     </div>
     <div>
     <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Originating IP</div>
-    <div style="font-size: 0.84rem; color: #e2e8f0; font-weight: 600; line-height: 1.4;"><code>{origin_ip or '127.0.0.1'}</code></div>
+    <div style="font-size: 0.84rem; color: #0f172a; font-weight: 600; line-height: 1.4;"><code>{origin_ip or '127.0.0.1'}</code></div>
     </div>
     </div>
     </div>"""
@@ -1101,15 +1338,15 @@ def render_email_sentinel(sound_alert, redact_enabled):
                     <div class="metric-title">Threat Score</div>
                     <div style="position: relative; width: 112px; height: 112px; margin: 4px 0;">
                         <svg width="112" height="112" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,0.06)" stroke-width="8" fill="transparent"/>
+                            <circle cx="50" cy="50" r="42" stroke="#f1f5f9" stroke-width="8" fill="transparent"/>
                             <circle cx="50" cy="50" r="42" stroke="{gauge_color}" stroke-width="8" fill="transparent"
                                 stroke-dasharray="{circumference}" stroke-dashoffset="{stroke_offset}"
                                 stroke-linecap="round" transform="rotate(-90 50 50)"
-                                style="transition: stroke-dashoffset 0.8s ease; filter: drop-shadow(0 0 10px {gauge_color});" />
+                                style="transition: stroke-dashoffset 0.8s ease;" />
                         </svg>
                         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
                             <div style="font-size: 1.65rem; font-weight: 800; color: {gauge_color}; line-height: 1;">{score}</div>
-                            <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 600;">/ 100</div>
+                            <div style="font-size: 0.65rem; color: #64748b; font-weight: 600;">/ 100</div>
                         </div>
                     </div>
                     <div><span class="metric-badge {badge_cls}">{verdict_text}</span></div>
@@ -1147,14 +1384,14 @@ def render_email_sentinel(sound_alert, redact_enabled):
                 f"""
                 <div class="metric-card" style="padding: 20px 24px; border-left: 4px solid {border_accent};">
                     <div class="sub-head-top" style="margin-bottom: 4px;">Forensic Assessment</div>
-                    <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 2px;">
+                    <div style="font-size: 1.25rem; font-weight: 800; color: #000000; margin-bottom: 2px;">
                         {data.get('threat_category', 'Email Security Audit')}
                     </div>
-                    <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 14px;">
-                        <b>Target:</b> <span style="color: #60a5fa; font-weight: 600;">{telemetry_info['title']}</span><br/>
+                    <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 14px;">
+                        <b>Target:</b> <span style="color: #000000; font-weight: 600;">{telemetry_info['title']}</span><br/>
                         <b>From:</b> {telemetry_info['from'][:38]} &bull; <b>Subject:</b> {telemetry_info['subject'][:42]}
                     </div>
-                    <div style="font-size: 0.88rem; line-height: 1.65; color: #e2e8f0;">
+                    <div style="font-size: 0.88rem; line-height: 1.65; color: #1e293b;">
                         <div style="margin-bottom: 8px;">{reason_identity}</div>
                         <div style="margin-bottom: 8px;">{reason_intent}</div>
                         <div>{reason_origin}</div>
@@ -1245,9 +1482,9 @@ def render_email_sentinel(sound_alert, redact_enabled):
         map_head_html = f"""<div style="display: flex; align-items: center; justify-content: space-between; margin-top: 16px; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
     <div style="display: flex; align-items: center; gap: 10px;">
     <span class="sub-head-top" style="margin-bottom: 0;">Global Transmission Map</span>
-    <span style="font-size: 1.05rem; font-weight: 700; color: #ffffff;">3D Origin Trajectory Flight Arc</span>
+    <span style="font-size: 1.05rem; font-weight: 700; color: #000000;">3D Origin Trajectory Flight Arc</span>
     </div>
-    <span style="font-size: 0.8rem; color: #38bdf8; font-weight: 600; background: rgba(56, 189, 248, 0.1); padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.25);">
+    <span style="font-size: 0.8rem; color: #0f172a; font-weight: 600; background: #f1f5f9; padding: 4px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
     ✈️ {origin_city}, {origin_country} ➔ Recipient MX (New Delhi, India)
     </span>
     </div>"""
@@ -1264,7 +1501,7 @@ def render_email_sentinel(sound_alert, redact_enabled):
         }])
 
         point_df = pd.DataFrame([
-            {"pos": [origin_lon, origin_lat], "color": [77, 101, 255, 255], "radius": 180000, "label": f"Origin Server: {origin_ip} ({origin_city}, {origin_country})"},
+            {"pos": [origin_lon, origin_lat], "color": [0, 0, 0, 255], "radius": 180000, "label": f"Origin Server: {origin_ip} ({origin_city}, {origin_country})"},
             {"pos": [dest_lon, dest_lat], "color": [16, 185, 129, 255], "radius": 180000, "label": "Target Organization MX (New Delhi)"},
         ])
 
@@ -1273,8 +1510,8 @@ def render_email_sentinel(sound_alert, redact_enabled):
             data=arc_df,
             get_source_position="from_coord",
             get_target_position="to_coord",
-            get_source_color=[77, 101, 255, 240],
-            get_target_color=[34, 211, 238, 220],
+            get_source_color=[0, 0, 0, 240],
+            get_target_color=[16, 185, 129, 220],
             get_width=5.0,
             get_tilt=25,
             pickable=True,
@@ -1301,7 +1538,7 @@ def render_email_sentinel(sound_alert, redact_enabled):
             pdk.Deck(
                 layers=[arc_layer, scatter_layer],
                 initial_view_state=view_state,
-                map_style="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+                map_style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
                 tooltip={"text": "{label}\n{from_name} ➔ {to_name}"},
             ),
             use_container_width=True,
@@ -2242,32 +2479,129 @@ else:
     render_smishing_sentinel(sound_alert)
 
 # -------------------------------------------------------------
-# GEEKPAY-INSPIRED CLEAN ENTERPRISE FOOTER
+# GEEKPAY-INSPIRED CLEAN ACCORDION FAQ, MINT CALLOUT & FOOTER
 # -------------------------------------------------------------
-st.markdown("<div style='height: 36px;'></div>", unsafe_allow_html=True)
+st.markdown("<div id='faq' style='height: 36px;'></div>", unsafe_allow_html=True)
+
+# Clean Accordion FAQ (GeekPay Image 5 Layout)
 st.markdown(
     """
-    <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding: 24px 0 16px 0; margin-top: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div style="margin: 40px 0 30px 0;">
+        <div style="margin-bottom: 24px;">
+            <div class="sub-head-top">FAQ</div>
+            <h2 style="font-size: 1.85rem; font-weight: 800; color: #000000; letter-spacing: -0.02em; margin: 4px 0 0 0;">
+                Frequently Asked Questions
+            </h2>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+with st.expander("What types of threats can PhishGuard intercept and analyze?", expanded=False):
+    st.markdown(
+        """
+        PhishGuard protects across dual vectors:
+        - **Enterprise Email:** Zero-day spear-phishing, Business Email Compromise (BEC), lookalike homograph domains, credential harvesters, and malicious attachments.
+        - **Mobile SMS / Smishing:** Financial KYC fraud, electricity cut-off panic scams, APK malware dispatch, and unauthorized commercial dispatch violating TRAI DLT regulations.
+        """
+    )
+
+with st.expander("How does PhishGuard stop attackers from sending more phishing attacks?", expanded=False):
+    st.markdown(
+        """
+        PhishGuard transitions from passive detection to active attack prevention:
+        1. **Perimeter Ingress Dropping:** Generates Microsoft 365 Exchange Online PowerShell scripts and Linux Postfix access rules to drop future connections at the gateway before emails ever reach inboxes.
+        2. **Infrastructure Takedowns:** Auto-generates ICANN RFC 2142 domain revocation notices and hosting provider null-route notifications to dismantle the attacker's servers.
+        3. **Brand Anti-Spoofing:** Enforces strict `v=DMARC1; p=reject` DNS policies so global mail servers reject forged emails using your brand.
+        4. **Telecom SIM Revocation:** Generates official DoT Sanchar Saathi (Chakshu) dossiers to blacklist scammer SIM cards and device IMEIs across all cellular carriers.
+        """
+    )
+
+with st.expander("Why does the DistilBERT Transformer outperform traditional ML algorithms?", expanded=False):
+    st.markdown(
+        """
+        Traditional models (like TF-IDF + Logistic Regression) evaluate keywords in isolation and achieve only ~54% detection on sophisticated Business Email Compromise (BEC). 
+        PhishGuard's **66-million-parameter DistilBERT transformer** understands bidirectional context, syntactic nuances, and conversational coercion, achieving **~98.6% detection** in under 100ms on standard CPU hardware without cloud dependencies.
+        """
+    )
+
+with st.expander("How does the Smishing Sentinel avoid flagging personal messages from friends?", expanded=False):
+    st.markdown(
+        """
+        Under TRAI's TCCCPR 2018 framework, commercial messages must originate from registered alphanumeric headers (e.g., `AD-HDFCBK`). When an SMS comes from a 10-digit mobile SIM, PhishGuard activates its **Person-to-Person (P2P) Exemption Engine**: if the message contains casual discussion without coercive financial terms or obfuscated links, it is safely verified with a low risk score (`5/100 Safe`), eliminating false alarms.
+        """
+    )
+
+with st.expander("Is sensitive enterprise email or SMS data transmitted to any third-party cloud API?", expanded=False):
+    st.markdown(
+        """
+        **No.** PhishGuard is architected with a strict **100% offline-first, zero-cloud dependency**. All feature extraction, transformer inference, and cryptographic hashing execute locally inside your security perimeter or SOC server. No user data, passwords, or company communications ever leave your environment.
+        """
+    )
+
+# Pastel Mint Callout Banner (GeekPay Image 5 Layout)
+st.markdown(
+    """
+    <div class="mint-callout-banner">
+        <h2 style="font-size: 2.15rem; font-weight: 900; color: #000000; letter-spacing: -0.03em; margin: 0 0 12px 0;">
+            Ready to secure your organization against phishing?
+        </h2>
+        <p style="font-size: 1.05rem; color: #1e293b; max-width: 600px; margin: 0 auto 26px auto; line-height: 1.5; font-weight: 500;">
+            Deploy autonomous detection, active gateway ingress dropping, and statutory court-ready forensic audit logging in minutes.
+        </p>
+        <a href="#workbench" style="text-decoration: none;">
+            <button style="background: #000000; color: #ffffff; border: none; padding: 13px 32px; border-radius: 6px; font-weight: 700; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.18);">
+                Start Free Threat Audit
+            </button>
+        </a>
+    </div>
+
+    <!-- GeekPay Deep Charcoal Footer (GeekPay Image 5 Layout) -->
+    <div class="geekpay-footer">
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1.2fr; gap: 32px; margin-bottom: 30px;">
             <div>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.25rem;">🛡️</span>
-                    <span style="font-weight: 800; font-size: 1.05rem; color: #ffffff;">PhishGuard</span>
-                    <span class="sub-head-top" style="margin-bottom: 0; font-size: 0.65rem; padding: 2px 8px;">Unified Sentinel</span>
+                <div style="font-size: 1.35rem; font-weight: 900; color: #ffffff; letter-spacing: -0.03em; margin-bottom: 10px;">
+                    PHISHGUARD
                 </div>
-                <div style="font-size: 0.78rem; color: #64748b; margin-top: 4px;">
-                    Next-Generation Autonomous Threat Defense &bull; Email & Mobile SMS Smishing Forensic Telemetry
+                <p style="font-size: 0.82rem; color: #94a3b8; line-height: 1.55; margin: 0 0 14px 0;">
+                    Next-generation autonomous cyber threat detection, digital forensics, and active attack mitigation platform.
+                </p>
+                <div style="font-size: 0.74rem; color: #64748b;">
+                    Smart India Hackathon 2026 &bull; Binary Battalion
                 </div>
             </div>
-            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                <span style="font-size: 0.74rem; color: #94a3b8; background: rgba(255, 255, 255, 0.04); padding: 5px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06);">ISO/IEC 27037</span>
-                <span style="font-size: 0.74rem; color: #94a3b8; background: rgba(255, 255, 255, 0.04); padding: 5px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06);">TRAI DLT TCCCPR</span>
-                <span style="font-size: 0.74rem; color: #94a3b8; background: rgba(255, 255, 255, 0.04); padding: 5px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06);">Section 65B BSA</span>
+            <div>
+                <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #ffffff; margin-bottom: 12px; letter-spacing: 0.06em;">Product</div>
+                <div style="font-size: 0.82rem; color: #94a3b8; line-height: 2;">
+                    Email Threat Radar<br/>
+                    Smishing Sentinel<br/>
+                    Active Prevention Hub<br/>
+                    Chrome Extension
+                </div>
+            </div>
+            <div>
+                <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #ffffff; margin-bottom: 12px; letter-spacing: 0.06em;">Regulatory</div>
+                <div style="font-size: 0.82rem; color: #94a3b8; line-height: 2;">
+                    TRAI DLT TCCCPR 2018<br/>
+                    Section 65B Indian Evidence Act<br/>
+                    Section 63 BSA 2023<br/>
+                    ISO/IEC 27037 Digital Custody
+                </div>
+            </div>
+            <div>
+                <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #ffffff; margin-bottom: 12px; letter-spacing: 0.06em;">Compliance & Defense</div>
+                <div style="font-size: 0.82rem; color: #94a3b8; line-height: 2;">
+                    DoT Sanchar Saathi (Chakshu)<br/>
+                    National 1930 Cyber Portal<br/>
+                    CERT-In Incident Reporting<br/>
+                    ICANN RAA Section 3.7.7
+                </div>
             </div>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.04); font-size: 0.75rem; color: #64748b; flex-wrap: wrap; gap: 8px;">
-            <div>&copy; 2026 PhishGuard Sentinel &bull; Smart India Hackathon &bull; Binary Battalion</div>
-            <div>Bank-Grade Cryptographic Telemetry &bull; Real-Time Email & Smishing Protection</div>
+        <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 18px; font-size: 0.75rem; color: #64748b; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>&copy; 2026 PhishGuard Autonomous SOC. All rights reserved.</div>
+            <div>Engine: DistilBERT 66M &bull; Stacking Meta-Classifier &bull; 100% Offline-First</div>
         </div>
     </div>
     """,

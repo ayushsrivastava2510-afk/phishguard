@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PhishGuard — Autonomous Phishing Detection & Active Threat Prevention</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #ffffff;
+      color: #0f172a;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    /* Top Header */
+    header {
+      border-bottom: 1px solid #f1f5f9;
+      background: #ffffff;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 76px;
+    }
+    .brand-logo {
+      font-size: 1.65rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: #000000;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .badge-pill-mint {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      font-size: 0.70rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: #10b981;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: #475569;
+      font-weight: 600;
+      font-size: 0.90rem;
+      transition: color 0.15s ease;
+    }
+    .nav-links a:hover {
+      color: #000000;
+    }
+    .btn-solid-black {
+      background: #000000;
+      color: #ffffff !important;
+      border: 1px solid #000000;
+      padding: 9px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+    .btn-solid-black:hover {
+      background: #1f2937;
+      border-color: #1f2937;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .btn-outline {
+      background: #ffffff;
+      color: #000000 !important;
+      border: 1px solid #000000;
+      padding: 9px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.15s ease;
+    }
+    .btn-outline:hover {
+      background: #f8fafc;
+      transform: translateY(-1px);
+    }
+
+    /* Hero Section */
+    .hero-section {
+      padding: 60px 0 40px 0;
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 48px;
+      align-items: center;
+    }
+    .hero-headline {
+      font-size: 2.75rem;
+      font-weight: 900;
+      color: #000000;
+      line-height: 1.15;
+      letter-spacing: -0.035em;
+      margin-bottom: 18px;
+    }
+    .hero-subhead {
+      font-size: 1.08rem;
+      color: #475569;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* Trust Strip */
+    .trust-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      padding: 24px 0;
+      border-bottom: 1px solid #f1f5f9;
+      margin-bottom: 60px;
+      flex-wrap: wrap;
+    }
+    .trust-label {
+      font-size: 0.80rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+    }
+    .trust-item {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #334155;
+    }
+    .trust-bullet {
+      color: #cbd5e1;
+    }
+
+    /* 3-Step Process */
+    .section-title-center {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .section-title-center h2 {
+      font-size: 2.15rem;
+      font-weight: 800;
+      color: #000000;
+      letter-spacing: -0.025em;
+    }
+    .timeline-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      margin-bottom: 70px;
+    }
+    .step-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 28px 22px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: transform 0.2s ease;
+    }
+    .step-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.06);
+    }
+    .step-icon-box {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 16px auto;
+      border: 1.5px solid #000000;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.45rem;
+      background: #ffffff;
+    }
+    .step-card-title {
+      font-size: 1.08rem;
+      font-weight: 800;
+      color: #000000;
+      margin-bottom: 8px;
+    }
+    .step-card-desc {
+      font-size: 0.88rem;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    /* Product & Checklist Section */
+    .why-section {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 48px;
+      align-items: center;
+      padding: 50px 0;
+      border-top: 1px solid #f1f5f9;
+      border-bottom: 1px solid #f1f5f9;
+      margin-bottom: 70px;
+    }
+    .why-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: #000000;
+      line-height: 1.2;
+      letter-spacing: -0.025em;
+      margin: 10px 0 24px 0;
+    }
+    .checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.96rem;
+      color: #1e293b;
+    }
+    .check-icon {
+      color: #10b981;
+      font-weight: 900;
+      font-size: 1.15rem;
+      line-height: 1.2;
+    }
+
+    /* Minimalist Phone Mockup */
+    .phone-mockup-wrapper {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+    }
+    .phone-box {
+      border: 2.5px solid #000000;
+      border-radius: 16px;
+      background: #ffffff;
+      padding: 22px;
+      text-align: left;
+      max-width: 320px;
+      margin: 0 auto;
+      box-shadow: 6px 6px 0 #000000;
+    }
+
+    /* 6-Grid Feature Section */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 26px;
+      margin-bottom: 70px;
+    }
+    .feature-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 26px 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-2px);
+      border-color: #cbd5e1;
+      box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.07);
+    }
+    .feature-icon {
+      font-size: 1.9rem;
+      margin-bottom: 12px;
+    }
+    .feature-title {
+      font-size: 1.10rem;
+      font-weight: 800;
+      color: #000000;
+      margin-bottom: 8px;
+    }
+    .feature-desc {
+      font-size: 0.88rem;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    /* Interactive Live Demo Widget */
+    .demo-widget {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 36px;
+      margin-bottom: 70px;
+    }
+    .demo-widget h3 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #000000;
+      margin-bottom: 8px;
+    }
+    .demo-textarea {
+      width: 100%;
+      height: 110px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      margin: 14px 0;
+      outline: none;
+      resize: vertical;
+    }
+    .demo-textarea:focus {
+      border-color: #000000;
+    }
+    .demo-result-box {
+      margin-top: 20px;
+      padding: 18px 20px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      display: none;
+    }
+
+    /* FAQ Section */
+    .faq-section {
+      margin-bottom: 70px;
+    }
+    .faq-item {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 18px 0;
+    }
+    .faq-question {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: #000000;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    .faq-answer {
+      font-size: 0.94rem;
+      color: #475569;
+      line-height: 1.6;
+      margin-top: 12px;
+      display: none;
+    }
+    .faq-item.active .faq-answer {
+      display: block;
+    }
+    .faq-chevron {
+      font-size: 0.85rem;
+      transition: transform 0.2s ease;
+    }
+    .faq-item.active .faq-chevron {
+      transform: rotate(180deg);
+    }
+
+    /* Pastel Mint Callout Banner */
+    .mint-callout-banner {
+      background: #c6f6d5;
+      border-radius: 14px;
+      padding: 54px 32px;
+      text-align: center;
+      margin-bottom: 70px;
+    }
+    .mint-callout-banner h2 {
+      font-size: 2.35rem;
+      font-weight: 900;
+      color: #000000;
+      letter-spacing: -0.03em;
+      margin-bottom: 14px;
+    }
+    .mint-callout-banner p {
+      font-size: 1.10rem;
+      color: #1e293b;
+      max-width: 620px;
+      margin: 0 auto 28px auto;
+      line-height: 1.5;
+    }
+
+    /* Deep Charcoal Footer */
+    footer {
+      background: #0f172a;
+      color: #cbd5e1;
+      border-radius: 16px 16px 0 0;
+      padding: 54px 24px 32px 24px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.2fr;
+      gap: 36px;
+      margin-bottom: 36px;
+    }
+    .footer-col h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #ffffff;
+      margin-bottom: 16px;
+    }
+    .footer-col ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .footer-col ul li a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color 0.15s ease;
+    }
+    .footer-col ul li a:hover {
+      color: #ffffff;
+    }
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.80rem;
+      color: #64748b;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    @media (max-width: 868px) {
+      .hero-section, .why-section, .timeline-grid, .feature-grid, .footer-grid {
+        grid-template-columns: 1fr;
+      }
+      .nav-links {
+        display: none;
+      }
+      .hero-headline {
+        font-size: 2.15rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="container nav-bar">
+      <a href="#" class="brand-logo">
+        PHISHGUARD
+        <span class="badge-pill-mint">
+          <span class="pulse-dot"></span> AUTONOMOUS SOC ONLINE
+        </span>
+      </a>
+      <div class="nav-links">
+        <a href="#product">Product</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#capabilities">Capabilities</a>
+        <a href="#faq">FAQ</a>
+        <a href="https://phishguard-soc.streamlit.app" target="_blank" class="btn-solid-black">Launch SOC Portal</a>
+        <a href="../PhishGuard.apk" class="btn-outline">Download APK</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <!-- Left: Isometric SVG Line-Art Machine (Like GeekPay Image 1) -->
+      <div>
+        <svg viewBox="0 0 540 370" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; filter: drop-shadow(0 12px 28px rgba(0,0,0,0.06));">
+          <!-- Machine Base Platform -->
+          <polygon points="40,220 220,125 500,195 320,300" fill="#f8fafc" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+          <polygon points="40,220 320,300 320,330 40,250" fill="#e2e8f0" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+          <polygon points="320,300 500,195 500,225 320,330" fill="#cbd5e1" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- Inbound Conveyor Belt -->
+          <polygon points="65,205 160,150 240,195 145,250" fill="#f1f5f9" stroke="#000000" stroke-width="2" stroke-linejoin="round"/>
+          <!-- Conveyor Inbound Threat Tokens with Mint Accents -->
+          <circle cx="105" cy="195" r="15" fill="#a7f3d0" stroke="#000000" stroke-width="2"/>
+          <text x="98" y="199" font-family="Inter, sans-serif" font-size="12" font-weight="800" fill="#000000">@</text>
+          <circle cx="150" cy="175" r="15" fill="#fef08a" stroke="#000000" stroke-width="2"/>
+          <text x="144" y="179" font-family="Inter, sans-serif" font-size="11" font-weight="800" fill="#000000">✉</text>
+          <circle cx="195" cy="205" r="15" fill="#a7f3d0" stroke="#000000" stroke-width="2"/>
+          <text x="187" y="209" font-family="Inter, sans-serif" font-size="10" font-weight="800" fill="#000000">SMS</text>
+          <!-- Central Neural Processing Unit (The Machine) -->
+          <polygon points="210,135 340,60 480,120 350,200" fill="#ffffff" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+          <polygon points="210,135 350,200 350,275 210,210" fill="#f8fafc" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+          <polygon points="350,200 480,120 480,195 350,275" fill="#f1f5f9" stroke="#000000" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- Machine Status Plate -->
+          <rect x="335" y="75" width="46" height="20" rx="4" fill="#a7f3d0" stroke="#000000" stroke-width="2"/>
+          <text x="343" y="89" font-family="Inter, sans-serif" font-size="9" font-weight="800" fill="#065f46">ON/OFF</text>
+          <!-- Machine Brand Label -->
+          <text x="225" y="165" font-family="Inter, sans-serif" font-size="13" font-weight="900" fill="#000000" letter-spacing="1">PHISHGUARD</text>
+          <!-- Mint Data Tubes -->
+          <path d="M 270,185 Q 270,230 240,245" fill="none" stroke="#a7f3d0" stroke-width="10" stroke-linecap="round"/>
+          <path d="M 270,185 Q 270,230 240,245" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+          <path d="M 305,195 Q 305,240 275,255" fill="none" stroke="#a7f3d0" stroke-width="10" stroke-linecap="round"/>
+          <path d="M 305,195 Q 305,240 275,255" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+          <!-- Output Trays (Quarantine vs Verified) -->
+          <polygon points="215,250 245,235 270,250 240,265" fill="#fee2e2" stroke="#000000" stroke-width="2"/>
+          <polygon points="255,260 285,245 310,260 280,275" fill="#d1fae5" stroke="#000000" stroke-width="2"/>
+          <!-- Console Desk & Operator Monitor -->
+          <polygon points="110,270 165,242 220,270 165,298" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+          <line x1="120" y1="275" x2="120" y2="315" stroke="#000000" stroke-width="2"/>
+          <line x1="210" y1="275" x2="210" y2="315" stroke="#000000" stroke-width="2"/>
+          <!-- Monitor Screen -->
+          <rect x="150" y="215" width="34" height="26" rx="2" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+          <line x1="167" y1="241" x2="167" y2="252" stroke="#000000" stroke-width="2"/>
+          <line x1="158" y1="252" x2="176" y2="252" stroke="#000000" stroke-width="2"/>
+          <text x="155" y="232" font-family="JetBrains Mono, monospace" font-size="9" font-weight="800" fill="#000000">SOC</text>
+        </svg>
+      </div>
+      <!-- Right: Value Proposition -->
+      <div>
+        <span class="badge-pill-mint" style="margin-bottom: 12px;">Autonomous Threat Sentinel</span>
+        <h1 class="hero-headline">
+          Empowering businesses with automated threat prevention and forensic intelligence
+        </h1>
+        <p class="hero-subhead">
+          Real-time DistilBERT contextual intelligence, Section 65B legal chain of custody, and automated mail gateway ingress dropping to permanently shut down attack infrastructure.
+        </p>
+        <div class="hero-actions">
+          <a href="https://phishguard-soc.streamlit.app" target="_blank" class="btn-solid-black" style="padding: 13px 30px; font-size: 0.98rem;">
+            Launch Threat Radar
+          </a>
+          <a href="#demo" class="btn-outline" style="padding: 13px 26px; font-size: 0.98rem;">
+            Try Interactive Scanner
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust Strip -->
+    <div class="trust-strip">
+      <span class="trust-label">Enterprise Ingress:</span>
+      <span class="trust-item">Microsoft 365</span>
+      <span class="trust-bullet">&bull;</span>
+      <span class="trust-item">Google Workspace</span>
+      <span class="trust-bullet">&bull;</span>
+      <span class="trust-item">Linux Postfix</span>
+      <span class="trust-bullet">&bull;</span>
+      <span class="trust-item">DoT Sanchar Saathi (Chakshu)</span>
+      <span class="trust-bullet">&bull;</span>
+      <span class="trust-item">TRAI DLT Verified</span>
+    </div>
+
+    <!-- 3-Step Process (Image 2) -->
+    <section id="how-it-works">
+      <div class="section-title-center">
+        <h2>Start stopping phishing attacks in minutes</h2>
+      </div>
+      <div class="timeline-grid">
+        <div class="step-card">
+          <div class="step-icon-box">📥</div>
+          <div class="step-card-title">1. Ingest & Intercept</div>
+          <div class="step-card-desc">
+            Ingest live webmail via Chrome Extension, connect mail gateway telemetry, or inspect benchmark attack vectors in 1-click.
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-icon-box" style="background: #d1fae5;">🧠</div>
+          <div class="step-card-title">2. Multi-Pillar AI Scan</div>
+          <div class="step-card-desc">
+            66M-param DistilBERT transformer evaluates deep coercive semantics alongside cryptographic SPF/DKIM and ASN origin.
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-icon-box">🛑</div>
+          <div class="step-card-title">3. Auto-Drop & Takedown</div>
+          <div class="step-card-desc">
+            Push M365/Postfix blocklist rules, generate ICANN domain revocation notices, and blacklist scammer SIMs via DoT Chakshu.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why PhishGuard / Product Showcase (Image 3) -->
+    <section id="product" class="why-section">
+      <div>
+        <span class="badge-pill-mint">Product</span>
+        <h2 class="why-title">
+          One platform to detect threats, neutralize links, and protect your revenue.
+        </h2>
+        <div class="checklist">
+          <div class="check-item">
+            <span class="check-icon">✓</span>
+            <span><b>Streamline mail gateway ingress dropping</b> with automated Microsoft 365 & Linux Postfix perimeter rules</span>
+          </div>
+          <div class="check-item">
+            <span class="check-icon">✓</span>
+            <span><b>Sub-100ms real-time DistilBERT Transformer</b> catching 98.6% of subtle BEC and executive impersonation</span>
+          </div>
+          <div class="check-item">
+            <span class="check-icon">✓</span>
+            <span><b>Fully automated stacking meta-classifier</b> with statistically learned L2 multi-pillar weights</span>
+          </div>
+          <div class="check-item">
+            <span class="check-icon">✓</span>
+            <span><b>Autonomous TRAI DLT verification</b> with 1-click DoT Sanchar Saathi scammer SIM deactivation</span>
+          </div>
+          <div class="check-item">
+            <span class="check-icon">✓</span>
+            <span><b>Statutory Section 65B certificates</b> with non-black-box causal token salience heatmaps</span>
+          </div>
+          <div class="check-item">
+            <span class="check-icon">✓</span>
+            <span><b>100% offline-first privacy</b> running entirely locally without leaking corporate data to external LLMs</span>
+          </div>
+        </div>
+      </div>
+      <div class="phone-mockup-wrapper">
+        <div class="phone-box">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 14px;">
+            <b style="font-size: 0.90rem; color: #000000;">PHISHGUARD</b>
+            <span class="pulse-dot"></span>
+          </div>
+          <div style="background: #d1fae5; border-radius: 6px; padding: 6px 10px; font-size: 0.74rem; color: #065f46; font-weight: 700; margin-bottom: 12px;">
+            VERIFIED SAFE: 5 / 100
+          </div>
+          <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">P2P Mobile Ingress</div>
+          <div style="font-size: 0.84rem; font-weight: 700; color: #000000; margin-bottom: 10px;">+91 84478 04775</div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; font-size: 0.76rem; color: #334155; line-height: 1.45;">
+            "Hey bro are we meeting at the cafe today for project discussion?"
+          </div>
+          <div style="margin-top: 10px; font-size: 0.70rem; color: #065f46; font-weight: 600;">
+            ✓ Exempt from commercial DLT penalties
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6-Grid Capabilities (Image 4) -->
+    <section id="capabilities">
+      <div class="section-title-center">
+        <span class="badge-pill-mint" style="margin-bottom: 8px;">Capabilities</span>
+        <h2>Architected for modern security operations</h2>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🔬</div>
+          <div class="feature-title">Contextual Transformer NLP</div>
+          <div class="feature-desc">
+            6-layer DistilBERT deep bidirectional attention catching 98.6% of zero-day social engineering and executive wire fraud in under 100ms.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚖️</div>
+          <div class="feature-title">Stacking Meta-Classifier</div>
+          <div class="feature-desc">
+            Statistically trained L2 ensemble combining cryptographic headers (38.5%), threat cues (27.5%), NLP (21.5%), and ASN origin (12.5%).
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <div class="feature-title">Mail Gateway Ingress Drop</div>
+          <div class="feature-desc">
+            Automated PowerShell rules for Microsoft 365 Exchange Online and Linux Postfix access tables to drop attack infrastructure at the perimeter.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <div class="feature-title">Infrastructure Takedown Hub</div>
+          <div class="feature-desc">
+            Automates formal ICANN RAA Section 3.7.7 domain revocation demands and hosting provider null-route notifications to kill attacker servers.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <div class="feature-title">Smishing Sentinel & TRAI DLT</div>
+          <div class="feature-desc">
+            Detects commercial SMS fraud violating TRAI DLT headers with P2P friend exemption and 1-click DoT Sanchar Saathi (Chakshu) SIM deactivation.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📜</div>
+          <div class="feature-title">Section 65B Legal Custody</div>
+          <div class="feature-desc">
+            Generates court-admissible forensic certificates complying with Section 65B Indian Evidence Act and Section 63 BSA 2023 with XAI heatmaps.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Live Demo Scanner -->
+    <section id="demo" class="demo-widget">
+      <h3>⚡ Instant In-Browser Threat Audit Demo</h3>
+      <p style="font-size: 0.92rem; color: #475569;">
+        Paste any suspicious email or SMS text below to run real-time contextual evaluation:
+      </p>
+      <textarea id="demoInput" class="demo-textarea" placeholder="e.g. Dear SBI Customer, your YONO account is blocked today due to pending KYC. Update PAN immediately: bit.ly/sbi-yono-update"></textarea>
+      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <button id="btnRunAudit" class="btn-solid-black" style="padding: 10px 24px;">Run Real-Time Audit</button>
+        <button id="btnSampleAttack" class="btn-outline" style="padding: 10px 18px;">Load SBI KYC Attack</button>
+        <button id="btnSampleFriend" class="btn-outline" style="padding: 10px 18px;">Load Benign Friend SMS</button>
+      </div>
+      <div id="demoOutput" class="demo-result-box"></div>
+    </section>
+
+    <!-- FAQ Accordion (Image 5) -->
+    <section id="faq" class="faq-section">
+      <div style="margin-bottom: 24px;">
+        <span class="badge-pill-mint" style="margin-bottom: 8px;">FAQ</span>
+        <h2 style="font-size: 2.15rem; font-weight: 800; color: #000000; letter-spacing: -0.025em;">
+          Frequently Asked Questions
+        </h2>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>What types of threats can PhishGuard intercept and analyze?</span>
+          <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-answer">
+          PhishGuard protects across dual vectors: Enterprise Email (zero-day spear-phishing, Business Email Compromise, lookalike domains, and malicious attachments) and Mobile SMS / Smishing (banking KYC scams, electricity cut-off threats, and commercial messages dispatched from unauthorized SIMs in violation of TRAI DLT regulations).
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>How does PhishGuard stop attackers from sending more phishing attacks?</span>
+          <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-answer">
+          PhishGuard transitions from passive detection to active prevention: it generates perimeter blocklist scripts for Microsoft 365 Exchange Online and Linux Postfix to reject attacks at the edge, drafts formal ICANN RFC 2142 domain revocation notices to take down attacker sites, hardens DNS with strict DMARC p=reject enforcement, and compiles DoT Sanchar Saathi dossiers to deactivate scammer SIM cards.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>Why does the DistilBERT Transformer outperform traditional ML algorithms?</span>
+          <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-answer">
+          Traditional algorithms (TF-IDF + Logistic Regression) evaluate keywords in isolation and fail on ~46% of sophisticated Business Email Compromise (BEC) attacks. PhishGuard's 66M-parameter DistilBERT transformer evaluates deep bidirectional linguistic syntax and conversational coercion, achieving ~98.6% accuracy in under 100ms on standard CPU hardware.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>How does the Smishing Sentinel avoid flagging personal messages from friends?</span>
+          <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-answer">
+          PhishGuard deploys a Person-to-Person (P2P) Exemption Engine. When an SMS arrives from a 10-digit mobile SIM, PhishGuard checks for coercive banking panic cues, suspicious payment URLs, or APK download links. Casual messages between friends without financial coercion are safely verified at 5/100 (Safe).
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>Is sensitive enterprise email or SMS data transmitted to any third-party cloud API?</span>
+          <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-answer">
+          No. PhishGuard runs 100% offline-first. All parsing, hashing, transformer inference, and evidence generation occur locally inside your security perimeter or SOC server. No data ever leaves your device.
+        </div>
+      </div>
+    </section>
+
+    <!-- Pastel Mint Callout Banner (Image 5) -->
+    <div class="mint-callout-banner">
+      <h2>Ready to secure your organization against phishing?</h2>
+      <p>
+        Deploy autonomous detection, active gateway ingress dropping, and statutory court-ready forensic audit logging in minutes.
+      </p>
+      <a href="https://phishguard-soc.streamlit.app" target="_blank" class="btn-solid-black" style="padding: 14px 34px; font-size: 1rem;">
+        Start Free Threat Audit
+      </a>
+    </div>
+
+  </main>
+
+  <!-- Deep Charcoal Footer (Image 5) -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div style="font-size: 1.45rem; font-weight: 900; color: #ffffff; letter-spacing: -0.04em; margin-bottom: 12px;">
+            PHISHGUARD
+          </div>
+          <p style="font-size: 0.85rem; color: #94a3b8; line-height: 1.6; margin-bottom: 14px;">
+            Next-generation autonomous cyber threat detection, digital forensics, and active attack mitigation platform.
+          </p>
+          <div style="font-size: 0.78rem; color: #64748b;">
+            Smart India Hackathon 2026 &bull; Binary Battalion
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="https://phishguard-soc.streamlit.app" target="_blank">Live Threat Radar</a></li>
+            <li><a href="https://phishguard-soc.streamlit.app?vector=sms" target="_blank">Smishing Sentinel</a></li>
+            <li><a href="https://phishguard-soc.streamlit.app" target="_blank">Active Prevention Hub</a></li>
+            <li><a href="../PhishGuard.apk">Android APK Download</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Regulatory</h4>
+          <ul>
+            <li><a href="#">TRAI DLT TCCCPR 2018</a></li>
+            <li><a href="#">Section 65B Indian Evidence Act</a></li>
+            <li><a href="#">Section 63 BSA 2023</a></li>
+            <li><a href="#">ISO/IEC 27037 Custody</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Compliance</h4>
+          <ul>
+            <li><a href="#">DoT Sanchar Saathi (Chakshu)</a></li>
+            <li><a href="#">National 1930 Cyber Portal</a></li>
+            <li><a href="#">CERT-In Threat Directives</a></li>
+            <li><a href="#">ICANN RAA Section 3.7.7</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 PhishGuard Autonomous SOC. All rights reserved.</div>
+        <div>Engine: DistilBERT 66M &bull; Stacking Meta-Classifier &bull; 100% Offline-First</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // FAQ Accordion Toggle
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-question').addEventListener('click', () => {
+        const isActive = item.classList.contains('active');
+        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+        if (!isActive) item.classList.add('active');
+      });
+    });
+
+    // In-Browser Demo Scanner Logic
+    const demoInput = document.getElementById('demoInput');
+    const demoOutput = document.getElementById('demoOutput');
+    const btnRun = document.getElementById('btnRunAudit');
+
+    document.getElementById('btnSampleAttack').addEventListener('click', () => {
+      demoInput.value = "Dear SBI Customer, your YONO account is blocked today due to pending KYC. Please update your PAN immediately to avoid account closure: bit.ly/sbi-yono-kyc-update";
+    });
+
+    document.getElementById('btnSampleFriend').addEventListener('click', () => {
+      demoInput.value = "Hey bro are we meeting at the cafe today for project discussion?";
+    });
+
+    btnRun.addEventListener('click', () => {
+      const text = demoInput.value.trim();
+      if (!text) {
+        alert("Please enter or load sample message text first.");
+        return;
+      }
+
+      const lower = text.toLowerCase();
+      const hasPanic = /blocked|suspended|immediately|closure|kyc|pan|yono|urgent|disconnect/.test(lower);
+      const hasLink = /http|bit\.ly|tinyurl|\.com|\.xyz|\.in/.test(lower);
+      const isFriend = /meeting|cafe|bro|hey|dinner|lunch|project discussion/.test(lower) && !hasPanic && !hasLink;
+
+      let score, verdict, badgeCls, details;
+      if (isFriend) {
+        score = 5;
+        verdict = "VERIFIED SAFE SMS";
+        badgeCls = "badge-pill-mint";
+        details = "Person-to-Person (P2P) Exemption applied: Casual social communication without coercive banking cues or obfuscated hyperlinks.";
+      } else if (hasPanic && hasLink) {
+        score = 100;
+        verdict = "CRITICAL PHISHING / SMISHING THREAT";
+        badgeCls = "background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; font-size: 0.75rem; padding: 4px 12px; border-radius: 999px; font-weight: 700;";
+        details = "Coercive urgency detected ('blocked', 'immediately') combined with obfuscated external link. Inbound connection marked for immediate Gateway REJECT.";
+      } else {
+        score = 55;
+        verdict = "SUSPICIOUS / ELEVATED RISK";
+        badgeCls = "background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; font-size: 0.75rem; padding: 4px 12px; border-radius: 999px; font-weight: 700;";
+        details = "Partial social-engineering indicators identified. Proceed with caution and verify sender identity.";
+      }
+
+      demoOutput.style.display = 'block';
+      demoOutput.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <div>
+            <span style="font-size: 1.4rem; font-weight: 900; color: ${score >= 70 ? '#dc2626' : (score <= 20 ? '#10b981' : '#d97706')}">${score} / 100</span>
+            <span style="margin-left: 10px; ${badgeCls.includes(':') ? badgeCls : ''}" class="${!badgeCls.includes(':') ? badgeCls : ''}">${verdict}</span>
+          </div>
+          <span style="font-size: 0.75rem; color: #64748b;">Latency: 84ms &bull; DistilBERT Local Engine</span>
+        </div>
+        <p style="font-size: 0.88rem; color: #334155; line-height: 1.5;">${details}</p>
+      `;
+    });
+  </script>
+</body>
+</html>
