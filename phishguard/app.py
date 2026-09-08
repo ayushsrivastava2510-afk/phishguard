@@ -36,6 +36,18 @@ from smishing_analyzer import analyze_smishing_message, SMISHING_BENCHMARKS
 from transformer_classifier import predict_phishing
 from stacking_classifier import combine_risk_scores_stacked, get_stacking_classifier
 from explainability import generate_token_heatmap_html, format_section_65b_legal_xai_summary
+from prevention_engine import (
+    add_to_quarantine,
+    get_quarantined_items,
+    is_quarantined,
+    generate_registrar_takedown_notice,
+    generate_hosting_abuse_notice,
+    generate_m365_tenant_block_script,
+    generate_postfix_block_rule,
+    generate_dmarc_enforcement_policy,
+    generate_global_threat_feed_payload,
+    generate_telecom_sim_block_dossier,
+)
 
 # Page Configuration
 st.set_page_config(
@@ -894,10 +906,20 @@ def render_email_sentinel(sound_alert, redact_enabled):
             for cue in threat_intent["cues_detected"]:
                 all_flags.append(f"Social Engineering: {cue}")
 
+            # Enterprise Perimeter Quarantine Check
+            is_dom_q, dom_q_msg = is_quarantined(header_res.get("from_domain"))
+            is_ip_q, ip_q_msg = is_quarantined(header_res.get("originating_ip"))
+            is_quarantine_hit = is_dom_q or is_ip_q
+            if is_quarantine_hit:
+                q_reason = dom_q_msg if is_dom_q else ip_q_msg
+                all_flags.insert(0, f"🛑 PERIMETER QUARANTINE TRIGGER: {q_reason}")
+                risk_score = 100
+
             case_id = f"PG-2026-CASE-{len(st.session_state.email_history) + 1:03d}"
 
             analysis_data = {
                 "case_id": case_id,
+                "is_quarantined": is_quarantine_hit,
                 "scenario_title": st.session_state.get("active_scenario_title", "Forensic Investigation Target"),
                 "source_type": st.session_state.get("active_source_type", "Forensic Pipeline"),
                 "subject": header_res.get("subject", "(No Subject)"),
@@ -1305,7 +1327,7 @@ def render_email_sentinel(sound_alert, redact_enabled):
                 "🛰️ SMTP Relay Hop Traversal",
                 "📧 Protocol & Cryptographic Headers",
                 "🕸️ Dynamic Campaign Syndicate Graph",
-                "🛡️ Incident Response Playbook",
+                "🛑 Active Prevention & Takedown Hub",
                 "⚖️ Legal Chain of Custody (BSA 65B)",
             ])
 
@@ -1532,47 +1554,152 @@ def render_email_sentinel(sound_alert, redact_enabled):
                     st.markdown("#### Session Incident Registry")
                     st.dataframe(pd.DataFrame(history), use_container_width=True)
 
-            # TAB 5: Incident Response Playbook
+            # TAB 5: Active Prevention & Takedown Hub
             with tab_playbook:
-                st.subheader("🛡️ Automated Incident Response & Firewall Playbook")
-                st.markdown("Instant actionable containment controls generated for SOC Analysts:")
+                st.subheader("🛑 Active Attack Prevention, Takedown & Ingress Dropping Hub")
+                st.markdown(
+                    "**Proactive Disarmament & Boundary Dropping:** Stop attackers from sending and delivering "
+                    "phishing attacks before they reach enterprise inboxes."
+                )
 
                 bad_ip = data.get("originating_ip") or "0.0.0.0"
                 bad_domain = data.get("from_domain") or "malicious-domain.com"
-
-                st.markdown("#### 1. Network Boundary Containment (Firewall Rules)")
-                c_fw1, c_fw2 = st.columns(2)
-                with c_fw1:
-                    st.write("**Linux iptables / Egress Block:**")
-                    st.code(f"iptables -A INPUT -s {bad_ip} -j DROP\niptables -A FORWARD -s {bad_ip} -j DROP", language="bash")
-                with c_fw2:
-                    st.write("**Cisco ASA / Fortinet Rule:**")
-                    st.code(f"access-list OUTSIDE_BLOCK deny ip host {bad_ip} any\nsh shun {bad_ip}", language="bash")
-
                 case_id_val = data.get("case_id", "EXT-LIVE")
                 threat_cat_val = data.get("threat_category", "Live Threat Audit")
                 ev_hashes = data.get("evidence_hashes", {})
+                from_addr = data.get("from", f"attacker@{bad_domain}")
 
-                st.markdown("#### 2. Mail Gateway & DNS Sinkhole Action")
-                st.code(
-                    f"# DNS Sinkhole for Lookalike Domain:\n{bad_domain} CNAME sinkhole.cert-in.org.in.\n\n"
-                    f"# Exchange / Google Workspace Transport Rule:\nSet-TransportRule -Name 'Block-PhishGuard-{case_id_val}' -SenderDomainIs '{bad_domain}' -RejectMessageReasonText 'Blocked by PhishGuard Forensics Policy'",
-                    language="powershell",
-                )
+                # 1. 1-Click Active Perimeter Quarantine
+                st.markdown("#### 1. 🛡️ 1-Click Enterprise Ingress Quarantine (Drop at Perimeter)")
+                is_currently_q, q_reason = is_quarantined(bad_domain)
+                if not is_currently_q:
+                    is_currently_q, q_reason = is_quarantined(bad_ip)
 
-                st.markdown("#### 3. CERT-In Incident Notification Draft")
-                cert_draft = (
-                    f"TO: incident@cert-in.org.in\n"
-                    f"SUBJECT: Cyber Threat Incident Report - {threat_cat_val} - Ref: {case_id_val}\n\n"
-                    f"Dear CERT-In Team,\n\n"
-                    f"A high-risk email threat incident was detected and verified by PhishGuard.\n"
-                    f"Evidence Hash (SHA-256): {ev_hashes.get('sha256', 'N/A')}\n"
-                    f"Originating Infrastructure IP: {bad_ip}\n"
-                    f"Impersonated/Spoofed Domain: {bad_domain}\n"
-                    f"Threat Category: {threat_cat_val}\n"
-                    f"Recommended Action: Ingress block on IP {bad_ip} and lookalike domain takedown."
-                )
-                st.code(cert_draft, language="text")
+                col_q1, col_q2 = st.columns([2, 1.1])
+                with col_q1:
+                    if is_currently_q:
+                        st.error(f"⛔ **ACTIVE QUARANTINE ENFORCED:** {q_reason}")
+                        st.caption("All future packets, emails, and connections from this entity are dropped at the gateway with zero latency.")
+                    else:
+                        st.info(f"Target Infrastructure: Domain `'{bad_domain}'` &bull; Origin IP `'{bad_ip}'`")
+                        st.caption("Enforcing quarantine adds this attacker to the persistent registry, triggering an instant 0-second perimeter drop across all gateways.")
+
+                with col_q2:
+                    if not is_currently_q:
+                        if st.button("⛔ Add to Active Quarantine", type="primary", use_container_width=True, key=f"btn_quarantine_{case_id_val}"):
+                            add_to_quarantine("domain", bad_domain, f"Phishing Syndicate: {threat_cat_val}", case_id_val)
+                            add_to_quarantine("ip", bad_ip, "Hostile sending node", case_id_val)
+                            st.success(f"Quarantined {bad_domain} & {bad_ip}!")
+                            st.rerun()
+                    else:
+                        st.success("✅ Actively Quarantined at Gateway")
+
+                # Sub-Tabs for the 4 Mitigation & Prevention Pillars
+                subtab_gateway, subtab_takedown, subtab_dmarc, subtab_feeds = st.tabs([
+                    "⚡ Mail Gateway Ingress Dropping",
+                    "⚖️ Attacker Takedown & Abuse Notice",
+                    "🛡️ DMARC Brand Anti-Spoofing Hardener",
+                    "🌐 Global Threat Feeds & CERT-In",
+                ])
+
+                # SUBTAB 1: Mail Gateway Ingress Dropping Rules
+                with subtab_gateway:
+                    st.markdown("##### ⚡ Drop Future Attacks at Mail Server Perimeter (Pre-Inbox Delivery)")
+                    st.markdown(
+                        "Configure your mail gateway to reject any incoming connection or envelope from this attacker before "
+                        "it reaches employees' mailboxes."
+                    )
+
+                    st.write("**Microsoft 365 Exchange Online (Tenant Allow/Block List + Ingress Transport Rule):**")
+                    m365_script = generate_m365_tenant_block_script(from_addr, bad_domain, bad_ip, case_id_val)
+                    st.code(m365_script, language="powershell")
+
+                    st.write("**Linux Postfix / Sendmail Ingress Drop Rule (`/etc/postfix/sender_access`):**")
+                    postfix_rule = generate_postfix_block_rule(bad_domain, bad_ip, case_id_val)
+                    st.code(postfix_rule, language="bash")
+
+                    st.write("**Firewall Boundary Drop (iptables & Cisco ASA):**")
+                    col_fw1, col_fw2 = st.columns(2)
+                    with col_fw1:
+                        st.code(f"iptables -A INPUT -s {bad_ip} -j DROP\niptables -A FORWARD -s {bad_ip} -j DROP", language="bash")
+                    with col_fw2:
+                        st.code(f"access-list OUTSIDE_BLOCK deny ip host {bad_ip} any\nsh shun {bad_ip}", language="bash")
+
+                # SUBTAB 2: Attacker Infrastructure Takedown Notice
+                with subtab_takedown:
+                    st.markdown("##### ⚖️ Disarm Attacker Infrastructure (Revoke Domain & Terminate VPS)")
+                    st.markdown(
+                        "Attackers cannot send phishing attacks if their domain registration is suspended and their hosting server is terminated. "
+                        "PhishGuard auto-generates legally enforceable ICANN RFC 2142 abuse notifications:"
+                    )
+
+                    reg_notice = generate_registrar_takedown_notice(
+                        bad_domain,
+                        case_id_val,
+                        data.get("red_flags", []),
+                        ev_hashes.get("sha256", "N/A"),
+                        data.get("domain_age", {}).get("registrar", "Registrar Abuse Operations")
+                    )
+                    st.write("**1. Domain Registrar DNS Revocation Notice (RFC 2142 / ICANN RAA 3.7.7):**")
+                    st.code(reg_notice, language="text")
+
+                    host_notice = generate_hosting_abuse_notice(
+                        bad_ip,
+                        case_id_val,
+                        data.get("red_flags", []),
+                        ev_hashes.get("sha256", "N/A"),
+                        data.get("geolocation", {}).get("isp", "Cloud Hosting Provider NOC")
+                    )
+                    st.write("**2. Cloud Host / VPS Server Termination Notice:**")
+                    st.code(host_notice, language="text")
+
+                # SUBTAB 3: DMARC Brand Anti-Spoofing Hardener
+                with subtab_dmarc:
+                    st.markdown("##### 🛡️ Global Brand Anti-Spoofing Hardener (Stop Attackers From Impersonating You)")
+                    st.markdown(
+                        "**Why do attackers spoof organizations?** If an enterprise has no DMARC record or sets `p=none`, "
+                        "mail servers worldwide will still deliver spoofed emails. By enforcing **`p=reject`**, receiving mail servers "
+                        "(Google, Microsoft, Yahoo, Apple) **automatically drop and destroy** all fraudulent emails claiming to be from your domain."
+                    )
+                    dmarc_policy = generate_dmarc_enforcement_policy(bad_domain)
+                    st.info(dmarc_policy["explanation"])
+
+                    st.write("**Hardened DMARC DNS TXT Record (Publish at `_dmarc.yourdomain.com`):**")
+                    st.code(dmarc_policy["dmarc_record"], language="text")
+
+                    st.write("**Strict SPF Hardening Record (Publish at `@` root domain):**")
+                    st.code(dmarc_policy["spf_record"], language="text")
+
+                # SUBTAB 4: Global Threat Feeds & CERT-In
+                with subtab_feeds:
+                    st.markdown("##### 🌐 Global Threat Feed Submissions & CERT-In Coordination")
+                    st.markdown(
+                        "Submitting verified indicators to global threat feeds alerts Google Safe Browsing and APWG, "
+                        "protecting billions of global Chrome, Firefox, and Safari users within minutes."
+                    )
+
+                    feed_payload = generate_global_threat_feed_payload(
+                        case_id_val,
+                        [u for u in data.get("red_flags", []) if "http" in u],
+                        bad_ip,
+                        bad_domain
+                    )
+                    st.write("**Google Safe Browsing & APWG API Threat Submission Payload (JSON):**")
+                    st.code(feed_payload, language="json")
+
+                    st.write("**CERT-In Formal Incident Notification Draft:**")
+                    cert_draft = (
+                        f"TO: incident@cert-in.org.in\n"
+                        f"SUBJECT: Cyber Threat Incident Report - {threat_cat_val} - Ref: {case_id_val}\n\n"
+                        f"Dear CERT-In Team,\n\n"
+                        f"A high-risk email threat incident was detected and verified by PhishGuard.\n"
+                        f"Evidence Hash (SHA-256): {ev_hashes.get('sha256', 'N/A')}\n"
+                        f"Originating Infrastructure IP: {bad_ip}\n"
+                        f"Impersonated/Spoofed Domain: {bad_domain}\n"
+                        f"Threat Category: {threat_cat_val}\n"
+                        f"Recommended Action: Ingress block on IP {bad_ip} and lookalike domain takedown."
+                    )
+                    st.code(cert_draft, language="text")
 
             # TAB 6: Chain of Custody & Legal
             with tab_legal:
@@ -2057,13 +2184,34 @@ def render_smishing_sentinel(sound_alert):
                 st.markdown(f"- 🔴 **{flag}**")
 
         with tab_dossier:
-            st.subheader("🏛️ Department of Telecommunications (DoT) & 1930 Official Dossier")
+            st.subheader("🏛️ Department of Telecommunications (DoT) & Telecom SIM Revocation")
             st.markdown(
                 """
                 This standardized complaint draft is generated in full compliance with **Sanchar Saathi (Chakshu)** and the **National Cyber Crime Helpline (1930)**.
                 It incorporates a cryptographic hash timestamp under **Section 65B of the Bharatiya Sakshya Adhiniyam (BSA)**.
                 """
             )
+
+            is_phone_q, phone_q_msg = is_quarantined(sms_data["sender_id"])
+            col_dot1, col_dot2 = st.columns([2, 1.2])
+            with col_dot1:
+                if is_phone_q:
+                    st.error(f"⛔ **OFFENDER NUMBER QUARANTINED:** {phone_q_msg}")
+                    st.caption("Carrier-level deactivation directive compiled for DoT CEIR & Sanchar Saathi registry.")
+                else:
+                    st.info(f"Offending Telecom Identifier: `'{sms_data['sender_id']}'` ({sms_data['sender_info']['entity_name']})")
+                    st.caption("Quarantining this number injects it into the telecom threat registry for SMSC gateway drop.")
+
+            with col_dot2:
+                if not is_phone_q:
+                    if st.button("⛔ Blacklist & Revoke SIM", type="primary", use_container_width=True, key=f"btn_block_phone_{sms_data['case_id']}"):
+                        add_to_quarantine("phone", sms_data["sender_id"], f"Smishing Fraud: {sms_data['threat_category']}", sms_data["case_id"])
+                        st.success(f"Quarantined {sms_data['sender_id']} in threat registry!")
+                        st.rerun()
+                else:
+                    st.success("✅ Quarantined in Threat Registry")
+
+            st.markdown("#### Official Sanchar Saathi (Chakshu) Complaint & CEIR Directive")
             st.code(sms_data["chakshu_draft"], language="text")
             st.caption(f"Cryptographic SHA-256 Digest: `{sms_data['evidence_hash']}`")
 

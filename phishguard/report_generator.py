@@ -333,7 +333,51 @@ def generate_pdf_report(analysis_data):
     ))
     story.append(Spacer(1, 8))
 
-    # 9. Legal Disclaimer and Evidentiary Declaration
+    # 9. Active Threat Mitigation, Ingress Dropping & Attacker Takedown Actions
+    story.append(Paragraph("6. Active Mitigation, Ingress Dropping & Attacker Takedown Actions", section_heading))
+    bad_domain = analysis_data.get("from_domain", "malicious-domain.com")
+    bad_ip = analysis_data.get("originating_ip", "0.0.0.0")
+    case_id_val = analysis_data.get("case_id", "CASE-001")
+
+    mitigation_data = [
+        [
+            Paragraph("<b>Prevention Layer</b>", bold_label),
+            Paragraph("<b>Target Entity</b>", bold_label),
+            Paragraph("<b>Automated Action / Enforced Defense Rule</b>", bold_label),
+        ],
+        [
+            Paragraph("M365 Ingress Drop", body_text),
+            Paragraph(str(bad_domain), body_text),
+            Paragraph(f"New-TenantAllowBlockListItems -ListType Sender -Block -Entries '*.{bad_domain}'", body_text),
+        ],
+        [
+            Paragraph("Postfix Mail Gateway", body_text),
+            Paragraph(str(bad_ip), body_text),
+            Paragraph(f"{bad_domain} REJECT PhishGuard Policy (Ref: {case_id_val})", body_text),
+        ],
+        [
+            Paragraph("Registrar Takedown", body_text),
+            Paragraph(f"abuse@{bad_domain}", body_text),
+            Paragraph(f"ICANN RAA 3.7.7 Domain Revocation & clientHold DNS Suspension Demand", body_text),
+        ],
+        [
+            Paragraph("Brand Protection", body_text),
+            Paragraph("Global MXs", body_text),
+            Paragraph(f"Enforce 'v=DMARC1; p=reject; pct=100' to instruct global mail servers to drop spoofed emails.", body_text),
+        ],
+    ]
+    t_mitigation = Table(mitigation_data, colWidths=[110, 110, 310])
+    t_mitigation.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#E2E8F0")),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E0")),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 2),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+    ]))
+    story.append(t_mitigation)
+    story.append(Spacer(1, 8))
+
+    # 10. Legal Disclaimer and Evidentiary Declaration
     story.append(Spacer(1, 6))
     legal_text = (
         "<b>LEGAL & FORENSIC PRESERVATION NOTICE:</b> This document constitutes a preliminary technical forensic "

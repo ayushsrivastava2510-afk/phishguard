@@ -331,16 +331,41 @@ function renderInPageAlertCard(data) {
       </div>
     </div>
 
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <button class="pg-launch-soc-btn" id="pg-open-soc-btn">
-        <span>🚀 Launch 3D Forensic Investigation in SOC Dashboard</span>
+    <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+      ${isHighRisk ? `
+      <button class="pg-launch-soc-btn" id="pg-defang-btn" style="background:linear-gradient(135deg, #dc2626 0%, #991b1b 100%); border:1px solid #ef4444; flex:1; min-width:180px;">
+        <span>🛑 Neutralize & Defang Links</span>
+      </button>` : ''}
+      <button class="pg-launch-soc-btn" id="pg-open-soc-btn" style="flex:1.4; min-width:220px;">
+        <span>🚀 Launch 3D SOC Takedown Hub</span>
       </button>
-      <span style="font-size:10px; color:#94a3b8;">Section 65B BSA Certified Evidence</span>
     </div>
+    <div style="font-size:10px; color:#94a3b8; margin-top:6px; text-align:right;">Section 65B BSA Certified Evidence &bull; Active Gateway Defense</div>
   `;
 
   // Attach event listeners
   card.querySelector("#pg-card-close").addEventListener("click", () => card.remove());
+
+  const defangBtn = card.querySelector("#pg-defang-btn");
+  if (defangBtn) {
+    defangBtn.addEventListener("click", () => {
+      const emailBody = document.querySelector(".a3s.aiL") || document.querySelector(".nH.hx") || document.body;
+      const links = emailBody.querySelectorAll("a");
+      let count = 0;
+      links.forEach(a => {
+        a.removeAttribute("href");
+        a.style.color = "#f87171";
+        a.style.textDecoration = "line-through";
+        a.style.pointerEvents = "none";
+        a.title = "NEUTRALIZED: Link defanged by PhishGuard Autonomous Sentinel";
+        count++;
+      });
+      defangBtn.innerHTML = `<span>✅ ${count} Links Disarmed</span>`;
+      defangBtn.style.background = "#15803d";
+      defangBtn.style.borderColor = "#22c55e";
+    });
+  }
+
   card.querySelector("#pg-open-soc-btn").addEventListener("click", () => {
     const payloadStr = encodeURIComponent(JSON.stringify(data));
     chrome.runtime.sendMessage({
