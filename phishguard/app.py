@@ -1875,7 +1875,8 @@ def render_smishing_sentinel(sound_alert):
                 st.markdown("#### 🌐 Extracted Hyperlinks")
                 if sms_urls["urls"]:
                     for u in sms_urls["urls"]:
-                        st.markdown(f"- 🔗 `http://{u}`")
+                        disp_u = u if u.startswith(("http://", "https://")) else f"http://{u}"
+                        st.markdown(f"- 🔗 `{disp_u}`")
                 else:
                     st.info("No URLs found in this message.")
 
@@ -1888,7 +1889,8 @@ def render_smishing_sentinel(sound_alert):
                 if sms_urls["apk_droppers"]:
                     st.error(f"🚨 **CRITICAL: Android Package (.APK) Trojan Detected!**")
                     for apk in sms_urls["apk_droppers"]:
-                        st.markdown(f"- 📥 Malicious Payload: `http://{apk}`")
+                        disp_apk = apk if apk.startswith(("http://", "https://")) else f"http://{apk}"
+                        st.markdown(f"- 📥 Malicious Payload: `{disp_apk}`")
                     st.markdown(
                         """
                         **Trojan Mechanism:** Fraudsters persuade victims to sideload an `.apk` disguised as an update (e.g. *mParivahan*, *SBI YONO*). 
