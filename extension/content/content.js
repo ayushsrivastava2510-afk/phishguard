@@ -118,7 +118,7 @@ function runFallbackForensics(details) {
   const fromEmail = (details.from_email || "").toLowerCase();
 
   let riskScore = 14;
-  let category = "Normal Business / Promotional Mail";
+  let category = "Safe Communication";
   let redFlags = [];
 
   // Banking / KYC Fraud

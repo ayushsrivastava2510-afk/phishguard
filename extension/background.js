@@ -9,7 +9,7 @@ function runClientSideForensics(details) {
   const fromEmail = (details.from_email || "").toLowerCase();
 
   let riskScore = 14;
-  let category = "Normal Business Mail";
+  let category = "Safe Communication";
   let redFlags = [];
 
   // Banking / KYC Fraud
@@ -22,7 +22,7 @@ function runClientSideForensics(details) {
   // Credential Harvesting
   if (text.includes("password expired") || text.includes("login attempt") || text.includes("reset your password") || text.includes("mfa verification") || text.includes("account suspended")) {
     riskScore += 42;
-    if (category === "Normal Business Mail") category = "Credential Harvesting / Account Takeover";
+    if (category === "Safe Communication") category = "Credential Harvesting / Account Takeover";
     redFlags.push("Credential harvesting / account suspension cue detected.");
   }
 

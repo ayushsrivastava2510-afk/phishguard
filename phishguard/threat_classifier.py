@@ -153,7 +153,7 @@ def classify_threat_intent(text, subject=""):
     url_flags = analyze_urls(urls)
 
     if not categories:
-        primary_threat = "General Suspicion" if score_increment > 0 else "Benign Communication"
+        primary_threat = "General Suspicion" if score_increment > 0 else "Safe Communication"
     else:
         primary_threat = " & ".join(categories)
 
