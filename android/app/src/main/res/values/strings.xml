@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">PhishGuard</string>
+    <string name="notification_channel_name">PhishGuard Threat Alerts</string>
+    <string name="notification_channel_desc">Real-time alerts for incoming mobile smishing and phishing attacks.</string>
+</resources>
