@@ -889,10 +889,11 @@ if st.session_state.last_analysis is not None:
             """,
             unsafe_allow_html=True,
         )
+        cid_file = data.get('case_id', 'EXT-LIVE')
         st.download_button(
             label="📄 Download Court Report (PDF)",
             data=pdf_report,
-            file_name=f"{data['case_id']}_Forensic_Report.pdf",
+            file_name=f"{cid_file}_Forensic_Report.pdf",
             mime="application/pdf",
             type="primary",
             use_container_width=True,
@@ -900,7 +901,7 @@ if st.session_state.last_analysis is not None:
         st.download_button(
             label="💾 Download JSON IOC Package",
             data=json_report,
-            file_name=f"{data['case_id']}_IOCs.json",
+            file_name=f"{cid_file}_IOCs.json",
             mime="application/json",
             use_container_width=True,
         )
@@ -998,21 +999,26 @@ if st.session_state.last_analysis is not None:
             st.subheader("Semantic & Social Engineering Intelligence")
             col_t1, col_t2 = st.columns([1.5, 1])
 
+            text_label = str(data.get("text_label", "Analyzed")).upper()
+            conf_val = data.get("text_confidence")
+            conf_str = f" (Confidence: `{conf_val:.1%}`)" if isinstance(conf_val, (int, float)) else ""
+
             with col_t1:
-                st.markdown(f"**Identified Threat Vector:** `{data['threat_category']}`")
-                st.markdown(f"**AI/NLP Model Verdict:** `{data['text_label'].upper()}` (Confidence: `{data['text_confidence']:.1%}`)")
-                st.markdown(f"**Attribution Assessment:** {data['attribution_explanation']}")
-                st.info(f"**Recommended Analyst Action:** {data['attribution_recommendation']}")
+                st.markdown(f"**Identified Threat Vector:** `{data.get('threat_category', 'General Threat Evaluation')}`")
+                st.markdown(f"**AI/NLP Model Verdict:** `{text_label}`{conf_str}")
+                st.markdown(f"**Attribution Assessment:** {data.get('attribution_explanation', 'Evaluated via PhishGuard SOC pipeline.')}")
+                st.info(f"**Recommended Analyst Action:** {data.get('attribution_recommendation', 'Standard security monitoring.')}")
 
             with col_t2:
                 st.markdown("**Evidence Snippet (Analyzed Body):**")
-                st.code(data["body_snippet"], language="text")
+                st.code(data.get("body_snippet", "(No message body content captured)"), language="text")
 
             st.markdown("#### 🚩 Forensic Red Flags & Extracted IOCs")
-            if not data["red_flags"]:
+            red_flags_list = data.get("red_flags", [])
+            if not red_flags_list:
                 st.success("✅ No technical red flags detected. Conforms to baseline security.")
             else:
-                for flag in data["red_flags"]:
+                for flag in red_flags_list:
                     st.warning(f"⚠️ {flag}")
 
         # TAB 2: SMTP Relay Hop Traversal
@@ -1139,23 +1145,27 @@ if st.session_state.last_analysis is not None:
                 st.write("**Cisco ASA / Fortinet Rule:**")
                 st.code(f"access-list OUTSIDE_BLOCK deny ip host {bad_ip} any\nsh shun {bad_ip}", language="bash")
 
+            case_id_val = data.get("case_id", "EXT-LIVE")
+            threat_cat_val = data.get("threat_category", "Live Threat Audit")
+            ev_hashes = data.get("evidence_hashes", {})
+
             st.markdown("#### 2. Mail Gateway & DNS Sinkhole Action")
             st.code(
                 f"# DNS Sinkhole for Lookalike Domain:\n{bad_domain} CNAME sinkhole.cert-in.org.in.\n\n"
-                f"# Exchange / Google Workspace Transport Rule:\nSet-TransportRule -Name 'Block-PhishGuard-{data['case_id']}' -SenderDomainIs '{bad_domain}' -RejectMessageReasonText 'Blocked by PhishGuard Forensics Policy'",
+                f"# Exchange / Google Workspace Transport Rule:\nSet-TransportRule -Name 'Block-PhishGuard-{case_id_val}' -SenderDomainIs '{bad_domain}' -RejectMessageReasonText 'Blocked by PhishGuard Forensics Policy'",
                 language="powershell",
             )
 
             st.markdown("#### 3. CERT-In Incident Notification Draft")
             cert_draft = (
                 f"TO: incident@cert-in.org.in\n"
-                f"SUBJECT: Cyber Threat Incident Report - {data['threat_category']} - Ref: {data['case_id']}\n\n"
+                f"SUBJECT: Cyber Threat Incident Report - {threat_cat_val} - Ref: {case_id_val}\n\n"
                 f"Dear CERT-In Team,\n\n"
                 f"A high-risk email threat incident was detected and verified by PhishGuard.\n"
-                f"Evidence Hash (SHA-256): {data['evidence_hashes'].get('sha256')}\n"
+                f"Evidence Hash (SHA-256): {ev_hashes.get('sha256', 'N/A')}\n"
                 f"Originating Infrastructure IP: {bad_ip}\n"
                 f"Impersonated/Spoofed Domain: {bad_domain}\n"
-                f"Threat Category: {data['threat_category']}\n"
+                f"Threat Category: {threat_cat_val}\n"
                 f"Recommended Action: Ingress block on IP {bad_ip} and lookalike domain takedown."
             )
             st.code(cert_draft, language="text")
@@ -1168,12 +1178,12 @@ if st.session_state.last_analysis is not None:
                 In accordance with digital forensics standards (**ISO/IEC 27037**) and **Section 65B of the Indian Evidence Act / Bharatiya Sakshya Adhiniyam (BSA)**:
                 """
             )
-            h = data["evidence_hashes"]
-            st.markdown(f"- **Cryptographic SHA-256 Digest:** `{h.get('sha256')}`")
-            st.markdown(f"- **Cryptographic MD5 Digest:** `{h.get('md5')}`")
-            st.markdown(f"- **Evidence File Size:** `{h.get('size_bytes')} bytes`")
-            st.markdown(f"- **Ingestion Timestamp (UTC):** `{h.get('timestamp_utc')}`")
-            st.markdown(f"- **Case Tracking Identifier:** `{data['case_id']}`")
+            h = data.get("evidence_hashes", {})
+            st.markdown(f"- **Cryptographic SHA-256 Digest:** `{h.get('sha256', 'N/A')}`")
+            st.markdown(f"- **Cryptographic MD5 Digest:** `{h.get('md5', 'N/A')}`")
+            st.markdown(f"- **Evidence File Size:** `{h.get('size_bytes', 'N/A')} bytes`")
+            st.markdown(f"- **Ingestion Timestamp (UTC):** `{h.get('timestamp_utc', 'N/A')}`")
+            st.markdown(f"- **Case Tracking Identifier:** `{case_id_val}`")
 
             st.divider()
             st.caption(
