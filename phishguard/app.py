@@ -350,13 +350,71 @@ def combine_risk_scores(text_confidence, text_label, header_score, threat_score_
 
 LIVE_SCAN_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "live_scan.json")
 
+
+def resolve_email_telemetry_display(data):
+    """
+    Computes clean, human-readable display attributes for the email currently
+    being analyzed, ensuring fallback coverage across pre-loaded scenarios,
+    custom uploads, and Chrome Extension captures so 'N/A' is never displayed.
+    """
+    scenario_title = (
+        data.get("scenario_title")
+        or st.session_state.get("active_scenario_title")
+        or "Forensic Security Audit Target"
+    )
+    source_type = (
+        data.get("source_type")
+        or st.session_state.get("active_source_type")
+        or ("Chrome Browser Extension Live Ingestion" if ("source" in data and "Chrome" in str(data.get("source"))) else "Enterprise Mail Gateway")
+    )
+
+    # Subject resolution
+    raw_subj = data.get("subject")
+    if raw_subj and str(raw_subj).strip() not in ["N/A", "(No Subject)", "None", ""]:
+        subject = str(raw_subj).strip()
+    else:
+        subject = scenario_title
+
+    # Sender resolution
+    raw_from = data.get("from") or data.get("from_email")
+    raw_domain = data.get("from_domain")
+    if raw_from and str(raw_from).strip() not in ["N/A", "None", ""]:
+        sender = str(raw_from).strip()
+    elif raw_domain:
+        sender = f"Automated Dispatch <alerts@{raw_domain}>"
+    else:
+        sender = "Gateway Ingestion <telemetry@phishguard.internal>"
+
+    if not raw_domain or str(raw_domain).strip() in ["None", "N/A", ""]:
+        if "@" in sender:
+            domain = sender.split("@")[-1].replace(">", "").strip()
+        else:
+            domain = "gateway.internal"
+    else:
+        domain = str(raw_domain).strip()
+
+    return {
+        "title": scenario_title,
+        "source": source_type,
+        "subject": subject,
+        "from": sender,
+        "domain": domain,
+    }
+
+
 # Session State
 if "email_history" not in st.session_state:
     st.session_state.email_history = []
 if "last_analysis" not in st.session_state:
     st.session_state.last_analysis = None
+if "active_scenario" not in st.session_state:
+    st.session_state.active_scenario = "sbi_kyc"
+if "active_scenario_title" not in st.session_state:
+    st.session_state.active_scenario_title = "Scenario 1: SBI Bank KYC Fraud"
+if "active_source_type" not in st.session_state:
+    st.session_state.active_source_type = "Pre-Loaded Attack Scenario"
 if "active_scenario_path" not in st.session_state:
-    st.session_state.active_scenario_path = "sample_emails/phishing_sample.eml"
+    st.session_state.active_scenario_path = "sample_emails/sbi_kyc_fraud.eml"
 
 # Auto-load when redirected from Chrome Extension (?live=1 or ?payload=...)
 payload_raw = st.query_params.get("payload")
@@ -365,12 +423,19 @@ if payload_raw:
         import urllib.parse
         decoded = json.loads(urllib.parse.unquote(payload_raw))
         if decoded and isinstance(decoded, dict):
+            raw_s = decoded.get("subject")
+            subj_clean = raw_s if raw_s and raw_s != "N/A" and raw_s != "(No Subject)" else "Live Webmail Capture"
+            st.session_state.active_scenario = "extension"
+            st.session_state.active_scenario_title = f"Chrome Extension Live Capture: {subj_clean[:35]}"
+            st.session_state.active_source_type = "Chrome Browser Extension Live Ingestion"
+            decoded["scenario_title"] = st.session_state.active_scenario_title
+            decoded["source_type"] = st.session_state.active_source_type
             st.session_state.last_analysis = decoded
             cid = decoded.get("case_id", "EXT-LIVE")
             if not any(item["id"] == cid for item in st.session_state.email_history):
                 st.session_state.email_history.append({
                     "id": cid,
-                    "subject": decoded.get("subject", "Live Extension Audit"),
+                    "subject": subj_clean,
                     "from_domain": decoded.get("from_domain") or (decoded.get("from_email", "").split("@")[-1] if "@" in decoded.get("from_email", "") else "webmail.local"),
                     "originating_ip": decoded.get("originating_ip") or decoded.get("origin_ip", "Webmail Client"),
                     "risk_score": decoded.get("risk_score", 0),
@@ -384,6 +449,13 @@ elif os.path.exists(LIVE_SCAN_PATH):
         with open(LIVE_SCAN_PATH, "r", encoding="utf-8") as f:
             live_data = json.load(f)
         if live_data:
+            raw_s = live_data.get("subject")
+            subj_clean = raw_s if raw_s and raw_s != "N/A" and raw_s != "(No Subject)" else "Live Webmail Capture"
+            st.session_state.active_scenario = "extension"
+            st.session_state.active_scenario_title = f"Chrome Extension Live Capture: {subj_clean[:35]}"
+            st.session_state.active_source_type = "Chrome Browser Extension Live Ingestion"
+            live_data["scenario_title"] = st.session_state.active_scenario_title
+            live_data["source_type"] = st.session_state.active_source_type
             if st.query_params.get("live") == "1" or st.session_state.last_analysis is None:
                 st.session_state.last_analysis = live_data
             if not any(item["id"] == live_data["case_id"] for item in st.session_state.email_history):
@@ -579,14 +651,20 @@ if os.path.exists(LIVE_SCAN_PATH):
         pass
 
 # -------------------------------------------------------------
+curr_active_title = st.session_state.get("active_scenario_title", "Scenario 1: SBI Bank KYC Fraud")
 st.markdown(
-    """
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; margin-top: 4px;">
+    f"""
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; margin-top: 4px; flex-wrap: wrap; gap: 8px;">
         <div style="display: flex; align-items: center; gap: 10px;">
             <span class="sub-head-top" style="margin-bottom: 0;">1-Click Telemetry</span>
             <span style="font-size: 0.95rem; font-weight: 700; color: #f8fafc;">Benchmark Forensic Scenarios</span>
         </div>
-        <span style="font-size: 0.78rem; color: #64748b; font-weight: 500;">Simulate real-time cyber attacks or legitimate traffic</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 0.75rem; color: #64748b; font-weight: 500;">Active Target:</span>
+            <span style="font-size: 0.76rem; color: #38bdf8; font-weight: 700; background: rgba(56, 189, 248, 0.12); padding: 3px 10px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.28);">
+                🎯 {curr_active_title}
+            </span>
+        </div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -594,22 +672,43 @@ st.markdown(
 
 q_col1, q_col2, q_col3, q_col4, q_col5 = st.columns(5)
 selected_file_to_run = None
+current_active = st.session_state.get("active_scenario", "sbi_kyc")
 
 with q_col1:
-    if st.button("🚨 SBI Bank KYC Scam", use_container_width=True, help="Fake KYC suspension panic coercing Aadhaar & PAN"):
+    is_act = (current_active == "sbi_kyc")
+    if st.button("🚨 SBI Bank KYC" + ("  ✓ ACTIVE" if is_act else ""), use_container_width=True, type="primary" if is_act else "secondary", help="Fake KYC suspension panic coercing Aadhaar & PAN"):
         selected_file_to_run = "sample_emails/sbi_kyc_fraud.eml"
+        st.session_state.active_scenario = "sbi_kyc"
+        st.session_state.active_scenario_title = "Scenario 1: SBI Bank KYC Fraud"
+        st.session_state.active_source_type = "Pre-Loaded Attack Scenario"
 with q_col2:
-    if st.button("🚨 PayPal Phishing", use_container_width=True, help="Spoofed domain paypa1.com + Broken SPF"):
+    is_act = (current_active == "paypal")
+    if st.button("🚨 PayPal Phish" + ("  ✓ ACTIVE" if is_act else ""), use_container_width=True, type="primary" if is_act else "secondary", help="Spoofed domain paypa1.com + Broken SPF"):
         selected_file_to_run = "sample_emails/phishing_sample.eml"
+        st.session_state.active_scenario = "paypal"
+        st.session_state.active_scenario_title = "Scenario 2: PayPal Account Phishing"
+        st.session_state.active_source_type = "Pre-Loaded Attack Scenario"
 with q_col3:
-    if st.button("🚨 Microsoft 365 Attack", use_container_width=True, help="Shares bulletproof IP 45.155.204.12 with PayPal"):
+    is_act = (current_active == "ms365")
+    if st.button("🚨 Microsoft 365" + ("  ✓ ACTIVE" if is_act else ""), use_container_width=True, type="primary" if is_act else "secondary", help="Shares bulletproof IP 45.155.204.12 with PayPal"):
         selected_file_to_run = "sample_emails/phishing_sample_2_same_campaign.eml"
+        st.session_state.active_scenario = "ms365"
+        st.session_state.active_scenario_title = "Scenario 3: Microsoft 365 Subscription Attack"
+        st.session_state.active_source_type = "Pre-Loaded Attack Scenario"
 with q_col4:
-    if st.button("⚠️ Executive Wire (BEC)", use_container_width=True, help="CFO impersonation for foreign wire diversion"):
+    is_act = (current_active == "bec")
+    if st.button("⚠️ Exec Wire (BEC)" + ("  ✓ ACTIVE" if is_act else ""), use_container_width=True, type="primary" if is_act else "secondary", help="CFO impersonation for foreign wire diversion"):
         selected_file_to_run = "sample_emails/bec_payment_diversion.eml"
+        st.session_state.active_scenario = "bec"
+        st.session_state.active_scenario_title = "Scenario 4: Executive Wire (BEC) Diversion"
+        st.session_state.active_source_type = "Pre-Loaded Attack Scenario"
 with q_col5:
-    if st.button("🟢 Legitimate Mail", use_container_width=True, help="Verified corporate email passing SPF/DKIM/DMARC"):
+    is_act = (current_active == "legit")
+    if st.button("🟢 Legitimate Mail" + ("  ✓ ACTIVE" if is_act else ""), use_container_width=True, type="primary" if is_act else "secondary", help="Verified corporate email passing SPF/DKIM/DMARC"):
         selected_file_to_run = "sample_emails/legit_sample.eml"
+        st.session_state.active_scenario = "legit"
+        st.session_state.active_scenario_title = "Scenario 5: Verified Legitimate Corporate Mail"
+        st.session_state.active_source_type = "Pre-Loaded Legitimate Communication"
 
 # Optional Custom Investigation Expander
 with st.expander("📂 Audit Custom Email (.eml Upload / Paste Raw Text)", expanded=False):
@@ -621,11 +720,17 @@ with st.expander("📂 Audit Custom Email (.eml Upload / Paste Raw Text)", expan
             if st.button("🔍 Analyze Uploaded File", type="primary", key="btn_cust_up"):
                 raw_bytes = custom_file.getvalue()
                 selected_file_to_run = "CUSTOM_UPLOAD_BYTES"
+                st.session_state.active_scenario = "custom_upload"
+                st.session_state.active_scenario_title = f"Uploaded File: {custom_file.name}"
+                st.session_state.active_source_type = "Custom .EML Upload"
     with tab_paste:
         custom_text = st.text_area("Paste email text here:", height=120, key="cust_text_area")
         if custom_text and st.button("🔍 Analyze Pasted Content", type="primary", key="btn_cust_text"):
             plain_text_only = custom_text
             selected_file_to_run = "CUSTOM_PASTE_TEXT"
+            st.session_state.active_scenario = "custom_paste"
+            st.session_state.active_scenario_title = "Custom Pasted Plain Text"
+            st.session_state.active_source_type = "Pasted Raw Text"
 
 # Chrome Extension Direct Download & Setup (Main Page)
 with st.expander("🧩 PhishGuard Chrome Extension — 1-Click Download & Setup Guide (Gmail & Outlook)", expanded=False):
@@ -670,6 +775,9 @@ with st.expander("🧩 PhishGuard Chrome Extension — 1-Click Download & Setup 
 if st.session_state.last_analysis is None and selected_file_to_run is None:
     if st.query_params.get("live") != "1" and not st.query_params.get("payload"):
         selected_file_to_run = "sample_emails/sbi_kyc_fraud.eml"
+        st.session_state.active_scenario = "sbi_kyc"
+        st.session_state.active_scenario_title = "Scenario 1: SBI Bank KYC Fraud"
+        st.session_state.active_source_type = "Pre-Loaded Attack Scenario"
 
 
 # -------------------------------------------------------------
@@ -741,6 +849,8 @@ if selected_file_to_run:
 
         analysis_data = {
             "case_id": case_id,
+            "scenario_title": st.session_state.get("active_scenario_title", "Forensic Investigation Target"),
+            "source_type": st.session_state.get("active_source_type", "Forensic Pipeline"),
             "subject": header_res.get("subject", "(No Subject)"),
             "from": display_from,
             "from_domain": header_res.get("from_domain"),
@@ -868,6 +978,61 @@ if st.session_state.last_analysis is not None:
     origin_ip = data.get("originating_ip") or geo.get("resolved_ip")
     auth = data.get("auth_results", {})
     spf_status = auth.get("spf", "unknown").upper()
+    telemetry_info = resolve_email_telemetry_display(data)
+
+    # Dedicated Active Email Identification Hero Card (GeekPay Clean High-Trust Palette)
+    st.markdown(
+        f"""
+        <div class="metric-card" style="margin-bottom: 20px; padding: 18px 22px; border-left: 4px solid #4d65ff; background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.92) 100%);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="sub-head-top" style="margin-bottom: 0; background: rgba(77, 101, 255, 0.2); color: #93c5fd; border: 1px solid rgba(77, 101, 255, 0.45); padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase;">
+                        🔍 CURRENTLY ANALYZING
+                    </span>
+                    <span style="font-size: 1.1rem; font-weight: 800; color: #ffffff;">
+                        {telemetry_info['title']}
+                    </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span style="background: rgba(148, 163, 184, 0.12); color: #94a3b8; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.2); font-weight: 500;">
+                        Pipeline: <b>{telemetry_info['source']}</b>
+                    </span>
+                    <span style="background: rgba(77, 101, 255, 0.15); color: #93c5fd; font-size: 0.74rem; padding: 4px 10px; border-radius: 6px; font-weight: 600;">
+                        Case: <code>{data.get('case_id', 'PG-AUDIT')}</code>
+                    </span>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 2.2fr 1.6fr 1.1fr 1.1fr; gap: 14px;">
+                <div>
+                    <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Email Subject Line</div>
+                    <div style="font-size: 0.90rem; color: #f8fafc; font-weight: 600; line-height: 1.4; word-break: break-word;" title="{telemetry_info['subject']}">
+                        {telemetry_info['subject']}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Sender Entity (From)</div>
+                    <div style="font-size: 0.84rem; color: #cbd5e1; font-weight: 500; line-height: 1.4; word-break: break-all;" title="{telemetry_info['from']}">
+                        <code>{telemetry_info['from']}</code>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Sender Domain</div>
+                    <div style="font-size: 0.84rem; color: #38bdf8; font-weight: 600; line-height: 1.4;">
+                        <code>{telemetry_info['domain']}</code>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size: 0.70rem; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 3px;">Originating IP</div>
+                    <div style="font-size: 0.84rem; color: #e2e8f0; font-weight: 600; line-height: 1.4;">
+                        <code>{origin_ip or '127.0.0.1'}</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     col_gauge, col_reasons, col_action = st.columns([1.1, 2.3, 1.4])
 
@@ -928,7 +1093,8 @@ if st.session_state.last_analysis is not None:
                     {data.get('threat_category', 'Email Security Audit')}
                 </div>
                 <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 14px;">
-                    <b>From:</b> {data.get('from', 'N/A')[:40]} &bull; <b>Subject:</b> {data.get('subject', 'N/A')[:45]}
+                    <b>Target:</b> <span style="color: #60a5fa; font-weight: 600;">{telemetry_info['title']}</span><br/>
+                    <b>From:</b> {telemetry_info['from'][:38]} &bull; <b>Subject:</b> {telemetry_info['subject'][:42]}
                 </div>
                 <div style="font-size: 0.88rem; line-height: 1.65; color: #e2e8f0;">
                     <div style="margin-bottom: 8px;">{reason_identity}</div>

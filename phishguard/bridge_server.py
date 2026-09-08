@@ -171,12 +171,26 @@ class PhishGuardBridgeHandler(BaseHTTPRequestHandler):
 
                 effective_ip = header_res.get("originating_ip") or origin_res.get("origin_ip")
 
+                # Resolve human-readable sender and domain fallbacks
+                clean_from = header_res.get("from")
+                if not clean_from or str(clean_from).strip() in ["N/A", "None", ""]:
+                    clean_from = f'"{from_name}" <{from_email}>' if from_name and from_email else (from_email or from_name or "Webmail Sender")
+
+                clean_domain = header_res.get("from_domain")
+                if not clean_domain or str(clean_domain).strip() in ["None", "N/A", ""]:
+                    clean_domain = from_email.split("@")[-1] if "@" in from_email else "webmail.local"
+
+                scenario_title = f"Live Extension: {subject[:32]}" if subject and str(subject).strip() not in ["(No Subject)", "N/A", ""] else "Chrome Extension In-Inbox Audit"
+                source_type = f"Chrome Extension ({data.get('source', 'Webmail')})"
+
                 # Assemble Full Forensic Record for Streamlit
                 forensic_record = {
                     "case_id": case_id,
+                    "scenario_title": scenario_title,
+                    "source_type": source_type,
                     "subject": subject,
-                    "from": header_res.get("from", from_email),
-                    "from_domain": header_res.get("from_domain"),
+                    "from": clean_from,
+                    "from_domain": clean_domain,
                     "originating_ip": effective_ip,
                     "risk_score": risk_score,
                     "threat_category": threat_intent["primary_threat"],
@@ -214,15 +228,26 @@ class PhishGuardBridgeHandler(BaseHTTPRequestHandler):
                 response_payload = {
                     "status": "success",
                     "case_id": case_id,
+                    "scenario_title": scenario_title,
+                    "source_type": source_type,
+                    "subject": subject,
+                    "from": clean_from,
+                    "from_domain": clean_domain,
                     "risk_score": risk_score,
                     "verdict": verdict,
                     "threat_category": threat_intent["primary_threat"],
+                    "urgency_level": threat_intent["urgency_level"],
                     "text_label": text_pred,
                     "origin_ip": effective_ip or "Webmail Relay Node",
                     "origin_country": geo.get("country") or "Verified Mail Gateway",
                     "is_hosting": geo.get("is_hosting_provider", False),
                     "sha256": hashes.get("sha256", ""),
-                    "dashboard_url": "http://localhost:8501/?live=1",
+                    "body_snippet": body_text[:400],
+                    "red_flags": all_flags,
+                    "auth_results": header_res["auth_results"],
+                    "geolocation": origin_res.get("geolocation", {}),
+                    "evidence_hashes": hashes,
+                    "dashboard_url": "https://phishguard-soc.streamlit.app/?live=1",
                 }
 
                 self._send_json(200, response_payload)

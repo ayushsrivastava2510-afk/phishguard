@@ -53,10 +53,21 @@ function runClientSideForensics(details) {
 
   riskScore = Math.min(100, Math.max(12, riskScore));
 
+  const cleanSubj = details.subject || "Live Webmail Capture";
+  const cleanDomain = details.from_email && details.from_email.includes("@") ? details.from_email.split("@").pop() : "webmail.local";
+  const cleanFrom = details.from_email ? (details.from_name ? `"${details.from_name}" <${details.from_email}>` : details.from_email) : (details.from_name || "Webmail Sender");
+
   return {
     case_id: "EXT-" + Math.random().toString(36).substring(2, 9).toUpperCase(),
+    scenario_title: `Live Extension: ${cleanSubj.substring(0, 32)}`,
+    source_type: details.source || "Chrome Extension Direct Audit",
+    subject: cleanSubj,
+    from: cleanFrom,
+    from_email: details.from_email || "user@webmail.local",
+    from_domain: cleanDomain,
     risk_score: riskScore,
     threat_category: category,
+    body_snippet: (details.body || cleanSubj).substring(0, 350),
     origin_country: "Client-Side In-Inbox Telemetry",
     origin_ip: "In-Browser Heuristic",
     is_hosting: false,
