@@ -87,3 +87,42 @@ data class EmailInboxScanSummary(
     val isLiveSync: Boolean = false
 )
 
+data class UpiDetails(
+    val payeeVpa: String,
+    val payeeName: String,
+    val amount: Double,
+    val currency: String,
+    val transactionNote: String,
+    val handle: String,
+    val isPersonalWallet: Boolean,
+    val walletType: String,
+    val mccCode: String,
+    val refId: String
+)
+
+data class QuishingRecord(
+    val caseId: String,
+    val payloadType: String, // "UPI", "URL", "PLAIN_TEXT"
+    val rawPayload: String,
+    val riskScore: Int,
+    val verdict: String,
+    val fraudCategory: String,
+    val headline: String,
+    val summary: String,
+    val redFlags: List<String>,
+    val isReverseCollect: Boolean,
+    val upiDetails: UpiDetails?,
+    val advisory: String,
+    val evidenceHash: String,
+    val timestamp: String,
+    val policeComplaintDraft: String
+)
+
+data class QuishingBenchmark(
+    val id: String,
+    val title: String,
+    val claimedContext: String,
+    val payload: String,
+    val description: String
+)
+

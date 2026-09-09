@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
+    implementation("com.google.zxing:core:3.5.3")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

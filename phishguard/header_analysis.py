@@ -324,6 +324,55 @@ def get_body_text(msg):
     return msg.get_content()
 
 
+def extract_images_from_email(msg):
+    """
+    Extracts all attached or inline images from an email message.
+    Returns a list of dicts with keys: 'filename', 'content_type', 'data'.
+    """
+    images = []
+    if msg.is_multipart():
+        for part in msg.walk():
+            ctype = part.get_content_type().lower()
+            if ctype.startswith("image/"):
+                payload = part.get_payload(decode=True)
+                if payload:
+                    filename = part.get_filename() or "embedded_image.png"
+                    images.append({
+                        "filename": filename,
+                        "content_type": ctype,
+                        "data": payload,
+                    })
+    return images
+
+
+def scan_email_for_quishing(msg, body_text=""):
+    """
+    Scans any images contained within the email for QR codes (Quishing / UPI Fraud).
+    If a QR code is detected, runs quishing payload audit with the email's body context.
+    Returns list of quishing audit report dicts.
+    """
+    try:
+        from .quishing_detector import decode_qr_from_bytes, analyze_quishing_payload
+    except ImportError:
+        try:
+            from quishing_detector import decode_qr_from_bytes, analyze_quishing_payload
+        except ImportError:
+            return []
+
+    images = extract_images_from_email(msg)
+    quishing_reports = []
+    for img in images:
+        try:
+            decoded_payloads = decode_qr_from_bytes(img["data"])
+            for payload in decoded_payloads:
+                report = analyze_quishing_payload(payload, context_text=body_text, image_bytes=img["data"])
+                report["attachment_filename"] = img["filename"]
+                quishing_reports.append(report)
+        except Exception:
+            pass
+    return quishing_reports
+
+
 if __name__ == "__main__":
     # Quick self-test against our two sample emails
     for label, path in [

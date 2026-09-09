@@ -26,11 +26,12 @@ import androidx.core.content.ContextCompat
 import com.binarybattalion.phishguard.core.SmishingAnalyzer
 import com.binarybattalion.phishguard.core.SmishingRecord
 import com.binarybattalion.phishguard.ui.screens.EmailScreen
+import com.binarybattalion.phishguard.ui.screens.QuishingScreen
 import com.binarybattalion.phishguard.ui.screens.SmishingScreen
 import com.binarybattalion.phishguard.ui.theme.*
 
 enum class ThreatVector {
-    SMS, EMAIL
+    SMS, EMAIL, QUISHING
 }
 
 class MainActivity : ComponentActivity() {
@@ -190,12 +191,12 @@ fun MainAppScaffold(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Dual-Vector Switcher Buttons (GeekPay Theme)
+            // Multi-Vector Switcher Buttons (GeekPay Theme)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Button(
                     onClick = { activeVector = ThreatVector.SMS },
@@ -207,8 +208,8 @@ fun MainAppScaffold(
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Text(
-                        text = "📱 SMS Sentinel" + if (activeVector == ThreatVector.SMS) " ✓" else "",
-                        fontSize = 12.sp,
+                        text = "📱 SMS" + if (activeVector == ThreatVector.SMS) " ✓" else "",
+                        fontSize = 11.sp,
                         fontWeight = if (activeVector == ThreatVector.SMS) FontWeight.Bold else FontWeight.Medium
                     )
                 }
@@ -223,9 +224,25 @@ fun MainAppScaffold(
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Text(
-                        text = "📧 Email Threat" + if (activeVector == ThreatVector.EMAIL) " ✓" else "",
-                        fontSize = 12.sp,
+                        text = "📧 Mail" + if (activeVector == ThreatVector.EMAIL) " ✓" else "",
+                        fontSize = 11.sp,
                         fontWeight = if (activeVector == ThreatVector.EMAIL) FontWeight.Bold else FontWeight.Medium
+                    )
+                }
+
+                Button(
+                    onClick = { activeVector = ThreatVector.QUISHING },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (activeVector == ThreatVector.QUISHING) PrimaryCobalt else CardDark,
+                        contentColor = if (activeVector == ThreatVector.QUISHING) Color.White else TextSecondary
+                    ),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text(
+                        text = "🎯 QR/UPI" + if (activeVector == ThreatVector.QUISHING) " ✓" else "",
+                        fontSize = 11.sp,
+                        fontWeight = if (activeVector == ThreatVector.QUISHING) FontWeight.Bold else FontWeight.Medium
                     )
                 }
             }
@@ -233,6 +250,7 @@ fun MainAppScaffold(
             when (activeVector) {
                 ThreatVector.SMS -> SmishingScreen(initialRecord = initialRecord)
                 ThreatVector.EMAIL -> EmailScreen()
+                ThreatVector.QUISHING -> QuishingScreen()
             }
         }
     }
