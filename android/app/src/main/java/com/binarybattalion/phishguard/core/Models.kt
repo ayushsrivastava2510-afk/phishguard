@@ -99,6 +99,23 @@ data class EmailInboxScanSummary(
     val isLiveSync: Boolean = false
 )
 
+data class UpiReputation(
+    val upiId: String,
+    val complaintCount: Int,
+    val riskLevel: String, // "CRITICAL", "HIGH", "SUSPICIOUS", "CLEAN"
+    val riskScore: Int,
+    val statusBadge: String,
+    val alertTitle: String,
+    val alertDesc: String,
+    val categories: List<String>,
+    val lawEnforcementStatus: String,
+    val financialLossReported: String,
+    val isBlocked: Boolean,
+    val isRepeatOffender: Boolean,
+    val handle: String = "",
+    val providerType: String = "Individual / Consumer Wallet"
+)
+
 data class UpiDetails(
     val payeeVpa: String,
     val payeeName: String,
@@ -109,7 +126,8 @@ data class UpiDetails(
     val isPersonalWallet: Boolean,
     val walletType: String,
     val mccCode: String,
-    val refId: String
+    val refId: String,
+    val reputation: UpiReputation? = null
 )
 
 data class QuishingRecord(

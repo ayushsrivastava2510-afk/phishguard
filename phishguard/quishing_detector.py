@@ -26,6 +26,14 @@ from urllib.parse import urlparse, parse_qs
 import cv2
 import numpy as np
 
+try:
+    from phishguard.upi_intel import check_upi_reputation
+except ImportError:
+    try:
+        from upi_intel import check_upi_reputation
+    except ImportError:
+        check_upi_reputation = None
+
 # Common disposable and high-risk TLDs used in quishing redirects
 SUSPICIOUS_TLDS = {
     ".xyz", ".top", ".tk", ".ml", ".ga", ".cf", ".gq", ".work", ".click",
@@ -301,6 +309,31 @@ def _audit_upi_payload(payload_str: str, context_lower: str, img_sha256: str = N
             red_flags.append("Open-amount collect deeplink: No fixed amount set; malicious collector can request custom debit.")
             risk_score = max(risk_score, 40)
 
+    # 4. National Cyber Fraud Complaints Registry Check (1930 Helpline / NPCI Chakshu)
+    upi_rep = None
+    if check_upi_reputation and pa:
+        try:
+            upi_rep = check_upi_reputation(pa)
+            complaints = upi_rep.get("complaint_count", 0)
+            if complaints > 0:
+                red_flags.insert(
+                    0,
+                    f"🚨 NATIONAL FRAUD REGISTRY ALERT: {complaints} citizen spam/fraud complaints filed against '{pa}' (Helpline 1930 / NPCI Chakshu)."
+                )
+                if upi_rep.get("is_repeat_offender"):
+                    fraud_category = "REPEAT_OFFENDER_UPI_FRAUD"
+                    risk_score = max(risk_score, 98)
+                    red_flags.insert(
+                        1,
+                        f"🛑 REPEAT OFFENDER SYNDICATE: Flagged under {upi_rep.get('primary_scam_vector', 'Financial Fraud')}. Reported Financial Damage: ₹{upi_rep.get('total_reported_loss_inr', 0):,}."
+                    )
+                else:
+                    risk_score = max(risk_score, upi_rep.get("risk_score", 75))
+            elif upi_rep.get("is_institutional_clean"):
+                pass
+        except Exception:
+            pass
+
     # Calculate Verdict
     if risk_score >= 85:
         verdict = "CRITICAL_THREAT"
@@ -315,11 +348,16 @@ def _audit_upi_payload(payload_str: str, context_lower: str, img_sha256: str = N
         verdict = "SAFE"
         verdict_color = "#2E7D32"
 
-    headline = (
-        "🚨 High-Severity UPI Reverse-Collect Fraud Detected" if is_reverse_collect
-        else f"⚠️ Impersonated UPI Merchant Detected: {pn or pa}" if risk_score >= 70
-        else "✅ Legitimate / Standard UPI Payment Payload"
-    )
+    if is_reverse_collect:
+        headline = "🚨 High-Severity UPI Reverse-Collect Fraud Detected"
+    elif upi_rep and upi_rep.get("complaint_count", 0) >= 10:
+        headline = f"🛑 DANGEROUS REPEAT OFFENDER UPI: {upi_rep['complaint_count']} Fraud Complaints Filed"
+    elif upi_rep and upi_rep.get("complaint_count", 0) >= 5:
+        headline = f"⚠️ HIGH-RISK UPI: {upi_rep['complaint_count']} Fraud Complaints Reported"
+    elif risk_score >= 70:
+        headline = f"⚠️ Impersonated UPI Merchant Detected: {pn or pa}"
+    else:
+        headline = "✅ Legitimate / Standard UPI Payment Payload"
 
     summary = (
         f"This QR code encodes an outbound payment request to VPA '{pa}' ({pn or 'Unknown'}). "
@@ -359,6 +397,9 @@ def _audit_upi_payload(payload_str: str, context_lower: str, img_sha256: str = N
             "wallet_type": wallet_provider or "Institutional / Enterprise",
             "mcc_code": upi_info.get("mc", "None"),
             "ref_id": upi_info.get("tr", "None"),
+            "reputation": upi_rep,
+            "complaint_count": upi_rep.get("complaint_count", 0) if upi_rep else 0,
+            "law_enforcement_status": upi_rep.get("law_enforcement_status", "Active") if upi_rep else "Unflagged",
         },
         "advisory": advisory,
         "forensics": {

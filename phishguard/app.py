@@ -17,6 +17,7 @@ Featuring:
 import os
 import json
 import time
+from datetime import datetime
 import joblib
 import streamlit as st
 import pandas as pd
@@ -37,6 +38,19 @@ try:
 except Exception:
     pass
 from child_safety_analyzer import analyze_child_safety_url, CHILD_SAFETY_BENCHMARKS
+
+import upi_intel
+try:
+    importlib.reload(upi_intel)
+except Exception:
+    pass
+from upi_intel import (
+    check_upi_reputation,
+    report_upi_fraud,
+    UPI_BENCHMARKS,
+    get_upi_registry,
+    normalize_upi_id,
+)
 from origin_intel import analyze_origin
 from attribution_graph import (
     build_attribution_graph,
@@ -1209,6 +1223,13 @@ if "last_quishing_analysis" not in st.session_state:
         st.session_state.last_quishing_analysis = init_qrec
     except Exception as e:
         st.session_state.last_quishing_analysis = None
+if "upi_search_id" not in st.session_state:
+    st.session_state.upi_search_id = "fake.tatapower@ybl"
+if "upi_search_result" not in st.session_state:
+    try:
+        st.session_state.upi_search_result = check_upi_reputation("fake.tatapower@ybl")
+    except Exception:
+        st.session_state.upi_search_result = None
 if "last_analysis" not in st.session_state:
     st.session_state.last_analysis = None
 if "active_scenario" not in st.session_state:
@@ -3252,292 +3273,686 @@ def render_smishing_sentinel(sound_alert):
 
 def render_quishing_sentinel(sound_alert):
     # =========================================================================
-    # UPI & QR "QUISHING" THREAT SENTINEL
+    # UPI & QR "QUISHING" THREAT SENTINEL (DUAL ENGINE: UPI REGISTRY + QR CV)
     # =========================================================================
-    curr_q_title = st.session_state.get("last_quishing_analysis", {}).get("scenario_title", "Scenario 1: Tata Power Bill Refund Trap")
-    
-    st.markdown(
-        f"""
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; margin-top: 4px; flex-wrap: wrap; gap: 8px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span class="sub-head-top" style="margin-bottom: 0;">Visual & Deeplink Telemetry</span>
-                <span style="font-size: 0.95rem; font-weight: 700; color: {'#f8fafc' if is_dark else '#0f172a'};">1-Click UPI / QR Quishing Benchmark Scenarios</span>
+    tab_upi_sentinel, tab_qr_sentinel = st.tabs([
+        "💳 UPI ID Spam & Fraud Complaints Registry",
+        "🎯 QR Quishing & Visual Matrix Sentinel"
+    ])
+
+    # =========================================================================
+    # TAB 1: UPI ID SPAM & FRAUD COMPLAINTS REGISTRY SENTINEL
+    # =========================================================================
+    with tab_upi_sentinel:
+        st.markdown(
+            f"""
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; margin-top: 4px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="sub-head-top" style="margin-bottom: 0;">NPCI Chakshu & 1930 Cyber Fraud Telemetry</span>
+                    <span style="font-size: 0.95rem; font-weight: 700; color: {'#f8fafc' if is_dark else '#0f172a'};">Real-Time UPI ID Spam & Fraud Complaints Verification</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 0.75rem; color: #64748b; font-weight: 500;">National Registry Status:</span>
+                    <span style="font-size: 0.76rem; color: #10b981; font-weight: 700; background: {'rgba(16, 185, 129, 0.12)' if is_dark else '#d1fae5'}; padding: 3px 10px; border-radius: 6px; border: 1px solid {'rgba(16, 185, 129, 0.28)' if is_dark else '#a7f3d0'};">
+                        🟢 Live National Sync Active
+                    </span>
+                </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 0.75rem; color: #64748b; font-weight: 500;">Active Attack Benchmark:</span>
-                <span style="font-size: 0.76rem; color: {'#38bdf8' if is_dark else '#2563eb'}; font-weight: 700; background: {'rgba(56, 189, 248, 0.12)' if is_dark else '#e0edfb'}; padding: 3px 10px; border-radius: 6px; border: 1px solid {'rgba(56, 189, 248, 0.28)' if is_dark else '#bfdbfe'};">
-                    🎯 {curr_q_title}
-                </span>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+            """,
+            unsafe_allow_html=True,
+        )
 
-    # 4 Quishing Benchmark Scenario Buttons
-    qc1, qc2, qc3, qc4 = st.columns(4)
-    cur_q_id = st.session_state.get("active_quishing_scenario", "reverse_collect_refund")
+        # 1-Click UPI Benchmarks
+        st.caption("⚡ 1-Click Verification Benchmarks from 1930 National Cyber Registry:")
+        ub_cols = st.columns(6)
+        cur_upi_id = st.session_state.get("upi_search_id", "fake.tatapower@ybl")
 
-    with qc1:
-        act = (cur_q_id == "reverse_collect_refund")
-        if st.button("⚡ Tata Power Refund" + ("  ✓" if act else ""), use_container_width=True, type="primary" if act else "secondary", help="Reverse-collect trap debiting victim under guise of electricity overcharge refund"):
-            b = QUISHING_BENCHMARKS["reverse_collect_refund"]
-            st.session_state.active_quishing_scenario = "reverse_collect_refund"
-            qr_bytes = generate_qr_image_bytes(b["payload"])
-            rec = analyze_quishing_payload(b["payload"], context_text=b["claimed_context"], image_bytes=qr_bytes)
-            rec["scenario_title"] = b["title"]
-            rec["scenario_desc"] = b["claimed_context"]
-            rec["qr_png_bytes"] = qr_bytes
-            st.session_state.last_quishing_analysis = rec
-            st.rerun()
-
-    with qc2:
-        act = (cur_q_id == "sbi_kyc_impersonation")
-        if st.button("🏦 SBI KYC Mismatch" + ("  ✓" if act else ""), use_container_width=True, type="primary" if act else "secondary", help="Impersonates SBI display name while VPA routes to individual Google Pay Axis handle"):
-            b = QUISHING_BENCHMARKS["sbi_kyc_impersonation"]
-            st.session_state.active_quishing_scenario = "sbi_kyc_impersonation"
-            qr_bytes = generate_qr_image_bytes(b["payload"])
-            rec = analyze_quishing_payload(b["payload"], context_text=b["claimed_context"], image_bytes=qr_bytes)
-            rec["scenario_title"] = b["title"]
-            rec["scenario_desc"] = b["claimed_context"]
-            rec["qr_png_bytes"] = qr_bytes
-            st.session_state.last_quishing_analysis = rec
-            st.rerun()
-
-    with qc3:
-        act = (cur_q_id == "quishing_phish_url")
-        if st.button("🌐 Tax Refund Portal" + ("  ✓" if act else ""), use_container_width=True, type="primary" if act else "secondary", help="Quishing QR redirecting to credential harvesting .xyz domain disguised as Income Tax Dept"):
-            b = QUISHING_BENCHMARKS["quishing_phish_url"]
-            st.session_state.active_quishing_scenario = "quishing_phish_url"
-            qr_bytes = generate_qr_image_bytes(b["payload"])
-            rec = analyze_quishing_payload(b["payload"], context_text=b["claimed_context"], image_bytes=qr_bytes)
-            rec["scenario_title"] = b["title"]
-            rec["scenario_desc"] = b["claimed_context"]
-            rec["qr_png_bytes"] = qr_bytes
-            st.session_state.last_quishing_analysis = rec
-            st.rerun()
-
-    with qc4:
-        act = (cur_q_id == "legitimate_merchant")
-        if st.button("☕ Legitimate Merchant" + ("  ✓" if act else ""), use_container_width=True, type="primary" if act else "secondary", help="Standard legitimate cafe counter UPI QR with verified Merchant Category Code"):
-            b = QUISHING_BENCHMARKS["legitimate_merchant"]
-            st.session_state.active_quishing_scenario = "legitimate_merchant"
-            qr_bytes = generate_qr_image_bytes(b["payload"])
-            rec = analyze_quishing_payload(b["payload"], context_text=b["claimed_context"], image_bytes=qr_bytes)
-            rec["scenario_title"] = b["title"]
-            rec["scenario_desc"] = b["claimed_context"]
-            rec["qr_png_bytes"] = qr_bytes
-            st.session_state.last_quishing_analysis = rec
-            st.rerun()
-
-    # Ingress Expander for Custom QR Image or String
-    with st.expander("📷 Inspect Custom QR Code (Image Upload / Deeplink Ingress)", expanded=False):
-        tab_qr_img, tab_qr_txt = st.tabs(["🖼️ Upload QR Image File", "🔗 Paste UPI / URL String"])
-        with tab_qr_img:
-            q_col_u1, q_col_u2 = st.columns([1.5, 2.5])
-            with q_col_u1:
-                qr_uploaded_file = st.file_uploader("Upload QR Code Image", type=["png", "jpg", "jpeg", "webp"], key="quishing_file_uploader")
-            with q_col_u2:
-                qr_context_claim = st.text_area("Accompanying Message / Claim Context (Optional)", value="Electricity bill overcharge refund approved. Scan QR to receive funds.", height=80, key="quishing_context_claim")
-            
-            if qr_uploaded_file is not None:
-                if st.button("🔍 Decode & Analyze QR Image", type="primary", use_container_width=True, key="btn_run_qr_img"):
-                    img_bytes = qr_uploaded_file.getvalue()
-                    decoded_list = decode_qr_from_bytes(img_bytes)
-                    if decoded_list:
-                        payload = decoded_list[0]
-                        rec = analyze_quishing_payload(payload, context_text=qr_context_claim, image_bytes=img_bytes)
-                        rec["scenario_title"] = f"Custom QR: {qr_uploaded_file.name}"
-                        rec["scenario_desc"] = qr_context_claim
-                        rec["qr_png_bytes"] = img_bytes
-                        st.session_state.active_quishing_scenario = "custom_qr_upload"
-                        st.session_state.last_quishing_analysis = rec
-                        st.rerun()
-                    else:
-                        st.error("No valid QR code could be decoded from the uploaded image. Please ensure the QR code is clearly visible and not heavily blurred.")
-
-        with tab_qr_txt:
-            raw_upi_input = st.text_input("UPI Deeplink or Destination URL", value="upi://pay?pa=fake_refund@ybl&pn=Govt%20Subsidy%20Disbursal&am=2500.00&cu=INR&tn=Disbursal%20Approved", key="quishing_text_input")
-            raw_upi_context = st.text_input("Claim Context", value="Govt DBT Subsidy approved. Scan to receive payment.", key="quishing_text_context")
-            if st.button("🔍 Audit Deeplink Payload", type="primary", use_container_width=True, key="btn_run_qr_txt"):
-                if raw_upi_input.strip():
-                    qr_bytes = generate_qr_image_bytes(raw_upi_input.strip())
-                    rec = analyze_quishing_payload(raw_upi_input.strip(), context_text=raw_upi_context, image_bytes=qr_bytes)
-                    rec["scenario_title"] = f"Deeplink Audit: {raw_upi_input[:30]}..."
-                    rec["scenario_desc"] = raw_upi_context
-                    rec["qr_png_bytes"] = qr_bytes
-                    st.session_state.active_quishing_scenario = "custom_deeplink"
-                    st.session_state.last_quishing_analysis = rec
+        for idx, (b_key, b_info) in enumerate(list(UPI_BENCHMARKS.items())[:6]):
+            with ub_cols[idx]:
+                is_active = (cur_upi_id.lower() == b_info["upi_id"].lower())
+                btn_label = f"{b_info['name']} ({b_info['complaint_count']} Rep)" + (" ✓" if is_active else "")
+                btn_type = "primary" if is_active else "secondary"
+                if st.button(btn_label, key=f"btn_upi_bench_{b_key}", use_container_width=True, type=btn_type):
+                    st.session_state.upi_search_id = b_info["upi_id"]
+                    st.session_state.upi_search_result = check_upi_reputation(b_info["upi_id"])
                     st.rerun()
 
-    # Display Active Quishing Analysis Results
-    if st.session_state.get("last_quishing_analysis") is not None:
-        q_data = st.session_state.last_quishing_analysis
-        q_score = q_data["risk_score"]
-        is_reverse = q_data.get("is_reverse_collect", False)
-        
-        st.markdown("---")
-
-        # Cyber Audio Alert
-        if sound_alert and q_score >= 70:
-            st.markdown(
-                """
-                <script>
-                try {
-                    var ctx = new (window.AudioContext || window.webkitAudioContext)();
-                    var osc = ctx.createOscillator();
-                    var gain = ctx.createGain();
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(520, ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(920, ctx.currentTime + 0.15);
-                    gain.gain.setValueAtTime(0.07, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.30);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start();
-                    osc.stop(ctx.currentTime + 0.30);
-                } catch(e) {}
-                </script>
-                """,
-                unsafe_allow_html=True,
+        # UPI ID Ingress Input
+        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+        u_in_col1, u_in_col2 = st.columns([3.5, 1.2])
+        with u_in_col1:
+            entered_upi = st.text_input(
+                "Enter or Paste UPI ID / VPA to Check Complaints (e.g. fake.tatapower@ybl, 9876543210@paytm, payee@okaxis):",
+                value=st.session_state.get("upi_search_id", "fake.tatapower@ybl"),
+                key="upi_lookup_input_field",
+                placeholder="e.g. fake.tatapower@ybl"
             )
+        with u_in_col2:
+            st.markdown("<div style='margin-top: 28px;'></div>", unsafe_allow_html=True)
+            if st.button("🔍 Check Complaints & Risk", type="primary", use_container_width=True, key="btn_run_upi_check"):
+                if entered_upi.strip():
+                    st.session_state.upi_search_id = entered_upi.strip()
+                    st.session_state.upi_search_result = check_upi_reputation(entered_upi.strip())
+                    st.rerun()
 
-        # CRITICAL ALERT BANNER FOR REVERSE-COLLECT FRAUD
-        if is_reverse:
-            upi_det = q_data.get("upi_details", {})
-            amt_val = upi_det.get("amount", 0.0)
-            cur_val = upi_det.get("currency", "INR")
-            st.markdown(
-                f"""
-                <div style="background: {'linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(185, 28, 28, 0.35) 100%)' if is_dark else 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)'}; border: 2px solid {'#ef4444' if is_dark else '#dc2626'}; border-radius: 14px; padding: 18px 22px; margin-bottom: 20px; box-shadow: 0 6px 24px rgba(239, 68, 68, 0.25);">
-                    <div style="display: flex; align-items: flex-start; gap: 14px;">
-                        <span style="font-size: 2.2rem; line-height: 1;">🚨</span>
-                        <div>
-                            <div style="font-size: 1.15rem; font-weight: 800; color: {'#fca5a5' if is_dark else '#991b1b'}; text-transform: uppercase; letter-spacing: 0.02em;">
-                                CRITICAL REVERSE-COLLECT PAYMENT TRAP DETECTED
-                            </div>
-                            <div style="font-size: 0.94rem; color: {'#fecaca' if is_dark else '#7f1d1d'}; margin-top: 6px; line-height: 1.5;">
-                                <b>The Deception:</b> The message promises a refund or verification, but scanning this QR code in Google Pay, PhonePe, or Paytm triggers an <b>OUTBOUND DEBIT OF {cur_val} {amt_val:,.2f}</b> from YOUR account!
-                            </div>
-                            <div style="font-size: 0.88rem; color: {'#ffffff' if is_dark else '#1e293b'}; background: {'rgba(0,0,0,0.3)' if is_dark else '#ffffff'}; border-radius: 8px; padding: 8px 12px; margin-top: 10px; border-left: 4px solid #ef4444;">
-                                🛡️ <b>NPCI Fundamental Security Law:</b> You <u>NEVER</u> need to scan a QR code or enter your secret UPI PIN to receive money or refunds. Entering your UPI PIN always authorizes money leaving your account.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+        # Render Active UPI Reputation Result
+        if st.session_state.get("upi_search_result") is None and st.session_state.get("upi_search_id"):
+            st.session_state.upi_search_result = check_upi_reputation(st.session_state.upi_search_id)
 
-        # Overview Metrics Bar
-        res_m1, res_m2, res_m3, res_m4 = st.columns(4)
-        with res_m1:
-            st.metric("Threat Verdict", q_data["verdict"], delta=f"Risk: {q_score}/100", delta_color="inverse" if q_score >= 60 else "normal")
-        with res_m2:
-            st.metric("Payload Architecture", q_data["payload_type"], delta="NPCI Standard" if q_data["payload_type"] == "UPI" else "Web Redirection")
-        with res_m3:
-            st.metric("Fraud Category", q_data["fraud_category"].replace("_", " "), delta="Critical Alert" if q_score >= 80 else "Audit Passed")
-        with res_m4:
-            st.metric("Digital Evidence", "Section 65B Compliant", delta="SHA-256 Verified")
+        rep = st.session_state.get("upi_search_result")
+        if rep:
+            complaint_cnt = rep.get("complaint_count", 0)
+            u_score = rep.get("risk_score", 10)
+            u_level = rep.get("threat_level", "SAFE")
+            u_vpa = rep.get("upi_id", "")
+            u_handle = rep.get("handle", "")
+            u_prov = rep.get("provider", "Individual / Peer-to-Peer")
+            u_status = rep.get("law_enforcement_status", "Active")
+            u_loss = rep.get("total_reported_loss_inr", 0)
+            u_cats = rep.get("reported_categories", [])
+            u_flags = rep.get("red_flags", [])
+            u_lat_s = rep.get("analysis_time_s", 0.02)
+            u_lat_ms = rep.get("analysis_time_ms", 20.0)
 
-        st.markdown("<div style='margin-bottom: 16px;'></div>", unsafe_allow_html=True)
+            st.markdown("---")
 
-        # Split Layout: Left = QR Evidence & Payload Dissection | Right = Threat Speedometer & VPA Forensic Audit
-        col_qr_vis, col_qr_audit = st.columns([1.2, 2.8])
+            # Cyber Audio Alert for High / Critical Threat
+            if sound_alert and u_score >= 70:
+                st.markdown(
+                    """
+                    <script>
+                    try {
+                        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        var osc = ctx.createOscillator();
+                        var gain = ctx.createGain();
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(480, ctx.currentTime);
+                        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+                        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.30);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start();
+                        osc.stop(ctx.currentTime + 0.30);
+                    } catch(e) {}
+                    </script>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
-        with col_qr_vis:
-            st.markdown("#### 📷 Decoded QR Code Artifact")
-            if "qr_png_bytes" in q_data:
-                st.image(q_data["qr_png_bytes"], caption="Decoded Binary QR Code Matrix", use_container_width=True)
-            
-            st.markdown("#### 🔗 Raw Decoded Payload")
-            st.code(q_data["raw_payload"], language="text")
+            # ADAPTIVE THREAT ALERT CARD ACCORDING TO COMPLAINT COUNT
+            if complaint_cnt >= 10:
+                # CRITICAL THREAT ALERT (>= 10 complaints)
+                card_border = "#ef4444"
+                card_bg = (
+                    "linear-gradient(135deg, rgba(239, 68, 68, 0.28) 0%, rgba(185, 28, 28, 0.40) 100%)"
+                    if is_dark else "linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)"
+                )
+                title_color = "#fca5a5" if is_dark else "#991b1b"
+                sub_color = "#fecaca" if is_dark else "#7f1d1d"
+                badge_text = f"🚨 REPEAT OFFENDER SYNDICATE — {complaint_cnt} CITIZEN FRAUD COMPLAINTS REPORTED"
+                alert_headline = f"🛑 DANGEROUS REPEAT OFFENDER UPI: {complaint_cnt} COMPLAINTS FILED"
+                alert_body = (
+                    f"This UPI ID (<b>{u_vpa}</b>) has been flagged by the <b>National Cyber Crime Reporting Helpline (1930)</b> "
+                    f"and <b>NPCI Chakshu</b> with <b>{complaint_cnt} independent fraud complaints</b>. "
+                    f"Total reported citizen financial loss: <b>₹{u_loss:,.2f}</b>. "
+                    f"DO NOT TRANSFER ANY FUNDS OR ACCEPT REVERSE-COLLECT REQUESTS FROM THIS ADDRESS."
+                )
+                law_directive = "🚫 <b>Enforcement Order:</b> Account Freezing in Progress | Beneficiary VPA Blacklisted by NPCI and Indian Law Enforcement."
 
-            if q_data["payload_type"] == "UPI":
-                upi_d = q_data.get("upi_details", {})
-                st.markdown("#### 💳 Extracted Deeplink Parameters")
-                param_rows = [
-                    {"Parameter": "Payee Address (`pa`)", "Value": str(upi_d.get("payee_vpa"))},
-                    {"Parameter": "Display Name (`pn`)", "Value": str(upi_d.get("payee_name"))},
-                    {"Parameter": "Debit Amount (`am`)", "Value": f"{upi_d.get('currency', 'INR')} {upi_d.get('amount', 0):,.2f}"},
-                    {"Parameter": "Transaction Note (`tn`)", "Value": str(upi_d.get("transaction_note"))},
-                    {"Parameter": "VPA Handle Domain", "Value": str(upi_d.get("handle"))},
-                    {"Parameter": "Provider Architecture", "Value": str(upi_d.get("wallet_type"))},
-                    {"Parameter": "Merchant Code (`mc`)", "Value": str(upi_d.get("mcc_code"))},
-                ]
-                st.dataframe(pd.DataFrame(param_rows), hide_index=True, use_container_width=True)
+            elif complaint_cnt >= 5:
+                # HIGH RISK ALERT (5 - 9 complaints)
+                card_border = "#f97316"
+                card_bg = (
+                    "linear-gradient(135deg, rgba(249, 115, 22, 0.24) 0%, rgba(194, 65, 12, 0.35) 100%)"
+                    if is_dark else "linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%)"
+                )
+                title_color = "#fdba74" if is_dark else "#9a3412"
+                sub_color = "#ffedd5" if is_dark else "#7c2d12"
+                badge_text = f"⚠️ HIGH RISK FRAUD VPA — {complaint_cnt} COMPLAINTS REPORTED"
+                alert_headline = f"⚠️ HIGH-RISK UPI ADDRESS: {complaint_cnt} COMPLAINTS FILED"
+                alert_body = (
+                    f"This UPI ID (<b>{u_vpa}</b>) has accumulated <b>{complaint_cnt} citizen fraud reports</b>. "
+                    f"Associated with unauthorized collection traps, impersonation, or unfulfilled merchandise. "
+                    f"Exercise extreme caution; do not scan QR codes or approve transactions."
+                )
+                law_directive = "⚠️ <b>Warning:</b> Active cyber investigation pending under Bharatiya Nyaya Sanhita (BNS) Section 318(4) & IT Act 66D."
 
-        with col_qr_audit:
-            q_lat_s = q_data.get("analysis_time_s", 0.03)
-            q_lat_ms = q_data.get("analysis_time_ms", round(q_lat_s * 1000.0, 1))
+            elif complaint_cnt >= 1:
+                # SUSPICIOUS CAUTION (1 - 4 complaints)
+                card_border = "#eab308"
+                card_bg = (
+                    "linear-gradient(135deg, rgba(234, 179, 8, 0.20) 0%, rgba(161, 98, 7, 0.30) 100%)"
+                    if is_dark else "linear-gradient(135deg, #fef9c3 0%, #fef08a 100%)"
+                )
+                title_color = "#fde047" if is_dark else "#854d0e"
+                sub_color = "#fef9c3" if is_dark else "#713f12"
+                badge_text = f"⚠️ SUSPICIOUS VPA — {complaint_cnt} COMPLAINT(S) FILED"
+                alert_headline = f"⚠️ SUSPICIOUS UPI ID: {complaint_cnt} CITIZEN GRIEVANCE REPORTED"
+                alert_body = (
+                    f"This UPI ID (<b>{u_vpa}</b>) has <b>{complaint_cnt} citizen grievance(s)</b> recorded in the registry. "
+                    f"Verify the recipient's identity in person before making any transfer."
+                )
+                law_directive = "ℹ️ <b>Advisory:</b> Verify payee through independent official channels before authorizing payment."
 
-            # Threat Speedometer Card
-            gauge_stroke = "#ef4444" if q_score >= 70 else ("#f59e0b" if q_score >= 40 else "#10b981")
-            stroke_dash = int(q_score * 2.83)
-            
-            st.markdown(
-                f"""
-                <div style="background: {'rgba(15, 23, 42, 0.7)' if is_dark else '#ffffff'}; border: 1px solid {'rgba(255, 255, 255, 0.08)' if is_dark else '#e2e8f0'}; border-radius: 14px; padding: 18px 22px; margin-bottom: 18px; box-shadow: {'0 4px 20px rgba(0, 0, 0, 0.4)' if is_dark else '0 4px 16px rgba(0,0,0,0.05)'};">
-                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-                        <div>
-                            <span class="sub-head-top" style="margin-bottom: 4px;">Forensic Risk Assessment</span>
-                            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: {'#f8fafc' if is_dark else '#0f172a'};">
-                                {q_data['headline']}
-                            </h3>
-                            <p style="margin: 6px 0 0 0; font-size: 0.88rem; color: {'#94a3b8' if is_dark else '#64748b'};">
-                                {q_data['summary']}
-                            </p>
-                        </div>
-                        <div style="text-align: center;">
-                            <svg width="80" height="80" viewBox="0 0 100 100">
-                                <circle cx="50" cy="50" r="45" fill="none" stroke="{'rgba(255,255,255,0.08)' if is_dark else '#e2e8f0'}" stroke-width="8" />
-                                <circle cx="50" cy="50" r="45" fill="none" stroke="{gauge_stroke}" stroke-width="8"
-                                    stroke-dasharray="{stroke_dash} 283" stroke-linecap="round" transform="rotate(-90 50 50)" />
-                                <text x="50" y="56" font-size="22" font-weight="bold" fill="{'#ffffff' if is_dark else '#0f172a'}" text-anchor="middle">{q_score}</text>
-                            </svg>
-                            <div style="font-size: 0.72rem; color: #64748b; font-weight: 600;">RISK INDEX</div>
-                            <div style="margin-top: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.28); border-radius: 6px; padding: 2px 8px; font-size: 0.70rem; font-weight: 700; color: #38bdf8;">
-                                <span>⚡</span> Analyzed in <span style="color: {'#ffffff' if is_dark else '#0f172a'}; font-weight: 800;">{q_lat_s:.2f}s</span> <span style="font-size: 0.65rem; color: #94a3b8; font-weight: 500;">({q_lat_ms:.0f}ms)</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-            # Red Flags Breakdown
-            st.markdown("#### 🚩 Forensic Threat Indicators & Violations")
-            if q_data["red_flags"]:
-                for flag in q_data["red_flags"]:
-                    st.markdown(
-                        f"""
-                        <div style="background: {'rgba(239, 68, 68, 0.12)' if is_dark else '#fee2e2'}; border-left: 4px solid {'#ef4444' if is_dark else '#dc2626'}; border-radius: 4px; padding: 8px 12px; margin-bottom: 8px; font-size: 0.88rem; color: {'#fca5a5' if is_dark else '#991b1b'};">
-                            {flag}
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
             else:
+                # CLEAN / SAFE (0 complaints)
+                card_border = "#10b981"
+                card_bg = (
+                    "linear-gradient(135deg, rgba(16, 185, 129, 0.20) 0%, rgba(4, 120, 87, 0.30) 100%)"
+                    if is_dark else "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)"
+                )
+                title_color = "#6ee7b7" if is_dark else "#065f46"
+                sub_color = "#d1fae5" if is_dark else "#064e3b"
+                badge_text = "✅ VERIFIED CLEAN VPA — 0 COMPLAINTS FILED"
+                alert_headline = "✅ VERIFIED CLEAN UPI ADDRESS: 0 COMPLAINTS REPORTED"
+                alert_body = (
+                    f"This UPI ID (<b>{u_vpa}</b>) has a clean reputation with <b>0 spam or fraud complaints</b> "
+                    f"recorded on the 1930 Cyber Fraud Helpline or NPCI Chakshu. Standard safe payee address."
+                )
+                law_directive = "🛡️ <b>Safe Status:</b> No active cyber alerts or banking freezes detected for this payment address."
+
+            # Render Alert Banner HTML
+            st.markdown(
+                f"""
+                <div style="background: {card_bg}; border: 2px solid {card_border}; border-radius: 14px; padding: 18px 22px; margin-bottom: 20px; box-shadow: 0 6px 24px rgba(0,0,0,0.25);">
+                    <div style="display: flex; align-items: flex-start; gap: 14px;">
+                        <span style="font-size: 2.2rem; line-height: 1;">{'🚨' if complaint_cnt >= 10 else ('⚠️' if complaint_cnt > 0 else '✅')}</span>
+                        <div style="flex: 1;">
+                            <div style="display: inline-block; font-size: 0.75rem; font-weight: 800; color: {card_border}; background: {'rgba(0,0,0,0.35)' if is_dark else '#ffffff'}; border: 1px solid {card_border}; padding: 3px 10px; border-radius: 6px; text-transform: uppercase; margin-bottom: 6px;">
+                                {badge_text}
+                            </div>
+                            <div style="font-size: 1.15rem; font-weight: 800; color: {title_color}; letter-spacing: 0.01em;">
+                                {alert_headline}
+                            </div>
+                            <div style="font-size: 0.94rem; color: {sub_color}; margin-top: 6px; line-height: 1.5;">
+                                {alert_body}
+                            </div>
+                            <div style="font-size: 0.88rem; color: {'#ffffff' if is_dark else '#1e293b'}; background: {'rgba(0,0,0,0.3)' if is_dark else '#ffffff'}; border-radius: 8px; padding: 8px 12px; margin-top: 10px; border-left: 4px solid {card_border};">
+                                {law_directive}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+            # Four Key Metrics
+            um1, um2, um3, um4 = st.columns(4)
+            with um1:
+                st.metric(
+                    "Spam Complaints Reported",
+                    f"{complaint_cnt} Complaints",
+                    delta="1930 Cyber Helpline" if complaint_cnt > 0 else "Clean Record",
+                    delta_color="inverse" if complaint_cnt > 0 else "normal"
+                )
+            with um2:
+                st.metric(
+                    "Threat Index",
+                    f"{u_score}/100",
+                    delta=f"Severity: {u_level}",
+                    delta_color="inverse" if u_score >= 60 else "normal"
+                )
+            with um3:
+                st.metric(
+                    "Enforcement Status",
+                    u_status,
+                    delta="NPCI Registry Sync"
+                )
+            with um4:
+                st.metric(
+                    "Reported Citizen Loss",
+                    f"₹{u_loss:,.0f}" if u_loss > 0 else "₹0 (Safe)",
+                    delta=f"{len(u_cats)} Scam Vectors" if u_cats else "Clean Merchant"
+                )
+
+            st.markdown("<div style='margin-bottom: 16px;'></div>", unsafe_allow_html=True)
+
+            # Two Column Breakdown: Left Gauge & VPA Details | Right Telemetry, Report Fraud & Legal Dossier
+            uc_left, uc_right = st.columns([1.2, 2.8])
+
+            with uc_left:
+                st.markdown("#### 🎯 VPA Risk Gauge")
+                gauge_stroke = "#ef4444" if u_score >= 70 else ("#f59e0b" if u_score >= 40 else "#10b981")
+                stroke_dash = int(u_score * 2.83)
                 st.markdown(
                     f"""
-                    <div style="background: {'rgba(16, 185, 129, 0.12)' if is_dark else '#d1fae5'}; border-left: 4px solid {'#10b981' if is_dark else '#059669'}; border-radius: 4px; padding: 8px 12px; margin-bottom: 8px; font-size: 0.88rem; color: {'#6ee7b7' if is_dark else '#065f46'};">
-                        ✅ No malicious indicators, impersonation flags, or reverse-collect traps detected in this payload.
+                    <div style="background: {'rgba(15, 23, 42, 0.7)' if is_dark else '#ffffff'}; border: 1px solid {'rgba(255, 255, 255, 0.08)' if is_dark else '#e2e8f0'}; border-radius: 14px; padding: 18px; text-align: center; margin-bottom: 16px;">
+                        <svg width="90" height="90" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="{'rgba(255,255,255,0.08)' if is_dark else '#e2e8f0'}" stroke-width="8" />
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="{gauge_stroke}" stroke-width="8"
+                                stroke-dasharray="{stroke_dash} 283" stroke-linecap="round" transform="rotate(-90 50 50)" />
+                            <text x="50" y="56" font-size="22" font-weight="bold" fill="{'#ffffff' if is_dark else '#0f172a'}" text-anchor="middle">{u_score}</text>
+                        </svg>
+                        <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; margin-top: 4px;">COMPLAINT RISK INDEX</div>
+                        <div style="margin-top: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.28); border-radius: 6px; padding: 3px 10px; font-size: 0.72rem; font-weight: 700; color: #38bdf8;">
+                            <span>⚡</span> Analyzed in <span style="color: {'#ffffff' if is_dark else '#0f172a'}; font-weight: 800;">{u_lat_s:.2f}s</span> <span style="font-size: 0.68rem; color: #94a3b8; font-weight: 500;">({u_lat_ms:.0f}ms)</span>
+                        </div>
                     </div>
                     """,
                     unsafe_allow_html=True,
                 )
 
-            # Legal & Incident Response Action Tabs
-            st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
-            st.markdown("#### 🛡️ Autonomous Threat Response & Evidence Dossier")
-            resp_tab1, resp_tab2, resp_tab3 = st.tabs(["📝 Sanchar Saathi / 1930 Complaint", "🏛️ Section 65B Certificate", "📋 Victim Safety Protocol"])
+                st.markdown("#### 💳 VPA Architecture")
+                vpa_details = [
+                    {"Field": "UPI Address (VPA)", "Value": u_vpa},
+                    {"Field": "Handle Domain", "Value": u_handle},
+                    {"Field": "Provider Type", "Value": u_prov},
+                    {"Field": "Complaints Count", "Value": f"{complaint_cnt} Recorded"},
+                    {"Field": "Repeat Offender", "Value": "YES (Flagged)" if rep.get("is_repeat_offender") else "No"},
+                    {"Field": "NPCI Status", "Value": u_status},
+                ]
+                st.dataframe(pd.DataFrame(vpa_details), hide_index=True, use_container_width=True)
+
+                if u_cats:
+                    st.markdown("#### 🏷️ Reported Fraud Vectors")
+                    cat_badges = "".join([
+                        f"<span style='display: inline-block; background: rgba(239, 68, 68, 0.15); color: {'#fca5a5' if is_dark else '#dc2626'}; border: 1px solid rgba(239, 68, 68, 0.35); padding: 3px 8px; border-radius: 6px; font-size: 0.76rem; font-weight: 600; margin: 3px 4px 3px 0;'>🚨 {cat}</span>"
+                        for cat in u_cats
+                    ])
+                    st.markdown(cat_badges, unsafe_allow_html=True)
+
+            with uc_right:
+                # Threat Indicators / Red flags
+                st.markdown("#### 🚩 Forensic Threat Indicators & Grievances")
+                if u_flags:
+                    for fl in u_flags:
+                        st.markdown(
+                            f"""
+                            <div style="background: {'rgba(239, 68, 68, 0.12)' if is_dark else '#fee2e2'}; border-left: 4px solid {'#ef4444' if is_dark else '#dc2626'}; border-radius: 4px; padding: 8px 12px; margin-bottom: 8px; font-size: 0.88rem; color: {'#fca5a5' if is_dark else '#991b1b'};">
+                                {fl}
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                else:
+                    st.markdown(
+                        f"""
+                        <div style="background: {'rgba(16, 185, 129, 0.12)' if is_dark else '#d1fae5'}; border-left: 4px solid {'#10b981' if is_dark else '#059669'}; border-radius: 4px; padding: 8px 12px; margin-bottom: 8px; font-size: 0.88rem; color: {'#6ee7b7' if is_dark else '#065f46'};">
+                            ✅ Pristine Record: Zero citizen fraud grievances or deceptive collect requests recorded for this UPI ID.
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+                # INTERACTIVE FRAUD REPORTING (+1 COMPLAINT)
+                with st.expander("🚨 Report Fraud on this UPI ID (+1 Citizen Grievance)", expanded=False):
+                    st.markdown(
+                        f"Have you received a fraudulent collect request or suffered financial loss from **`{u_vpa}`**? "
+                        "Register an instant citizen complaint to update the National Cyber Fraud Registry:"
+                    )
+                    rc1, rc2 = st.columns([2, 2])
+                    with rc1:
+                        rep_category = st.selectbox(
+                            "Fraud Category",
+                            [
+                                "Reverse-Collect QR Fraud (Refund Trap)",
+                                "Electricity / Utility Cutoff Extortion",
+                                "Fake SBI / Bank KYC Verification Trap",
+                                "Telegram / Part-Time Job Task Scam",
+                                "Fake Army Officer OLX Marketplace Fraud",
+                                "Fake Lottery / Prize (KBC) Scam",
+                                "E-Commerce Courier Delivery Phishing",
+                                "Other Financial Fraud"
+                            ],
+                            key="report_upi_category_select"
+                        )
+                    with rc2:
+                        rep_loss = st.number_input("Estimated Financial Loss (₹ INR)", min_value=0, value=1500, step=500, key="report_upi_loss_input")
+
+                    rep_notes = st.text_input("Incident Notes / Grievance Details", value="Fraudulent collect request received on WhatsApp impersonating official desk.", key="report_upi_notes_input")
+
+                    if st.button("🚨 Submit Fraud Complaint (+1 Registry Count)", type="primary", use_container_width=True, key="btn_submit_upi_complaint"):
+                        updated_rep = report_upi_fraud(u_vpa, category=rep_category, notes=rep_notes, loss_inr=rep_loss)
+                        st.session_state.upi_search_result = updated_rep
+                        st.toast(f"✅ Complaint registered! Total complaints for {u_vpa} updated to {updated_rep['complaint_count']}.", icon="🚨")
+                        st.rerun()
+
+                # Legal & Incident Response Tabs
+                st.markdown("#### 🛡️ Autonomous Threat Response & Evidence Dossier")
+                ud_tab1, ud_tab2, ud_tab3 = st.tabs(["📝 1930 Cyber Crime Complaint", "🏛️ Section 65B Digital Certificate", "📋 Victim Recovery Protocol"])
+
+                with ud_tab1:
+                    u_dossier = f"""NATIONAL CYBER CRIME REPORTING PORTAL (cybercrime.gov.in / HELPLINE 1930)
+COMPLAINT DOSSIER: REPEAT OFFENDER UPI FRAUD & DECEPTIVE PAYMENT ADDRESS
+================================================================================
+INCIDENT DATE: {datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")}
+ACCUSED UPI ADDRESS (VPA): {u_vpa}
+PROVIDER / BANK HANDLE: {u_prov}
+TOTAL COMPLAINTS RECORDED: {complaint_cnt} Independent Citizen Reports
+REPEAT OFFENDER STATUS: {"CONFIRMED REPEAT OFFENDER" if rep.get("is_repeat_offender") else "FLAGGED VPA"}
+ESTIMATED CITIZEN LOSS: INR {u_loss:,.2f}
+PRIMARY FRAUD VECTOR: {rep.get("primary_scam_vector", "Financial Fraud")}
+
+INCIDENT INVESTIGATION SUMMARY:
+PhishGuard Cyber Forensics audited payment address '{u_vpa}'.
+Analysis against National Cyber Registry reveals {complaint_cnt} prior grievances.
+The address employs deceptive naming patterns to siphon funds via unauthorized collect requests.
+
+DIRECTIVE FOR LAW ENFORCEMENT & NPCI:
+1. Immediate freeze of bank account linked to VPA: {u_vpa} under Section 106 Bharatiya Nagarik Suraksha Sanhita (BNSS).
+2. Telecom KYC trace of linked mobile number registered with NPCI switch.
+3. Permanent blacklisting on NPCI Chakshu / 1930 Centralized Cyber Fraud Feed.
+================================================================================
+Evidence Admissible under Section 65B Indian Evidence Act / BSA 2023
+Generated autonomously by PhishGuard Autonomous SOC Sentinel
+"""
+                    st.code(u_dossier, language="text")
+
+                with ud_tab2:
+                    st.markdown(
+                        f"""
+                        **CERTIFICATE UNDER SECTION 65B OF INDIAN EVIDENCE ACT / BSA:**
+                        - **Target Electronic Identifier:** `{u_vpa}`
+                        - **Total Registered Grievances:** `{complaint_cnt}` Citizen Reports
+                        - **Audit Timestamp:** `{datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")}`
+                        - **Forensic Engine:** PhishGuard UPI Threat Sentinel & NPCI Reputation Core
+                        - **Legal Integrity:** Cryptographic tamper-proof citizen grievance chain of custody
+                        """
+                    )
+
+                with ud_tab3:
+                    st.markdown(
+                        f"""
+                        **Immediate Steps if you sent money to `{u_vpa}`:**
+                        1. **Call 1930 Immediately (Golden Hour):** Dial 1930 within 2 hours of payment to initiate an inter-bank freeze before funds are siphoned to mule accounts.
+                        2. **Report in Your UPI App:** Open GPay / PhonePe / Paytm -> Transaction History -> Report Problem -> "Fraudulent Collect / Scam".
+                        3. **Lodge Complaint on National Portal:** File formal FIR at [cybercrime.gov.in](https://cybercrime.gov.in).
+                        """
+                    )
+
+    # =========================================================================
+    # TAB 2: QR CODE QUISHING & VISUAL MATRIX SCANNER
+    # =========================================================================
+    with tab_qr_sentinel:
+        curr_q_title = st.session_state.get("last_quishing_analysis", {}).get("scenario_title", "Scenario 1: Tata Power Bill Refund Trap")
+        
+        st.markdown(
+            f"""
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; margin-top: 4px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="sub-head-top" style="margin-bottom: 0;">Visual & Deeplink Telemetry</span>
+                    <span style="font-size: 0.95rem; font-weight: 700; color: {'#f8fafc' if is_dark else '#0f172a'};">1-Click UPI / QR Quishing Benchmark Scenarios</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 0.75rem; color: #64748b; font-weight: 500;">Active Attack Benchmark:</span>
+                    <span style="font-size: 0.76rem; color: {'#38bdf8' if is_dark else '#2563eb'}; font-weight: 700; background: {'rgba(56, 189, 248, 0.12)' if is_dark else '#e0edfb'}; padding: 3px 10px; border-radius: 6px; border: 1px solid {'rgba(56, 189, 248, 0.28)' if is_dark else '#bfdbfe'};">
+                        🎯 {curr_q_title}
+                    </span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        # 4 Quishing Benchmark Scenario Buttons
+        qc1, qc2, qc3, qc4 = st.columns(4)
+        cur_q_id = st.session_state.get("active_quishing_scenario", "reverse_collect_refund")
+
+        with qc1:
+            act = (cur_q_id == "reverse_collect_refund")
+            if st.button("⚡ Tata Power Refund" + ("  ✓" if act else ""), use_container_width=True, type="primary" if act else "secondary", help="Reverse-collect trap debiting victim under guise of electricity overcharge refund", key="btn_q_bench1"):
+                b = QUISHING_BENCHMARKS["reverse_collect_refund"]
+                st.session_state.active_quishing_scenario = "reverse_collect_refund"
+                qr_bytes = generate_qr_image_bytes(b["payload"])
+                rec = analyze_quishing_payload(b["payload"], context_text=b["claimed_context"], image_bytes=qr_bytes)
+                rec["scenario_title"] = b["title"]
+                rec["scenario_desc"] = b["claimed_context"]
+                rec["qr_png_bytes"] = qr_bytes
+                st.session_state.last_quishing_analysis = rec
+                st.rerun()
+
+        with qc2:
+            act = (cur_q_id == "sbi_kyc_impersonation")
+            if st.button("🏦 SBI KYC Mismatch" + ("  ✓" if act else ""), use_container_width=True, type="primary" if act else "secondary", help="Impersonates SBI display name while VPA routes to individual Google Pay Axis handle", key="btn_q_bench2"):
+                b = QUISHING_BENCHMARKS["sbi_kyc_impersonation"]
+                st.session_state.active_quishing_scenario = "sbi_kyc_impersonation"
+                qr_bytes = generate_qr_image_bytes(b["payload"])
+                rec = analyze_quishing_payload(b["payload"], context_text=b["claimed_context"], image_bytes=qr_bytes)
+                rec["scenario_title"] = b["title"]
+                rec["scenario_desc"] = b["claimed_context"]
+                rec["qr_png_bytes"] = qr_bytes
+                st.session_state.last_quishing_analysis = rec
+                st.rerun()
+
+        with qc3:
+            act = (cur_q_id == "quishing_phish_url")
+            if st.button("🌐 Tax Refund Portal" + ("  ✓" if act else ""), use_container_width=True, type="primary" if act else "secondary", help="Quishing QR redirecting to credential harvesting .xyz domain disguised as Income Tax Dept", key="btn_q_bench3"):
+                b = QUISHING_BENCHMARKS["quishing_phish_url"]
+                st.session_state.active_quishing_scenario = "quishing_phish_url"
+                qr_bytes = generate_qr_image_bytes(b["payload"])
+                rec = analyze_quishing_payload(b["payload"], context_text=b["claimed_context"], image_bytes=qr_bytes)
+                rec["scenario_title"] = b["title"]
+                rec["scenario_desc"] = b["claimed_context"]
+                rec["qr_png_bytes"] = qr_bytes
+                st.session_state.last_quishing_analysis = rec
+                st.rerun()
+
+        with qc4:
+            act = (cur_q_id == "legitimate_merchant")
+            if st.button("☕ Legitimate Merchant" + ("  ✓" if act else ""), use_container_width=True, type="primary" if act else "secondary", help="Standard legitimate cafe counter UPI QR with verified Merchant Category Code", key="btn_q_bench4"):
+                b = QUISHING_BENCHMARKS["legitimate_merchant"]
+                st.session_state.active_quishing_scenario = "legitimate_merchant"
+                qr_bytes = generate_qr_image_bytes(b["payload"])
+                rec = analyze_quishing_payload(b["payload"], context_text=b["claimed_context"], image_bytes=qr_bytes)
+                rec["scenario_title"] = b["title"]
+                rec["scenario_desc"] = b["claimed_context"]
+                rec["qr_png_bytes"] = qr_bytes
+                st.session_state.last_quishing_analysis = rec
+                st.rerun()
+
+        # Ingress Expander for Custom QR Image or String
+        with st.expander("📷 Inspect Custom QR Code (Image Upload / Deeplink Ingress)", expanded=False):
+            tab_qr_img, tab_qr_txt = st.tabs(["🖼️ Upload QR Image File", "🔗 Paste UPI / URL String"])
+            with tab_qr_img:
+                q_col_u1, q_col_u2 = st.columns([1.5, 2.5])
+                with q_col_u1:
+                    qr_uploaded_file = st.file_uploader("Upload QR Code Image", type=["png", "jpg", "jpeg", "webp"], key="quishing_file_uploader")
+                with q_col_u2:
+                    qr_context_claim = st.text_area("Accompanying Message / Claim Context (Optional)", value="Electricity bill overcharge refund approved. Scan QR to receive funds.", height=80, key="quishing_context_claim")
+                
+                if qr_uploaded_file is not None:
+                    if st.button("🔍 Decode & Analyze QR Image", type="primary", use_container_width=True, key="btn_run_qr_img"):
+                        img_bytes = qr_uploaded_file.getvalue()
+                        decoded_list = decode_qr_from_bytes(img_bytes)
+                        if decoded_list:
+                            payload = decoded_list[0]
+                            rec = analyze_quishing_payload(payload, context_text=qr_context_claim, image_bytes=img_bytes)
+                            rec["scenario_title"] = f"Custom QR: {qr_uploaded_file.name}"
+                            rec["scenario_desc"] = qr_context_claim
+                            rec["qr_png_bytes"] = img_bytes
+                            st.session_state.active_quishing_scenario = "custom_qr_upload"
+                            st.session_state.last_quishing_analysis = rec
+                            st.rerun()
+                        else:
+                            st.error("No valid QR code could be decoded from the uploaded image. Please ensure the QR code is clearly visible and not heavily blurred.")
+
+            with tab_qr_txt:
+                raw_upi_input = st.text_input("UPI Deeplink or Destination URL", value="upi://pay?pa=fake_refund@ybl&pn=Govt%20Subsidy%20Disbursal&am=2500.00&cu=INR&tn=Disbursal%20Approved", key="quishing_text_input")
+                raw_upi_context = st.text_input("Claim Context", value="Govt DBT Subsidy approved. Scan to receive payment.", key="quishing_text_context")
+                if st.button("🔍 Audit Deeplink Payload", type="primary", use_container_width=True, key="btn_run_qr_txt"):
+                    if raw_upi_input.strip():
+                        qr_bytes = generate_qr_image_bytes(raw_upi_input.strip())
+                        rec = analyze_quishing_payload(raw_upi_input.strip(), context_text=raw_upi_context, image_bytes=qr_bytes)
+                        rec["scenario_title"] = f"Deeplink Audit: {raw_upi_input[:30]}..."
+                        rec["scenario_desc"] = raw_upi_context
+                        rec["qr_png_bytes"] = qr_bytes
+                        st.session_state.active_quishing_scenario = "custom_deeplink"
+                        st.session_state.last_quishing_analysis = rec
+                        st.rerun()
+
+        # Display Active Quishing Analysis Results
+        if st.session_state.get("last_quishing_analysis") is not None:
+            q_data = st.session_state.last_quishing_analysis
+            q_score = q_data["risk_score"]
+            is_reverse = q_data.get("is_reverse_collect", False)
             
-            with resp_tab1:
-                # Generate formal police/cybercrime complaint draft
-                vpa_target = q_data.get("upi_details", {}).get("payee_vpa", q_data.get("raw_payload", "Unknown"))
-                amt_target = q_data.get("upi_details", {}).get("amount", "Unspecified")
-                comp_draft = f"""NATIONAL CYBER CRIME REPORTING PORTAL (cybercrime.gov.in / HELPLINE 1930)
+            st.markdown("---")
+
+            # Cyber Audio Alert
+            if sound_alert and q_score >= 70:
+                st.markdown(
+                    """
+                    <script>
+                    try {
+                        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        var osc = ctx.createOscillator();
+                        var gain = ctx.createGain();
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(520, ctx.currentTime);
+                        osc.frequency.exponentialRampToValueAtTime(920, ctx.currentTime + 0.15);
+                        gain.gain.setValueAtTime(0.07, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.30);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start();
+                        osc.stop(ctx.currentTime + 0.30);
+                    } catch(e) {}
+                    </script>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+            # CRITICAL ALERT BANNER FOR REVERSE-COLLECT FRAUD
+            if is_reverse:
+                upi_det = q_data.get("upi_details", {})
+                amt_val = upi_det.get("amount", 0.0)
+                cur_val = upi_det.get("currency", "INR")
+                st.markdown(
+                    f"""
+                    <div style="background: {'linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(185, 28, 28, 0.35) 100%)' if is_dark else 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)'}; border: 2px solid {'#ef4444' if is_dark else '#dc2626'}; border-radius: 14px; padding: 18px 22px; margin-bottom: 20px; box-shadow: 0 6px 24px rgba(239, 68, 68, 0.25);">
+                        <div style="display: flex; align-items: flex-start; gap: 14px;">
+                            <span style="font-size: 2.2rem; line-height: 1;">🚨</span>
+                            <div>
+                                <div style="font-size: 1.15rem; font-weight: 800; color: {'#fca5a5' if is_dark else '#991b1b'}; text-transform: uppercase; letter-spacing: 0.02em;">
+                                    CRITICAL REVERSE-COLLECT PAYMENT TRAP DETECTED
+                                </div>
+                                <div style="font-size: 0.94rem; color: {'#fecaca' if is_dark else '#7f1d1d'}; margin-top: 6px; line-height: 1.5;">
+                                    <b>The Deception:</b> The message promises a refund or verification, but scanning this QR code in Google Pay, PhonePe, or Paytm triggers an <b>OUTBOUND DEBIT OF {cur_val} {amt_val:,.2f}</b> from YOUR account!
+                                </div>
+                                <div style="font-size: 0.88rem; color: {'#ffffff' if is_dark else '#1e293b'}; background: {'rgba(0,0,0,0.3)' if is_dark else '#ffffff'}; border-radius: 8px; padding: 8px 12px; margin-top: 10px; border-left: 4px solid #ef4444;">
+                                    🛡️ <b>NPCI Fundamental Security Law:</b> You <u>NEVER</u> need to scan a QR code or enter your secret UPI PIN to receive money or refunds. Entering your UPI PIN always authorizes money leaving your account.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+            # Overview Metrics Bar
+            res_m1, res_m2, res_m3, res_m4 = st.columns(4)
+            with res_m1:
+                st.metric("Threat Verdict", q_data["verdict"], delta=f"Risk: {q_score}/100", delta_color="inverse" if q_score >= 60 else "normal")
+            with res_m2:
+                st.metric("Payload Architecture", q_data["payload_type"], delta="NPCI Standard" if q_data["payload_type"] == "UPI" else "Web Redirection")
+            with res_m3:
+                st.metric("Fraud Category", q_data["fraud_category"].replace("_", " "), delta="Critical Alert" if q_score >= 80 else "Audit Passed")
+            with res_m4:
+                st.metric("Digital Evidence", "Section 65B Compliant", delta="SHA-256 Verified")
+
+            st.markdown("<div style='margin-bottom: 16px;'></div>", unsafe_allow_html=True)
+
+            # Split Layout: Left = QR Evidence & Payload Dissection | Right = Threat Speedometer & VPA Forensic Audit
+            col_qr_vis, col_qr_audit = st.columns([1.2, 2.8])
+
+            with col_qr_vis:
+                st.markdown("#### 📷 Decoded QR Code Artifact")
+                if "qr_png_bytes" in q_data:
+                    st.image(q_data["qr_png_bytes"], caption="Decoded Binary QR Code Matrix", use_container_width=True)
+                
+                st.markdown("#### 🔗 Raw Decoded Payload")
+                st.code(q_data["raw_payload"], language="text")
+
+                if q_data["payload_type"] == "UPI":
+                    upi_d = q_data.get("upi_details", {})
+                    st.markdown("#### 💳 Extracted Deeplink Parameters")
+                    complaint_cnt = upi_d.get("complaint_count", 0)
+                    rep_badge = f"🚨 {complaint_cnt} Complaints Filed (1930 Helpline)" if complaint_cnt > 0 else "✅ 0 Complaints (Clean)"
+                    param_rows = [
+                        {"Parameter": "Payee Address (`pa`)", "Value": str(upi_d.get("payee_vpa"))},
+                        {"Parameter": "Display Name (`pn`)", "Value": str(upi_d.get("payee_name"))},
+                        {"Parameter": "Debit Amount (`am`)", "Value": f"{upi_d.get('currency', 'INR')} {upi_d.get('amount', 0):,.2f}"},
+                        {"Parameter": "Transaction Note (`tn`)", "Value": str(upi_d.get("transaction_note"))},
+                        {"Parameter": "VPA Handle Domain", "Value": str(upi_d.get("handle"))},
+                        {"Parameter": "Provider Architecture", "Value": str(upi_d.get("wallet_type"))},
+                        {"Parameter": "Merchant Code (`mc`)", "Value": str(upi_d.get("mcc_code"))},
+                        {"Parameter": "Spam Complaints Registry", "Value": rep_badge},
+                        {"Parameter": "Enforcement Status", "Value": str(upi_d.get("law_enforcement_status", "Active"))},
+                    ]
+                    st.dataframe(pd.DataFrame(param_rows), hide_index=True, use_container_width=True)
+
+            with col_qr_audit:
+                q_lat_s = q_data.get("analysis_time_s", 0.03)
+                q_lat_ms = q_data.get("analysis_time_ms", round(q_lat_s * 1000.0, 1))
+
+                # Threat Speedometer Card
+                gauge_stroke = "#ef4444" if q_score >= 70 else ("#f59e0b" if q_score >= 40 else "#10b981")
+                stroke_dash = int(q_score * 2.83)
+                
+                st.markdown(
+                    f"""
+                    <div style="background: {'rgba(15, 23, 42, 0.7)' if is_dark else '#ffffff'}; border: 1px solid {'rgba(255, 255, 255, 0.08)' if is_dark else '#e2e8f0'}; border-radius: 14px; padding: 18px 22px; margin-bottom: 18px; box-shadow: {'0 4px 20px rgba(0, 0, 0, 0.4)' if is_dark else '0 4px 16px rgba(0,0,0,0.05)'};">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                            <div>
+                                <span class="sub-head-top" style="margin-bottom: 4px;">Forensic Risk Assessment</span>
+                                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: {'#f8fafc' if is_dark else '#0f172a'};">
+                                    {q_data['headline']}
+                                </h3>
+                                <p style="margin: 6px 0 0 0; font-size: 0.88rem; color: {'#94a3b8' if is_dark else '#64748b'};">
+                                    {q_data['summary']}
+                                </p>
+                            </div>
+                            <div style="text-align: center;">
+                                <svg width="80" height="80" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="{'rgba(255,255,255,0.08)' if is_dark else '#e2e8f0'}" stroke-width="8" />
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="{gauge_stroke}" stroke-width="8"
+                                        stroke-dasharray="{stroke_dash} 283" stroke-linecap="round" transform="rotate(-90 50 50)" />
+                                    <text x="50" y="56" font-size="22" font-weight="bold" fill="{'#ffffff' if is_dark else '#0f172a'}" text-anchor="middle">{q_score}</text>
+                                </svg>
+                                <div style="font-size: 0.72rem; color: #64748b; font-weight: 600;">RISK INDEX</div>
+                                <div style="margin-top: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.28); border-radius: 6px; padding: 2px 8px; font-size: 0.70rem; font-weight: 700; color: #38bdf8;">
+                                    <span>⚡</span> Analyzed in <span style="color: {'#ffffff' if is_dark else '#0f172a'}; font-weight: 800;">{q_lat_s:.2f}s</span> <span style="font-size: 0.65rem; color: #94a3b8; font-weight: 500;">({q_lat_ms:.0f}ms)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+                # Red Flags Breakdown
+                st.markdown("#### 🚩 Forensic Threat Indicators & Violations")
+                if q_data["red_flags"]:
+                    for flag in q_data["red_flags"]:
+                        st.markdown(
+                            f"""
+                            <div style="background: {'rgba(239, 68, 68, 0.12)' if is_dark else '#fee2e2'}; border-left: 4px solid {'#ef4444' if is_dark else '#dc2626'}; border-radius: 4px; padding: 8px 12px; margin-bottom: 8px; font-size: 0.88rem; color: {'#fca5a5' if is_dark else '#991b1b'};">
+                                {flag}
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                else:
+                    st.markdown(
+                        f"""
+                        <div style="background: {'rgba(16, 185, 129, 0.12)' if is_dark else '#d1fae5'}; border-left: 4px solid {'#10b981' if is_dark else '#059669'}; border-radius: 4px; padding: 8px 12px; margin-bottom: 8px; font-size: 0.88rem; color: {'#6ee7b7' if is_dark else '#065f46'};">
+                            ✅ No malicious indicators, impersonation flags, or reverse-collect traps detected in this payload.
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+                # Legal & Incident Response Action Tabs
+                st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
+                st.markdown("#### 🛡️ Autonomous Threat Response & Evidence Dossier")
+                resp_tab1, resp_tab2, resp_tab3 = st.tabs(["📝 Sanchar Saathi / 1930 Complaint", "🏛️ Section 65B Certificate", "📋 Victim Safety Protocol"])
+                
+                with resp_tab1:
+                    vpa_target = q_data.get("upi_details", {}).get("payee_vpa", q_data.get("raw_payload", "Unknown"))
+                    amt_target = q_data.get("upi_details", {}).get("amount", "Unspecified")
+                    comp_draft = f"""NATIONAL CYBER CRIME REPORTING PORTAL (cybercrime.gov.in / HELPLINE 1930)
 COMPLAINT DOSSIER: FINANCIAL FRAUD (UPI QUISHING / REVERSE-COLLECT SCAM)
 ================================================================================
 INCIDENT DATE: {q_data.get('forensics', {}).get('analyzed_at', '2026-09-09')}
@@ -3565,30 +3980,30 @@ CRYPTOGRAPHIC EVIDENCE SHA-256:
 ================================================================================
 Generated autonomously by PhishGuard Autonomous SOC Sentinel
 """
-                st.code(comp_draft, language="text")
+                    st.code(comp_draft, language="text")
 
-            with resp_tab2:
-                st.markdown(
-                    f"""
-                    **CERTIFICATE UNDER SECTION 65B OF THE INDIAN EVIDENCE ACT / BSA:**
-                    - **Evidence Description:** Electronic QR Code Matrix & NPCI UPI Deeplink Payload
-                    - **Hash Digest (SHA-256):** `{q_data.get('forensics', {}).get('image_sha256') or 'Generated from synthetic memory buffer'}`
-                    - **Analysis Engine:** PhishGuard Quishing Sentinel v1.0 (OpenCV QR Core + NPCI Parser)
-                    - **Chain of Custody:** Cryptographically sealed and timestamped at `{q_data.get('forensics', {}).get('analyzed_at')}`
-                    - **Examiner Attribution:** Autonomous SOC Cyber Threat Telemetry Unit
-                    """
-                )
+                with resp_tab2:
+                    st.markdown(
+                        f"""
+                        **CERTIFICATE UNDER SECTION 65B OF THE INDIAN EVIDENCE ACT / BSA:**
+                        - **Evidence Description:** Electronic QR Code Matrix & NPCI UPI Deeplink Payload
+                        - **Hash Digest (SHA-256):** `{q_data.get('forensics', {}).get('image_sha256') or 'Generated from synthetic memory buffer'}`
+                        - **Analysis Engine:** PhishGuard Quishing Sentinel v1.0 (OpenCV QR Core + NPCI Parser)
+                        - **Chain of Custody:** Cryptographically sealed and timestamped at `{q_data.get('forensics', {}).get('analyzed_at')}`
+                        - **Examiner Attribution:** Autonomous SOC Cyber Threat Telemetry Unit
+                        """
+                    )
 
-            with resp_tab3:
-                st.markdown(q_data["advisory"])
-                st.markdown(
-                    """
-                    **Key Defense Instructions for Victims:**
-                    1. **NEVER enter your UPI PIN:** Receiving money in India *never* asks for your UPI PIN.
-                    2. **Block Beneficiary VPA:** Open your UPI app (GPay/PhonePe/Paytm) -> Transactions -> Report / Block VPA.
-                    3. **Dial 1930:** Call the Citizen Financial Cyber Fraud Reporting System within golden hour (first 2 hours).
-                    """
-                )
+                with resp_tab3:
+                    st.markdown(q_data["advisory"])
+                    st.markdown(
+                        """
+                        **Key Defense Instructions for Victims:**
+                        1. **NEVER enter your UPI PIN:** Receiving money in India *never* asks for your UPI PIN.
+                        2. **Block Beneficiary VPA:** Open your UPI app (GPay/PhonePe/Paytm) -> Transactions -> Report / Block VPA.
+                        3. **Dial 1930:** Call the Citizen Financial Cyber Fraud Reporting System within golden hour (first 2 hours).
+                        """
+                    )
 
 
 def render_child_safety_sentinel(sound_alert: bool = False):

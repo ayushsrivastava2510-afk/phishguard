@@ -1,0 +1,245 @@
+{
+  "last_updated": "2026-09-09T10:07:01Z",
+  "registry": {
+    "fake.tatapower@ybl": {
+      "upi_id": "fake.tatapower@ybl",
+      "display_name": "Tata Power Refund Cell",
+      "complaint_count": 47,
+      "risk_level": "CRITICAL",
+      "risk_score": 98,
+      "categories": [
+        "Electricity Bill Refund Scam",
+        "Reverse Collect QR Trap",
+        "Utility Impersonation"
+      ],
+      "law_enforcement_status": "Flagged under 1930 Cyber Fraud Helpline \u2022 NPCI Account Freeze Directive Issued",
+      "first_reported": "2026-05-18",
+      "last_reported": "2026-09-09",
+      "financial_loss_reported": "\u20b914,28,500 across 47 victims",
+      "notes": "Pretends to offer electricity overcharge refund while triggering reverse-collect debits."
+    },
+    "sbi.kyc.update@okaxis": {
+      "upi_id": "sbi.kyc.update@okaxis",
+      "display_name": "State Bank of India",
+      "complaint_count": 38,
+      "risk_level": "CRITICAL",
+      "risk_score": 96,
+      "categories": [
+        "SBI YONO Fake KYC",
+        "VPA Handle Spoofing Mismatch",
+        "Banking Phishing"
+      ],
+      "law_enforcement_status": "Active MHA Cybercrime Portal Dossier (Ref: MHA-UPI-4921) \u2022 Bank Lien Initiated",
+      "first_reported": "2026-06-02",
+      "last_reported": "2026-09-08",
+      "financial_loss_reported": "\u20b99,84,000 across 38 victims",
+      "notes": "Impersonates State Bank of India display name while routing to consumer Axis wallet."
+    },
+    "electricity.dept@paytm": {
+      "upi_id": "electricity.dept@paytm",
+      "display_name": "State Electricity Billing Board",
+      "complaint_count": 29,
+      "risk_level": "CRITICAL",
+      "risk_score": 94,
+      "categories": [
+        "Urgent Power Disconnection Threat",
+        "Utility Extortion",
+        "Fake Official Payment"
+      ],
+      "law_enforcement_status": "State Cyber Cell Blacklisted \u2022 Telecom SIM Deactivation Submitted",
+      "first_reported": "2026-07-11",
+      "last_reported": "2026-09-07",
+      "financial_loss_reported": "\u20b96,15,000 across 29 victims",
+      "notes": "Threatens victims with immediate 9:30 PM power cutoff to extort urgent UPI payments."
+    },
+    "telegram.earn@ibl": {
+      "upi_id": "telegram.earn@ibl",
+      "display_name": "Global Media Task Rewards",
+      "complaint_count": 19,
+      "risk_level": "CRITICAL",
+      "risk_score": 88,
+      "categories": [
+        "Part-Time YouTube Task Scam",
+        "Crypto Investment Fraud",
+        "Prepaid Task Trap"
+      ],
+      "law_enforcement_status": "International Cross-Border Syndicate Investigation",
+      "first_reported": "2026-08-01",
+      "last_reported": "2026-09-06",
+      "financial_loss_reported": "\u20b918,50,000 across 19 victims",
+      "notes": "Promises \u20b93,000 daily for liking videos, then traps victim in escalating advance fees."
+    },
+    "olx.army.buyer@oksbi": {
+      "upi_id": "olx.army.buyer@oksbi",
+      "display_name": "Capt. R. K. Sharma (Indian Army)",
+      "complaint_count": 16,
+      "risk_level": "CRITICAL",
+      "risk_score": 85,
+      "categories": [
+        "OLX Marketplace Fraud",
+        "Fake Defense Personnel Impersonation",
+        "QR Payment Trap"
+      ],
+      "law_enforcement_status": "Reported to Defence Cyber Agency & State CID",
+      "first_reported": "2026-08-14",
+      "last_reported": "2026-09-05",
+      "financial_loss_reported": "\u20b94,20,000 across 16 victims",
+      "notes": "Pretends to buy furniture on OLX, sends reverse-collect QR claiming it's an Army portal."
+    },
+    "lottery.winner@apl": {
+      "upi_id": "lottery.winner@apl",
+      "display_name": "KBC Lucky Winner Cell",
+      "complaint_count": 12,
+      "risk_level": "CRITICAL",
+      "risk_score": 82,
+      "categories": [
+        "Lottery & Prize Scam",
+        "Advance Fee Fraud",
+        "Consumer Wallet Misuse"
+      ],
+      "law_enforcement_status": "Flagged under DoT Sanchar Saathi Chakshu Registry",
+      "first_reported": "2026-08-20",
+      "last_reported": "2026-09-04",
+      "financial_loss_reported": "\u20b92,80,000 across 12 victims",
+      "notes": "Claims victim won \u20b925 Lakhs, asks for GST and processing fee via Amazon Pay handle."
+    },
+    "custom_refund@ybl": {
+      "upi_id": "custom_refund@ybl",
+      "display_name": "E-Commerce Support Desk",
+      "complaint_count": 8,
+      "risk_level": "HIGH",
+      "risk_score": 76,
+      "categories": [
+        "Courier Delivery Scam",
+        "Address Update Phishing"
+      ],
+      "law_enforcement_status": "Under Investigation by Cyber Cell (1930)",
+      "first_reported": "2026-08-28",
+      "last_reported": "2026-09-03",
+      "financial_loss_reported": "\u20b975,000 across 8 victims",
+      "notes": "Claims \u20b95 re-delivery fee required, debits higher amounts."
+    },
+    "rajesh_electric_refund@ybl": {
+      "upi_id": "rajesh_electric_refund@ybl",
+      "display_name": "Tata Power Refund Cell",
+      "complaint_count": 47,
+      "risk_level": "CRITICAL",
+      "risk_score": 98,
+      "categories": [
+        "Electricity Bill Refund Scam",
+        "Reverse Collect QR Trap"
+      ],
+      "law_enforcement_status": "Flagged under 1930 Cyber Fraud Helpline \u2022 NPCI Account Freeze Directive Issued",
+      "first_reported": "2026-05-18",
+      "last_reported": "2026-09-09",
+      "financial_loss_reported": "\u20b914,28,500 across 47 victims",
+      "notes": "Benchmark test handle for reverse collect fraud."
+    },
+    "sbi_kyc_desk99@okaxis": {
+      "upi_id": "sbi_kyc_desk99@okaxis",
+      "display_name": "State Bank of India",
+      "complaint_count": 38,
+      "risk_level": "CRITICAL",
+      "risk_score": 96,
+      "categories": [
+        "SBI YONO Fake KYC",
+        "VPA Handle Spoofing Mismatch"
+      ],
+      "law_enforcement_status": "Active MHA Cybercrime Portal Dossier (Ref: MHA-UPI-4921)",
+      "first_reported": "2026-06-02",
+      "last_reported": "2026-09-08",
+      "financial_loss_reported": "\u20b99,84,000 across 38 victims",
+      "notes": "Benchmark test handle for VPA handle mismatch."
+    },
+    "starbucks.store@hdfcbank": {
+      "upi_id": "starbucks.store@hdfcbank",
+      "display_name": "Tata Starbucks Pvt Ltd",
+      "complaint_count": 0,
+      "risk_level": "CLEAN",
+      "risk_score": 5,
+      "categories": [
+        "Verified Institutional Merchant"
+      ],
+      "law_enforcement_status": "Verified Clean Merchant Account \u2022 Zero Complaints Recorded",
+      "first_reported": "N/A",
+      "last_reported": "N/A",
+      "financial_loss_reported": "\u20b90.00",
+      "notes": "Legitimate enterprise counter merchant with verified NPCI Merchant Category Code."
+    },
+    "bluetokai@icici": {
+      "upi_id": "bluetokai@icici",
+      "display_name": "Blue Tokai Coffee Roasters",
+      "complaint_count": 0,
+      "risk_level": "CLEAN",
+      "risk_score": 5,
+      "categories": [
+        "Verified Institutional Merchant"
+      ],
+      "law_enforcement_status": "Verified Clean Merchant Account \u2022 Zero Complaints Recorded",
+      "first_reported": "N/A",
+      "last_reported": "N/A",
+      "financial_loss_reported": "\u20b90.00",
+      "notes": "Benchmark test handle for verified counter merchant."
+    },
+    "zomato.order@icici": {
+      "upi_id": "zomato.order@icici",
+      "display_name": "Zomato Limited",
+      "complaint_count": 0,
+      "risk_level": "CLEAN",
+      "risk_score": 5,
+      "categories": [
+        "Verified Institutional Merchant"
+      ],
+      "law_enforcement_status": "Verified Clean Enterprise Account",
+      "first_reported": "N/A",
+      "last_reported": "N/A",
+      "financial_loss_reported": "\u20b90.00",
+      "notes": "Official food delivery payment handle."
+    },
+    "khanacademy@sbi": {
+      "upi_id": "khanacademy@sbi",
+      "display_name": "Khan Academy India Foundation",
+      "complaint_count": 0,
+      "risk_level": "CLEAN",
+      "risk_score": 5,
+      "categories": [
+        "Verified Non-Profit Organization"
+      ],
+      "law_enforcement_status": "Verified Clean Non-Profit Account",
+      "first_reported": "N/A",
+      "last_reported": "N/A",
+      "financial_loss_reported": "\u20b90.00",
+      "notes": "Official educational non-profit donation handle."
+    },
+    "test_new_scam@ybl": {
+      "upi_id": "test_new_scam@ybl",
+      "display_name": "Unverified Recipient",
+      "complaint_count": 1,
+      "risk_level": "SUSPICIOUS",
+      "risk_score": 75,
+      "categories": [
+        "Test Scam"
+      ],
+      "law_enforcement_status": "Flagged under 1930 Citizen Portal \u2022 Verification Pending",
+      "first_reported": "2026-09-09",
+      "last_reported": "2026-09-09",
+      "financial_loss_reported": "Pending victim assessment",
+      "notes": "User submitted fraud complaint via PhishGuard SOC."
+    },
+    "scam.lottery.test@ybl": {
+      "upi_id": "scam.lottery.test@ybl",
+      "display_name": "Unverified Recipient",
+      "complaint_count": 2,
+      "risk_level": "HIGH",
+      "risk_score": 80,
+      "categories": [
+        "Fake Lottery Scam"
+      ],
+      "law_enforcement_status": "Flagged under 1930 Citizen Portal \u2022 Verification Pending",
+      "first_reported": "2026-09-09",
+      "last_reported": "2026-09-09",
+      "financial_loss_reported": "\u20b95,000.00",
+      "notes": "Test grievance"
+    }
+  }
+}

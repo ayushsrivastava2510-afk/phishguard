@@ -40,7 +40,7 @@ if target_dir not in sys.path:
 
 # Purge stale submodule cache from sys.modules so inner module changes take effect immediately
 for mod_name in list(sys.modules.keys()):
-    if mod_name.startswith(("child_safety", "smishing", "quishing", "header_analysis", "origin_intel")):
+    if mod_name.startswith(("child_safety", "smishing", "quishing", "header_analysis", "origin_intel", "upi_intel")):
         del sys.modules[mod_name]
 
 os.chdir(target_dir)
