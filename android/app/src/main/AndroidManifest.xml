@@ -6,6 +6,11 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -33,13 +38,33 @@
             </intent-filter>
         </activity>
 
+        <!-- Real-Time Floating Threat Analysis Popup (Dialog Activity) -->
+        <activity
+            android:name=".ui.activities.ThreatAlertActivity"
+            android:exported="true"
+            android:theme="@style/Theme.PhishGuard.Dialog"
+            android:launchMode="singleTask"
+            android:excludeFromRecents="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true" />
+
+        <!-- 24/7 Autonomous Threat Sentinel Foreground Service -->
+        <service
+            android:name=".core.SentinelService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Autonomous cybersecurity telemetry and real-time smishing threat interception" />
+        </service>
+
         <!-- Real-Time Background SMS Interception Receiver -->
         <receiver
             android:name=".core.SmsReceiver"
-            android:exported="true"
-            android:permission="android.permission.BROADCAST_SMS">
+            android:exported="true">
             <intent-filter android:priority="999">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+                <action android:name="com.binarybattalion.phishguard.SIMULATE_SMS" />
             </intent-filter>
         </receiver>
 

@@ -10,25 +10,41 @@ import androidx.core.app.NotificationCompat
 import com.binarybattalion.phishguard.MainActivity
 import com.binarybattalion.phishguard.PhishGuardApplication
 import com.binarybattalion.phishguard.R
+import com.binarybattalion.phishguard.ui.activities.ThreatAlertActivity
 
 class SmsReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+        var sender = ""
+        var body = ""
+
         if (intent.action == Telephony.Sms.Intents.SMS_RECEIVED_ACTION) {
             val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
             if (messages.isNullOrEmpty()) return
 
-            val sender = messages[0].originatingAddress ?: "Unknown"
-            val body = messages.joinToString(separator = "") { it.messageBody ?: "" }
-
-            // Execute on-device native Smishing forensics
-            val analysis = SmishingAnalyzer.analyzeSmishingMessage(sender, body)
-
-            // If assessed risk is high or critical, trigger heads-up warning notification
-            if (analysis.riskScore >= 70) {
-                showSmishingAlertNotification(context, analysis)
-            }
+            sender = messages[0].originatingAddress ?: "Unknown"
+            body = messages.joinToString(separator = "") { it.messageBody ?: "" }
+        } else if (intent.action == ACTION_SIMULATE_SMS) {
+            sender = intent.getStringExtra(EXTRA_SIMULATED_SENDER) ?: "+91 98112 34567"
+            body = intent.getStringExtra(EXTRA_SIMULATED_MESSAGE) ?: "प्रिय उपभोक्ता, आपका बिजली बिल अपडेट नहीं हुआ है। आज रात 9:30 बजे आपकी बिजली काट दी जाएगी। तुरंत संपर्क करें: bit.ly/bijli-bill-update"
+        } else {
+            return
         }
+
+        if (body.isBlank()) return
+
+        // Execute on-device native Smishing forensics
+        val analysis = SmishingAnalyzer.analyzeSmishingMessage(sender, body)
+
+        // 1. Launch floating side-by-side analysis popup immediately
+        try {
+            ThreatAlertActivity.launch(context, analysis.senderId, analysis.rawMessage)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        // 2. Post high-priority Heads-up Notification alongside the system SMS notification
+        showSmishingAlertNotification(context, analysis)
     }
 
     private fun showSmishingAlertNotification(context: Context, record: SmishingRecord) {
@@ -46,26 +62,61 @@ class SmsReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(context, PhishGuardApplication.THREAT_CHANNEL_ID)
+        // Floating full-screen intent for instant pop-up
+        val alertIntent = Intent(context, ThreatAlertActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(ThreatAlertActivity.EXTRA_SENDER, record.senderId)
+            putExtra(ThreatAlertActivity.EXTRA_MESSAGE, record.rawMessage)
+        }
+        val alertPendingIntent = PendingIntent.getActivity(
+            context,
+            record.caseId.hashCode() + 1,
+            alertIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val isThreat = record.riskScore >= 35
+        val alertTitle = if (record.riskScore >= 70) {
+            "🚨 CRITICAL SMISHING DETECTED: ${record.senderId}"
+        } else if (isThreat) {
+            "⚠️ SUSPICIOUS SMS FLAGGED: ${record.senderId}"
+        } else {
+            "🟢 VERIFIED SAFE SMS: ${record.senderId}"
+        }
+
+        val builder = NotificationCompat.Builder(context, PhishGuardApplication.THREAT_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("🚨 Critical Smishing Alert: ${record.senderId}")
+            .setContentTitle(alertTitle)
             .setContentText("${record.threatCategory} (${record.riskScore}/100 Risk). Tap to inspect evidence.")
             .setStyle(
                 NotificationCompat.BigTextStyle()
                     .bigText(
-                        "Sender: ${record.senderId}\n" +
+                        "Risk Score: ${record.riskScore}/100 (${record.verdict})\n" +
+                        "Sender: ${record.senderId} (${record.senderInfo.senderType})\n" +
                         "Category: ${record.threatCategory}\n" +
-                        "Action: ${record.actionMsg}\n" +
+                        (if (record.vernacularInfo.isVernacular) "Language: ${record.vernacularInfo.detectedLanguage}\n" else "") +
+                        "Advisory: ${record.actionMsg}\n" +
                         "Message: \"${record.rawMessage}\""
                     )
             )
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .build()
+            .setFullScreenIntent(alertPendingIntent, true)
+            .addAction(
+                R.drawable.ic_launcher_foreground,
+                "🔬 Inspect Forensics",
+                pendingIntent
+            )
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.notify(record.caseId.hashCode(), notification)
+        manager.notify(record.caseId.hashCode(), builder.build())
+    }
+
+    companion object {
+        const val ACTION_SIMULATE_SMS = "com.binarybattalion.phishguard.SIMULATE_SMS"
+        const val EXTRA_SIMULATED_SENDER = "EXTRA_SIMULATED_SENDER"
+        const val EXTRA_SIMULATED_MESSAGE = "EXTRA_SIMULATED_MESSAGE"
     }
 }

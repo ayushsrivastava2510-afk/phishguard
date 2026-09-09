@@ -1,6 +1,7 @@
 package com.binarybattalion.phishguard
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -23,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.binarybattalion.phishguard.core.SentinelService
 import com.binarybattalion.phishguard.core.SmishingAnalyzer
 import com.binarybattalion.phishguard.core.SmishingRecord
 import com.binarybattalion.phishguard.ui.screens.EmailScreen
@@ -36,10 +38,15 @@ enum class ThreatVector {
 
 class MainActivity : ComponentActivity() {
 
+    private val liveRecordState = mutableStateOf<SmishingRecord?>(null)
+
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { _ ->
-        // Permissions granted/denied handled gracefully; on-device scanning continues
+    ) { grants ->
+        val smsGranted = grants[Manifest.permission.RECEIVE_SMS] == true
+        if (smsGranted) {
+            SentinelService.startSentinel(this)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,19 +55,35 @@ class MainActivity : ComponentActivity() {
 
         val incomingSender = intent.getStringExtra("EXTRA_INCOMING_SENDER")
         val incomingMessage = intent.getStringExtra("EXTRA_INCOMING_MESSAGE")
-        val initialRecord: SmishingRecord? = if (!incomingSender.isNullOrEmpty() && !incomingMessage.isNullOrEmpty()) {
-            SmishingAnalyzer.analyzeSmishingMessage(incomingSender, incomingMessage)
-        } else null
+        if (!incomingSender.isNullOrEmpty() && !incomingMessage.isNullOrEmpty()) {
+            liveRecordState.value = SmishingAnalyzer.analyzeSmishingMessage(incomingSender, incomingMessage)
+        }
+
+        // Start background Sentinel if permission already available
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED) {
+            SentinelService.startSentinel(this)
+        }
 
         setContent {
             var isDarkMode by remember { mutableStateOf(false) } // Default to Day Mode / Pastel Blue & White
+            val activeRecord = liveRecordState.value
             PhishGuardTheme(darkTheme = isDarkMode) {
                 MainAppScaffold(
-                    initialRecord = initialRecord,
+                    initialRecord = activeRecord,
                     isDarkMode = isDarkMode,
                     onToggleTheme = { isDarkMode = !isDarkMode }
                 )
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val incomingSender = intent.getStringExtra("EXTRA_INCOMING_SENDER")
+        val incomingMessage = intent.getStringExtra("EXTRA_INCOMING_MESSAGE")
+        if (!incomingSender.isNullOrEmpty() && !incomingMessage.isNullOrEmpty()) {
+            liveRecordState.value = SmishingAnalyzer.analyzeSmishingMessage(incomingSender, incomingMessage)
         }
     }
 

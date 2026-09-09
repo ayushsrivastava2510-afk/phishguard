@@ -4,7 +4,11 @@ import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,8 +38,10 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.binarybattalion.phishguard.core.InboxScanSummary
 import com.binarybattalion.phishguard.core.InboxSmsScanner
+import com.binarybattalion.phishguard.core.SentinelService
 import com.binarybattalion.phishguard.core.SmishingAnalyzer
 import com.binarybattalion.phishguard.core.SmishingRecord
+import com.binarybattalion.phishguard.core.SmsReceiver
 import com.binarybattalion.phishguard.ui.components.CircularRiskGauge
 import com.binarybattalion.phishguard.ui.theme.*
 import kotlinx.coroutines.Dispatchers
@@ -105,6 +111,14 @@ fun SmishingScreen(
         }
     }
 
+    // 24/7 Background Sentinel State
+    var isSentinelRunning by remember { mutableStateOf(SentinelService.isServiceRunning) }
+    val hasOverlayPermission = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Settings.canDrawOverlays(context)
+        } else true
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -112,6 +126,195 @@ fun SmishingScreen(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
+        // 0. 24/7 Real-Time Background Sentinel & Popups Card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = CardDark),
+            border = BorderStroke(1.dp, if (isSentinelRunning) RiskClean.copy(alpha = 0.6f) else BorderDark),
+            shape = RoundedCornerShape(14.dp)
+        ) {
+            Column(modifier = Modifier.padding(14.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .background(if (isSentinelRunning) Color(0x3310B981) else Color(0x334D65FF), RoundedCornerShape(6.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                if (isSentinelRunning) Icons.Default.Shield else Icons.Default.NotificationsActive,
+                                contentDescription = null,
+                                tint = if (isSentinelRunning) RiskCleanLight else PrimaryCobaltLight,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "REAL-TIME BACKGROUND SENTINEL",
+                            color = TextPrimary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                if (isSentinelRunning) Color(0x2610B981) else Color(0x26F59E0B),
+                                RoundedCornerShape(4.dp)
+                            )
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = if (isSentinelRunning) "🟢 ACTIVE 24/7" else "🟡 STANDBY",
+                            color = if (isSentinelRunning) RiskCleanLight else Color(0xFFFBBF24),
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Operates autonomously in the background. When an SMS arrives from any sender, PhishGuard intercepts it, verifies TRAI DLT, displays a side-by-side analysis popup over other apps, and fires a priority alert.",
+                    color = TextSecondary,
+                    fontSize = 11.sp,
+                    lineHeight = 15.sp
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            if (isSentinelRunning) {
+                                SentinelService.stopSentinel(context)
+                                isSentinelRunning = false
+                                Toast.makeText(context, "Background Sentinel Paused", Toast.LENGTH_SHORT).show()
+                            } else {
+                                SentinelService.startSentinel(context)
+                                isSentinelRunning = true
+                                Toast.makeText(context, "Background Sentinel Active!", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isSentinelRunning) Color(0x33EF4444) else PrimaryCobalt
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = if (isSentinelRunning) "Pause Sentinel" else "Engage Sentinel",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    if (!hasOverlayPermission && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        OutlinedButton(
+                            onClick = {
+                                val intent = Intent(
+                                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                    Uri.parse("package:${context.packageName}")
+                                )
+                                context.startActivity(intent)
+                            },
+                            modifier = Modifier.weight(1f),
+                            border = BorderStroke(1.dp, Color(0xFFF59E0B)),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(
+                                text = "Enable Popups",
+                                color = Color(0xFFFBBF24),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Real-Time Demo Simulation Suite
+                Text(
+                    text = "⚡ TEST REAL-TIME POPUP & NOTIFICATION (NO 2ND PHONE NEEDED):",
+                    color = TextTertiary,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            val simIntent = Intent(context, SmsReceiver::class.java).apply {
+                                action = SmsReceiver.ACTION_SIMULATE_SMS
+                                putExtra(SmsReceiver.EXTRA_SIMULATED_SENDER, "+91 98112 34567")
+                                putExtra(SmsReceiver.EXTRA_SIMULATED_MESSAGE, "प्रिय उपभोक्ता, आपका बिजली बिल अपडेट नहीं हुआ है। आज रात 9:30 बजे आपकी बिजली काट दी जाएगी। तुरंत बिजली अधिकारी से संपर्क करें: 9811234567 अथवा ऐप डाउनलोड करें: bit.ly/bijli-bill-update")
+                            }
+                            context.sendBroadcast(simIntent)
+                            Toast.makeText(context, "⚡ Dispatched Simulated Hindi Scam SMS!", Toast.LENGTH_SHORT).show()
+                        },
+                        border = BorderStroke(1.dp, RiskCritical.copy(alpha = 0.7f)),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text("🇮🇳 Test Hindi Cut-off", color = RiskCriticalLight, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            val simIntent = Intent(context, SmsReceiver::class.java).apply {
+                                action = SmsReceiver.ACTION_SIMULATE_SMS
+                                putExtra(SmsReceiver.EXTRA_SIMULATED_SENDER, "+91 87654 09876")
+                                putExtra(SmsReceiver.EXTRA_SIMULATED_MESSAGE, "Dear customer aapka SBI khata aaj raat block kar diya jayega pending KYC ke karan. Turant apna PAN card link kare: http://sbi-kyc-verification.in/update")
+                            }
+                            context.sendBroadcast(simIntent)
+                            Toast.makeText(context, "⚡ Dispatched Simulated Hinglish SBI Scam!", Toast.LENGTH_SHORT).show()
+                        },
+                        border = BorderStroke(1.dp, Color(0xFFF59E0B).copy(alpha = 0.7f)),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text("🗣️ Test Hinglish KYC", color = Color(0xFFFBBF24), fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            val simIntent = Intent(context, SmsReceiver::class.java).apply {
+                                action = SmsReceiver.ACTION_SIMULATE_SMS
+                                putExtra(SmsReceiver.EXTRA_SIMULATED_SENDER, "AD-HDFCBK")
+                                putExtra(SmsReceiver.EXTRA_SIMULATED_MESSAGE, "847291 is your OTP for purchase of INR 2,499.00 at FLIPKART using HDFC Bank Card ending 7041. Valid 10 mins. Never share OTP.")
+                            }
+                            context.sendBroadcast(simIntent)
+                            Toast.makeText(context, "⚡ Dispatched Simulated Safe OTP!", Toast.LENGTH_SHORT).show()
+                        },
+                        border = BorderStroke(1.dp, RiskClean.copy(alpha = 0.7f)),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text("🟢 Test Safe OTP", color = RiskCleanLight, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
         // 1. Live Device Inbox Sentinel Card
         Card(
             modifier = Modifier.fillMaxWidth(),

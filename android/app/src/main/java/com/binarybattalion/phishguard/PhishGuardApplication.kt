@@ -25,10 +25,22 @@ class PhishGuardApplication : Application() {
             val notificationManager: NotificationManager =
                 getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
+
+            // Sentinel Foreground Service Persistent Notification Channel
+            val sentinelChannel = NotificationChannel(
+                SENTINEL_CHANNEL_ID,
+                "PhishGuard 24/7 Background Sentinel",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Keeps PhishGuard active in background to monitor incoming carrier SMS for scam links and DLT violations."
+                setShowBadge(false)
+            }
+            notificationManager.createNotificationChannel(sentinelChannel)
         }
     }
 
     companion object {
         const val THREAT_CHANNEL_ID = "phishguard_threat_alerts_channel"
+        const val SENTINEL_CHANNEL_ID = "phishguard_sentinel_channel"
     }
 }
