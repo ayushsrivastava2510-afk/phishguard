@@ -14,7 +14,8 @@ data class ChildSafetyRecord(
     val reason: String,
     val recommendedAction: String,
     val isBlocked: Boolean,
-    val analysisTimeMs: Long = 12L
+    val analysisTimeMs: Long = 12L,
+    val isParentBlocked: Boolean = false
 )
 
 data class ChildSafetyBenchmark(
@@ -74,7 +75,12 @@ object ChildSafetyAnalyzer {
 
     private val SUSPICIOUS_TLDS = setOf(".xyz", ".top", ".tk", ".ml", ".cf", ".gq", ".buzz", ".work", ".site", ".live")
 
-    fun analyzeUrl(url: String, contextText: String = ""): ChildSafetyRecord {
+    fun analyzeUrl(
+        url: String,
+        contextText: String = "",
+        customBlocklist: List<String> = emptyList(),
+        isParentalControlActive: Boolean = true
+    ): ChildSafetyRecord {
         val startTime = System.nanoTime()
         var cleanUrl = url.trim()
         if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
@@ -86,6 +92,34 @@ object ChildSafetyAnalyzer {
             uri.host?.lowercase(Locale.ROOT) ?: ""
         } catch (e: Exception) {
             cleanUrl.substringAfter("://").substringBefore("/").lowercase(Locale.ROOT)
+        }
+
+        // 0. Check Parent Custom Blocklist (Study Mode Enforced via 4-Digit PIN)
+        if (isParentalControlActive && customBlocklist.isNotEmpty()) {
+            for (rawBlocked in customBlocklist) {
+                if (rawBlocked.isBlank()) continue
+                val cleanB = rawBlocked.lowercase(Locale.ROOT).trim()
+                    .removePrefix("http://")
+                    .removePrefix("https://")
+                    .substringBefore("/")
+                    .removePrefix("www.")
+                if (cleanB.isNotBlank() && (hostname == cleanB || hostname.endsWith(".$cleanB"))) {
+                    return ChildSafetyRecord(
+                        url = url,
+                        hostname = hostname,
+                        safetyScore = 0,
+                        ageRating = "Restricted (Study Mode)",
+                        verdict = "BLOCKED BY PARENT (STUDY LOCK ENFORCED)",
+                        primaryCategory = "Parent-Restricted Website (Study Hours)",
+                        matchedCues = listOf("Parent Blocklist Rule: $cleanB"),
+                        reason = "This website ('$cleanB') was explicitly locked by your parent to prevent distractions during study hours.",
+                        recommendedAction = "Access is strictly prohibited. Ask your parent to enter their 4-digit PIN to temporarily pause Study Mode.",
+                        isBlocked = true,
+                        analysisTimeMs = Math.max(1L, (System.nanoTime() - startTime) / 1_000_000L),
+                        isParentBlocked = true
+                    )
+                }
+            }
         }
 
         val combinedTarget = "$cleanUrl ${contextText.lowercase(Locale.ROOT)}"
@@ -223,6 +257,13 @@ object ChildSafetyAnalyzer {
             url = "https://www.khanacademy.org/math/class-10-math-india",
             context = "NCERT Class 10 Mathematics Interactive Video Lessons and Practice Quizzes.",
             description = "Certified kid-safe educational platform compliant with student privacy regulations."
+        ),
+        ChildSafetyBenchmark(
+            id = "parent_study_lock",
+            title = "🚫 Scenario 5: Instagram & Social Media (Study Lock)",
+            url = "https://www.instagram.com/explore",
+            context = "Student attempting to browse social media reels during designated study hours.",
+            description = "Custom study distraction blocked strictly by Parent Focus Shield (PIN required to unlock)."
         )
     )
 }

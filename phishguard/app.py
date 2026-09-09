@@ -3585,6 +3585,16 @@ Generated autonomously by PhishGuard Autonomous SOC Sentinel
 
 
 def render_child_safety_sentinel(sound_alert: bool = False):
+    # Session state initialization for PIN-protected Parental Control Study Mode
+    if "parent_pin" not in st.session_state:
+        st.session_state.parent_pin = "1234"
+    if "is_parent_unlocked" not in st.session_state:
+        st.session_state.is_parent_unlocked = False
+    if "parental_control_active" not in st.session_state:
+        st.session_state.parental_control_active = True
+    if "parent_custom_blocklist" not in st.session_state:
+        st.session_state.parent_custom_blocklist = ["instagram.com", "youtube.com", "roblox.com", "snapchat.com", "netflix.com"]
+
     st.markdown(
         """
         <div style="margin-bottom: 16px;">
@@ -3593,35 +3603,163 @@ def render_child_safety_sentinel(sound_alert: bool = False):
                 👨‍👩‍👧 Child Safe Browsing & Parental Control Sentinel
             </h2>
             <div style="font-size: 0.88rem; color: #94a3b8;">
-                Guards children and teenagers against predatory gaming currency phishing (Free Fire Diamonds, Roblox Robux, BGMI UC), illegal underage betting apps, and age-inappropriate adult content.
+                Guards children and teenagers against predatory gaming currency phishing, illegal betting, and non-educational distractions during study hours.
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
+    # PIN Protected Parental Control & Study Mode Management Box
+    ctrl_bg = "rgba(30, 41, 59, 0.7)"
+    is_active = st.session_state.parental_control_active
+    is_unlocked = st.session_state.is_parent_unlocked
+
+    st.markdown(
+        f"""
+        <div style="background: {ctrl_bg}; border: 1.5px solid {'#a855f7' if is_active else '#64748b'}; border-radius: 12px; padding: 16px 20px; margin-bottom: 18px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.4rem;">{'🔒' if not is_unlocked else '🔓'}</span>
+                    <div>
+                        <div style="font-size: 1.05rem; font-weight: 700; color: #f8fafc;">
+                            Parental Control & Study Mode Lock
+                        </div>
+                        <div style="font-size: 0.8rem; color: #94a3b8;">
+                            {'Zero-tolerance distraction filter active' if is_active else 'Study filter temporarily paused'} &bull; Protected by 4-digit PIN
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: {'rgba(168, 85, 247, 0.2)' if is_active else 'rgba(100, 116, 139, 0.2)'}; color: {'#c084fc' if is_active else '#94a3b8'}; border: 1px solid {'#a855f7' if is_active else '#64748b'}; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.75rem;">
+                        {'🟢 STUDY LOCK ACTIVE' if is_active else '🟡 STUDY LOCK PAUSED'}
+                    </span>
+                    <span style="background: {'rgba(16, 185, 129, 0.15)' if is_unlocked else 'rgba(239, 68, 68, 0.15)'}; color: {'#34d399' if is_unlocked else '#f87171'}; border: 1px solid {'#10b981' if is_unlocked else '#ef4444'}; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 0.72rem;">
+                        {'UNLOCKED' if is_unlocked else 'PIN LOCKED'}
+                    </span>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # If Locked: Render PIN Entry Gate
+    if not is_unlocked:
+        with st.expander("🔑 Parent Authentication (Click to Enter 4-Digit PIN to Manage)", expanded=False):
+            pin_col1, pin_col2 = st.columns([2, 1])
+            with pin_col1:
+                entered_pin = st.text_input(
+                    "Enter 4-Digit Parent PIN (Default: 1234)",
+                    type="password",
+                    max_chars=4,
+                    key="parent_pin_input",
+                    help="Default PIN is 1234. Required to toggle study mode or modify blocked websites.",
+                )
+            with pin_col2:
+                st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+                if st.button("🔓 Unlock Controls", type="primary", use_container_width=True, key="btn_unlock_parent"):
+                    if entered_pin.strip() == st.session_state.parent_pin:
+                        st.session_state.is_parent_unlocked = True
+                        st.success("✅ PIN Verified! Parent controls unlocked.")
+                        st.rerun()
+                    else:
+                        st.error("❌ Incorrect 4-digit PIN. Access denied.")
+    else:
+        # If Unlocked: Render Full Control Panel
+        with st.container():
+            p_col1, p_col2 = st.columns([2, 1])
+            with p_col1:
+                new_toggle = st.toggle(
+                    "Enforce Parental Control / Study Mode (Zero-Tolerance Web Lock)",
+                    value=st.session_state.parental_control_active,
+                    key="toggle_parental_active"
+                )
+                if new_toggle != st.session_state.parental_control_active:
+                    st.session_state.parental_control_active = new_toggle
+                    st.rerun()
+            with p_col2:
+                if st.button("🔒 Lock Controls", use_container_width=True, key="btn_relock_parent"):
+                    st.session_state.is_parent_unlocked = False
+                    st.rerun()
+
+            # Website Feed Ingress
+            st.markdown("<div style='font-size: 0.85rem; font-weight: 600; color: #f8fafc; margin-top: 10px; margin-bottom: 4px;'>🚫 Custom Blocked Websites for Study Hours:</div>", unsafe_allow_html=True)
+
+            add_col1, add_col2 = st.columns([3, 1])
+            with add_col1:
+                new_site_input = st.text_input(
+                    "Add domain or website to block",
+                    placeholder="e.g. discord.com, twitch.tv, reddit.com",
+                    key="input_new_blocked_site",
+                    label_visibility="collapsed"
+                )
+            with add_col2:
+                if st.button("➕ Add to Blocklist", use_container_width=True, key="btn_add_blocked_site"):
+                    if new_site_input and new_site_input.strip():
+                        import re
+                        raw_s = new_site_input.strip().lower()
+                        clean_s = re.sub(r"^https?://", "", raw_s).split("/")[0].lstrip("www.")
+                        if clean_s and clean_s not in st.session_state.parent_custom_blocklist:
+                            st.session_state.parent_custom_blocklist.append(clean_s)
+                            st.success(f"Added '{clean_s}' to study blocklist!")
+                            st.rerun()
+
+            # Quick Preset Chips
+            st.markdown("<div style='font-size: 0.76rem; color: #94a3b8; margin-top: 6px; margin-bottom: 6px;'>Quick-add popular study distractions:</div>", unsafe_allow_html=True)
+            qp_cols = st.columns(6)
+            presets = [
+                ("📸 Instagram", "instagram.com"),
+                ("▶️ YouTube", "youtube.com"),
+                ("🎮 Roblox", "roblox.com"),
+                ("👻 Snapchat", "snapchat.com"),
+                ("🎬 Netflix", "netflix.com"),
+                ("💬 Discord", "discord.com"),
+            ]
+            for i, (label, domain) in enumerate(presets):
+                with qp_cols[i]:
+                    if st.button(label, use_container_width=True, key=f"btn_preset_{domain}"):
+                        if domain not in st.session_state.parent_custom_blocklist:
+                            st.session_state.parent_custom_blocklist.append(domain)
+                            st.rerun()
+
+            # Display active blocked chips with delete buttons
+            st.markdown("<div style='margin-top: 10px; font-size: 0.78rem; font-weight: 700; color: #cbd5e1;'>Active Restricted Domains:</div>", unsafe_allow_html=True)
+            if st.session_state.parent_custom_blocklist:
+                chip_cols = st.columns(min(5, len(st.session_state.parent_custom_blocklist)))
+                for idx, domain in enumerate(st.session_state.parent_custom_blocklist):
+                    col_idx = idx % len(chip_cols)
+                    with chip_cols[col_idx]:
+                        if st.button(f"✕ {domain}", key=f"btn_del_block_{domain}_{idx}", help=f"Click to remove {domain} from blocklist"):
+                            st.session_state.parent_custom_blocklist.remove(domain)
+                            st.rerun()
+            else:
+                st.info("No custom websites currently blocked.")
+
+            st.markdown("<div style='margin-bottom: 14px;'></div>", unsafe_allow_html=True)
+
     # 1-Click Interactive Kid-Safety Benchmarks
     st.markdown("##### 🎯 1-Click Child Safety & Threat Benchmark Scenarios")
-    col_b1, col_b2, col_b3, col_b4 = st.columns(4)
+    col_b1, col_b2, col_b3, col_b4, col_b5 = st.columns(5)
 
     if "cs_target_url" not in st.session_state:
         st.session_state.cs_target_url = CHILD_SAFETY_BENCHMARKS[0]["url"]
         st.session_state.cs_context = CHILD_SAFETY_BENCHMARKS[0]["context"]
 
     with col_b1:
-        if st.button("🎮 Free Fire Diamond Trap", use_container_width=True, key="btn_cs_bm1"):
+        if st.button("🎮 Free Fire Trap", use_container_width=True, key="btn_cs_bm1"):
             st.session_state.cs_target_url = CHILD_SAFETY_BENCHMARKS[0]["url"]
             st.session_state.cs_context = CHILD_SAFETY_BENCHMARKS[0]["context"]
             st.rerun()
 
     with col_b2:
-        if st.button("🎰 Mahadev Betting App", use_container_width=True, key="btn_cs_bm2"):
+        if st.button("🎰 Mahadev Betting", use_container_width=True, key="btn_cs_bm2"):
             st.session_state.cs_target_url = CHILD_SAFETY_BENCHMARKS[1]["url"]
             st.session_state.cs_context = CHILD_SAFETY_BENCHMARKS[1]["context"]
             st.rerun()
 
     with col_b3:
-        if st.button("💬 Stranger Video Chat", use_container_width=True, key="btn_cs_bm3"):
+        if st.button("💬 Stranger Chat", use_container_width=True, key="btn_cs_bm3"):
             st.session_state.cs_target_url = CHILD_SAFETY_BENCHMARKS[2]["url"]
             st.session_state.cs_context = CHILD_SAFETY_BENCHMARKS[2]["context"]
             st.rerun()
@@ -3630,6 +3768,12 @@ def render_child_safety_sentinel(sound_alert: bool = False):
         if st.button("📚 Khan Academy (Safe)", use_container_width=True, key="btn_cs_bm4"):
             st.session_state.cs_target_url = CHILD_SAFETY_BENCHMARKS[3]["url"]
             st.session_state.cs_context = CHILD_SAFETY_BENCHMARKS[3]["context"]
+            st.rerun()
+
+    with col_b5:
+        if st.button("🚫 Instagram (Parent Lock)", use_container_width=True, key="btn_cs_bm5"):
+            st.session_state.cs_target_url = CHILD_SAFETY_BENCHMARKS[4]["url"]
+            st.session_state.cs_context = CHILD_SAFETY_BENCHMARKS[4]["context"]
             st.rerun()
 
     st.markdown("<div style='margin-bottom: 14px;'></div>", unsafe_allow_html=True)
@@ -3661,8 +3805,14 @@ def render_child_safety_sentinel(sound_alert: bool = False):
     target_ctx = cs_ctx_input.strip()
 
     if target_url:
-        cs_res = analyze_child_safety_url(target_url, target_ctx)
+        cs_res = analyze_child_safety_url(
+            target_url,
+            target_ctx,
+            custom_blocklist=st.session_state.parent_custom_blocklist,
+            is_parental_control_active=st.session_state.parental_control_active,
+        )
         is_blocked = cs_res["is_blocked"]
+        is_parent_blocked = cs_res.get("is_parent_blocked", False)
         safety_score = cs_res["safety_score"]
 
         # Alert Sound Trigger
@@ -3690,7 +3840,26 @@ def render_child_safety_sentinel(sound_alert: bool = False):
             )
 
         # 1. Action Banner
-        if is_blocked:
+        if is_parent_blocked:
+            st.markdown(
+                f"""
+                <div style="background: rgba(168, 85, 247, 0.18); border: 2px solid #a855f7; border-radius: 12px; padding: 18px 22px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #c084fc;">
+                            🚫 BLOCKED BY PARENT &bull; STUDY LOCK ENFORCED
+                        </div>
+                        <div style="font-size: 0.9rem; color: #e9d5ff; margin-top: 4px;">
+                            {cs_res['verdict']} &bull; Age Rating: <b>{cs_res['age_rating']}</b>
+                        </div>
+                    </div>
+                    <div style="background: #a855f7; color: #ffffff; padding: 6px 14px; border-radius: 8px; font-weight: 800; font-size: 0.85rem;">
+                        SAFETY SCORE: {safety_score}/100 (STUDY LOCKED)
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        elif is_blocked:
             st.markdown(
                 f"""
                 <div style="background: rgba(239, 68, 68, 0.15); border: 1.5px solid #ef4444; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
@@ -3712,7 +3881,7 @@ def render_child_safety_sentinel(sound_alert: bool = False):
         else:
             st.markdown(
                 f"""
-                <div style="background: rgba(16, 185, 129, 0.15); border: 1.5px solid #10b981; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                <div style="background: rgba(168, 185, 129, 0.15); border: 1.5px solid #10b981; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
                     <div>
                         <div style="font-size: 1.25rem; font-weight: 800; color: #34d399;">
                             ✅ APPROVED (SAFE FOR CHILDREN & STUDENTS)
@@ -3728,6 +3897,7 @@ def render_child_safety_sentinel(sound_alert: bool = False):
                 """,
                 unsafe_allow_html=True,
             )
+
 
         # 2. Key Metrics
         m1, m2, m3 = st.columns(3)

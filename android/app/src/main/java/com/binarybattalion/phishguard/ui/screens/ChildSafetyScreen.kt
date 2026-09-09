@@ -39,6 +39,13 @@ fun ChildSafetyScreen(
     var pinInput by remember { mutableStateOf("") }
     var pinError by remember { mutableStateOf(false) }
 
+    // Parental Control Study Mode State
+    var isParentalControlActive by remember { mutableStateOf(true) }
+    var customBlocklist by remember {
+        mutableStateOf(listOf("instagram.com", "youtube.com", "roblox.com", "snapchat.com", "netflix.com"))
+    }
+    var newWebsiteInput by remember { mutableStateOf("") }
+
     // Protection Category Policies
     var blockGamingPhishing by remember { mutableStateOf(true) }
     var blockGambling by remember { mutableStateOf(true) }
@@ -50,7 +57,14 @@ fun ChildSafetyScreen(
     var inputUrl by remember { mutableStateOf(ChildSafetyAnalyzer.BENCHMARKS[0].url) }
     var inputContext by remember { mutableStateOf(ChildSafetyAnalyzer.BENCHMARKS[0].context) }
     var currentRecord by remember {
-        mutableStateOf(ChildSafetyAnalyzer.analyzeUrl(ChildSafetyAnalyzer.BENCHMARKS[0].url, ChildSafetyAnalyzer.BENCHMARKS[0].context))
+        mutableStateOf(
+            ChildSafetyAnalyzer.analyzeUrl(
+                ChildSafetyAnalyzer.BENCHMARKS[0].url,
+                ChildSafetyAnalyzer.BENCHMARKS[0].context,
+                customBlocklist = listOf("instagram.com", "youtube.com", "roblox.com", "snapchat.com", "netflix.com"),
+                isParentalControlActive = true
+            )
+        )
     }
 
     Column(
@@ -104,26 +118,44 @@ fun ChildSafetyScreen(
                         }
                     }
 
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                if (isParentUnlocked) Color(0x2610B981) else Color(0x264D65FF),
-                                RoundedCornerShape(4.dp)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    if (isParentalControlActive) Color(0x33A855F7) else Color(0x3364748B),
+                                    RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = if (isParentalControlActive) "🟢 STUDY LOCK ON" else "🟡 PAUSED",
+                                color = if (isParentalControlActive) Color(0xFFC084FC) else Color(0xFF94A3B8),
+                                fontSize = 8.sp,
+                                fontWeight = FontWeight.Bold
                             )
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = if (isParentUnlocked) "🔓 UNLOCKED" else "🔒 PIN LOCKED",
-                            color = if (isParentUnlocked) RiskCleanLight else PrimaryCobaltLight,
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        }
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    if (isParentUnlocked) Color(0x2610B981) else Color(0x264D65FF),
+                                    RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = if (isParentUnlocked) "🔓 UNLOCKED" else "🔒 PIN LOCKED",
+                                color = if (isParentUnlocked) RiskCleanLight else PrimaryCobaltLight,
+                                fontSize = 8.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Blocks predatory gaming currency traps (Free Fire Diamonds, Roblox Robux), underage betting apps (Mahadev), and adult redirects across links.",
+                    text = "Blocks predatory gaming traps, illegal betting apps, and custom distracting websites to help children focus during study hours.",
                     color = TextSecondary,
                     fontSize = 11.sp,
                     lineHeight = 15.sp
@@ -149,7 +181,7 @@ fun ChildSafetyScreen(
                     ) {
                         Column {
                             Text("Parent Security Lock", color = TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            Text("Enter PIN to modify child protection rules (Default: 1234)", color = TextTertiary, fontSize = 9.sp)
+                            Text("Enter 4-digit PIN to toggle Study Mode or edit blocklist (Default: 1234)", color = TextTertiary, fontSize = 9.sp)
                         }
                     }
 
@@ -227,11 +259,125 @@ fun ChildSafetyScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
+                    // Master Study Mode Toggle
+                    PolicyToggleRow("🔒 Parental Control / Study Mode (Zero-Tolerance Lock)", isParentalControlActive) {
+                        isParentalControlActive = it
+                        Toast.makeText(context, if (it) "Study Mode Activated" else "Study Mode Paused", Toast.LENGTH_SHORT).show()
+                    }
+
                     // Policy Toggles
                     PolicyToggleRow("🎮 Block Gaming Currency & Skin Phishing", blockGamingPhishing) { blockGamingPhishing = it }
                     PolicyToggleRow("🎰 Block Youth Betting & Color Prediction Apps", blockGambling) { blockGambling = it }
                     PolicyToggleRow("🔞 Block Explicit Adult Content & Redirection", blockAdultContent) { blockAdultContent = it }
                     PolicyToggleRow("💬 Block Unmonitored Stranger Video Chats", blockStrangerChat) { blockStrangerChat = it }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Custom Website Blocklist Ingress
+                    Text("🚫 Blocked Websites during Study Hours", color = TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("Websites listed here cannot be opened under any circumstances while Study Mode is active.", color = TextTertiary, fontSize = 9.sp)
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = newWebsiteInput,
+                            onValueChange = { newWebsiteInput = it },
+                            placeholder = { Text("e.g. discord.com, twitch.tv", fontSize = 11.sp) },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PrimaryCobalt,
+                                unfocusedBorderColor = BorderDark,
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary
+                            )
+                        )
+                        Button(
+                            onClick = {
+                                if (newWebsiteInput.isNotBlank()) {
+                                    val clean = newWebsiteInput.trim().lowercase(java.util.Locale.ROOT)
+                                        .removePrefix("http://")
+                                        .removePrefix("https://")
+                                        .substringBefore("/")
+                                        .removePrefix("www.")
+                                    if (clean.isNotBlank() && !customBlocklist.contains(clean)) {
+                                        customBlocklist = customBlocklist + clean
+                                        newWebsiteInput = ""
+                                        Toast.makeText(context, "Added $clean to study blocklist", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = PrimaryCobalt),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("+ Add", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text("Quick Presets:", color = TextTertiary, fontSize = 9.sp)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        val presets = listOf("instagram.com", "youtube.com", "roblox.com", "snapchat.com", "netflix.com", "discord.com")
+                        presets.forEach { domain ->
+                            SuggestionChip(
+                                onClick = {
+                                    if (!customBlocklist.contains(domain)) {
+                                        customBlocklist = customBlocklist + domain
+                                        Toast.makeText(context, "Added $domain", Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                                label = { Text("+ $domain", fontSize = 10.sp) },
+                                colors = SuggestionChipDefaults.suggestionChipColors(
+                                    containerColor = CardDark,
+                                    labelColor = if (customBlocklist.contains(domain)) PrimaryCobaltLight else TextSecondary
+                                ),
+                                border = BorderStroke(1.dp, if (customBlocklist.contains(domain)) PrimaryCobalt else BorderDark)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Currently Blocked Sites (${customBlocklist.size}):", color = TextSecondary, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        customBlocklist.forEach { domain ->
+                            InputChip(
+                                selected = true,
+                                onClick = {
+                                    customBlocklist = customBlocklist.filter { it != domain }
+                                    Toast.makeText(context, "Removed $domain", Toast.LENGTH_SHORT).show()
+                                },
+                                label = { Text(domain, fontSize = 10.sp, color = TextPrimary) },
+                                trailingIcon = {
+                                    Icon(
+                                        Icons.Default.Close,
+                                        contentDescription = "Remove",
+                                        tint = RiskCriticalLight,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                },
+                                colors = InputChipDefaults.inputChipColors(
+                                    selectedContainerColor = Color(0x33A855F7)
+                                ),
+                                border = BorderStroke(1.dp, Color(0xFFA855F7))
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -262,6 +408,7 @@ fun ChildSafetyScreen(
                     "mahadev_betting_scam" -> "🎰 Mahadev Betting"
                     "stranger_chat_scam" -> "💬 Stranger Chat"
                     "khan_academy_safe" -> "📚 Khan Academy"
+                    "parent_study_lock" -> "🚫 Instagram (Study Lock)"
                     else -> bm.title
                 }
                 FilterChip(
@@ -270,7 +417,12 @@ fun ChildSafetyScreen(
                         activeBenchmarkId = bm.id
                         inputUrl = bm.url
                         inputContext = bm.context
-                        currentRecord = ChildSafetyAnalyzer.analyzeUrl(bm.url, bm.context)
+                        currentRecord = ChildSafetyAnalyzer.analyzeUrl(
+                            url = bm.url,
+                            contextText = bm.context,
+                            customBlocklist = customBlocklist,
+                            isParentalControlActive = isParentalControlActive
+                        )
                     },
                     label = {
                         Text(
@@ -344,7 +496,12 @@ fun ChildSafetyScreen(
                     onClick = {
                         if (inputUrl.isNotBlank()) {
                             activeBenchmarkId = "custom"
-                            currentRecord = ChildSafetyAnalyzer.analyzeUrl(inputUrl, inputContext)
+                            currentRecord = ChildSafetyAnalyzer.analyzeUrl(
+                                url = inputUrl,
+                                contextText = inputContext,
+                                customBlocklist = customBlocklist,
+                                isParentalControlActive = isParentalControlActive
+                            )
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -360,9 +517,22 @@ fun ChildSafetyScreen(
 
         // 5. Forensics Results Display
         val isBlocked = currentRecord.isBlocked
-        val bannerBg = if (isBlocked) Color(0x26EF4444) else Color(0x2610B981)
-        val bannerBorder = if (isBlocked) RiskCritical else RiskClean
-        val bannerText = if (isBlocked) RiskCriticalLight else RiskCleanLight
+        val isParentBlocked = currentRecord.isParentBlocked
+        val bannerBg = when {
+            isParentBlocked -> Color(0x33A855F7)
+            isBlocked -> Color(0x26EF4444)
+            else -> Color(0x2610B981)
+        }
+        val bannerBorder = when {
+            isParentBlocked -> Color(0xFFA855F7)
+            isBlocked -> RiskCritical
+            else -> RiskClean
+        }
+        val bannerText = when {
+            isParentBlocked -> Color(0xFFC084FC)
+            isBlocked -> RiskCriticalLight
+            else -> RiskCleanLight
+        }
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -378,14 +548,22 @@ fun ChildSafetyScreen(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = if (isBlocked) Icons.Default.Block else Icons.Default.CheckCircle,
+                            imageVector = when {
+                                isParentBlocked -> Icons.Default.Lock
+                                isBlocked -> Icons.Default.Block
+                                else -> Icons.Default.CheckCircle
+                            },
                             contentDescription = null,
                             tint = bannerText,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (isBlocked) "SITE BLOCKED FOR CHILD SAFETY" else "APPROVED (CHILD SAFE)",
+                            text = when {
+                                isParentBlocked -> "BLOCKED BY PARENT (STUDY LOCK)"
+                                isBlocked -> "SITE BLOCKED FOR CHILD SAFETY"
+                                else -> "APPROVED (CHILD SAFE)"
+                            },
                             color = bannerText,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 12.sp
@@ -398,7 +576,7 @@ fun ChildSafetyScreen(
                             .padding(horizontal = 6.dp, vertical = 3.dp)
                     ) {
                         Text(
-                            text = "${currentRecord.safetyScore}/100",
+                            text = if (isParentBlocked) "0/100 (LOCKED)" else "${currentRecord.safetyScore}/100",
                             color = Color.White,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.ExtraBold

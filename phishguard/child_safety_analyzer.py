@@ -65,9 +65,15 @@ STRANGER_CHAT_KEYWORDS = [
 SUSPICIOUS_TLDS = {".xyz", ".top", ".tk", ".ml", ".cf", ".gq", ".buzz", ".work", ".site", ".live"}
 
 
-def analyze_child_safety_url(url: str, context_text: str = "") -> Dict[str, Any]:
+def analyze_child_safety_url(
+    url: str,
+    context_text: str = "",
+    custom_blocklist: List[str] = None,
+    is_parental_control_active: bool = True,
+) -> Dict[str, Any]:
     """
-    Analyzes a URL and optional accompanying context for child safety threats.
+    Analyzes a URL and optional accompanying context for child safety threats,
+    enforcing parent-defined study mode blocklists when Parental Control is active.
     
     Returns:
         dict containing safety_score (0-100), age_rating, category, verdict,
@@ -84,6 +90,33 @@ def analyze_child_safety_url(url: str, context_text: str = "") -> Dict[str, Any]
     query = (parsed.query or "").lower()
     combined_target = f"{hostname}{path}?{query}".lower()
     full_context = f"{combined_target} {context_text.lower()}"
+
+    # 0. Check Parent Custom Blocklist (Study Mode Enforced via 4-Digit PIN)
+    if is_parental_control_active and custom_blocklist:
+        for raw_blocked in custom_blocklist:
+            if not raw_blocked or not raw_blocked.strip():
+                continue
+            clean_b = raw_blocked.lower().strip()
+            clean_b = re.sub(r"^https?://", "", clean_b).split("/")[0].lstrip("www.")
+            if hostname == clean_b or hostname.endswith("." + clean_b):
+                exec_s = round(time.perf_counter() - t_start, 3)
+                return {
+                    "url": url,
+                    "hostname": hostname,
+                    "safety_score": 0,
+                    "age_rating": "Restricted (Study Mode)",
+                    "verdict": "BLOCKED BY PARENT (STUDY LOCK ENFORCED)",
+                    "primary_category": "Parent-Restricted Website (Study Hours)",
+                    "all_categories": ["Parent Custom Blocklist", "Study Focus Shield"],
+                    "matched_cues": [f"Parent Blocklist Rule: {clean_b}"],
+                    "reason": f"This website ('{clean_b}') was explicitly locked by your parent to prevent distractions during study hours.",
+                    "recommended_action": "Access is strictly prohibited. Ask your parent to enter their 4-digit PIN to temporarily pause Study Mode.",
+                    "clean_dns_recommendation": "Cloudflare Family DNS (1.1.1.3) blocks adult and malware traffic at router level.",
+                    "is_blocked": True,
+                    "is_parent_blocked": True,
+                    "analysis_time_s": max(0.012, exec_s),
+                    "analysis_time_ms": round(max(0.012, exec_s) * 1000, 1),
+                }
 
     detected_categories = []
     matched_cues = []
@@ -251,5 +284,12 @@ CHILD_SAFETY_BENCHMARKS = [
         "url": "https://www.khanacademy.org/math/class-10-math-india",
         "context": "NCERT Class 10 Mathematics Interactive Video Lessons and Practice Quizzes for CBSE Students.",
         "description": "Certified kid-safe, ad-free educational platform compliant with global student privacy regulations."
+    },
+    {
+        "id": "parent_study_lock",
+        "title": "🚫 Scenario 5: Instagram & Social Media (Parent Study Lock)",
+        "url": "https://www.instagram.com/explore",
+        "context": "Student attempting to browse social media reels during designated study hours.",
+        "description": "Custom study distraction blocked strictly by Parent Focus Shield (PIN required to unlock)."
     }
 ]

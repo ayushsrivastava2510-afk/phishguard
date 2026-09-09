@@ -76,4 +76,45 @@ class SmishingAnalyzerTest {
         assertNotNull("Must generate SHA-256 evidence hash", result.evidenceHash)
         assertEquals(64, result.evidenceHash.length)
     }
+
+    @Test
+    fun testParentalControlStudyModeBlocksCustomSite() {
+        val customSites = listOf("instagram.com", "youtube.com", "roblox.com")
+        val res = com.binarybattalion.phishguard.core.ChildSafetyAnalyzer.analyzeUrl(
+            url = "https://www.instagram.com/explore",
+            customBlocklist = customSites,
+            isParentalControlActive = true
+        )
+
+        assertTrue("Target site in parent blocklist must be blocked", res.isBlocked)
+        assertTrue("Must be flagged as parent-blocked", res.isParentBlocked)
+        assertEquals(0, res.safetyScore)
+        assertEquals("BLOCKED BY PARENT (STUDY LOCK ENFORCED)", res.verdict)
+        assertEquals("Parent-Restricted Website (Study Hours)", res.primaryCategory)
+    }
+
+    @Test
+    fun testParentalControlInactiveAllowsSite() {
+        val customSites = listOf("instagram.com")
+        val res = com.binarybattalion.phishguard.core.ChildSafetyAnalyzer.analyzeUrl(
+            url = "https://www.instagram.com/explore",
+            customBlocklist = customSites,
+            isParentalControlActive = false
+        )
+
+        assertFalse("When Parental Control is paused/off, site must not be parent-blocked", res.isParentBlocked)
+    }
+
+    @Test
+    fun testParentalControlSubdomainMatching() {
+        val customSites = listOf("youtube.com")
+        val res = com.binarybattalion.phishguard.core.ChildSafetyAnalyzer.analyzeUrl(
+            url = "https://m.youtube.com/watch?v=test",
+            customBlocklist = customSites,
+            isParentalControlActive = true
+        )
+
+        assertTrue("Subdomain m.youtube.com must be blocked by youtube.com rule", res.isParentBlocked)
+        assertEquals(0, res.safetyScore)
+    }
 }
