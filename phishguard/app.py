@@ -15,6 +15,7 @@ Featuring:
 """
 
 import os
+import re
 import json
 import time
 from datetime import datetime
@@ -4014,6 +4015,7 @@ def sanitize_blocked_domain(raw_url_or_domain: str) -> str:
     into a clean, normalized domain string.
     Never uses lstrip('www.') which corrupts domains starting with 'w' (e.g. whatsapp, wikipedia).
     """
+    import re
     if not raw_url_or_domain:
         return ""
     clean = str(raw_url_or_domain).strip().lower()
