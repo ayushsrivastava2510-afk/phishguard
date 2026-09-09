@@ -245,7 +245,7 @@ fun SmishingScreen(
 
                 // Real-Time Demo Simulation Suite
                 Text(
-                    text = "⚡ TEST REAL-TIME POPUP & 3s SIREN ALARM (>90 THREAT):",
+                    text = "⚡ TEST REAL-TIME POPUP & 5s EMERGENCY SIREN (>90 THREAT):",
                     color = TextTertiary,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Bold,
@@ -267,13 +267,13 @@ fun SmishingScreen(
                                 putExtra(SmsReceiver.EXTRA_SIMULATED_MESSAGE, "प्रिय उपभोक्ता, आपका बिजली बिल अपडेट नहीं हुआ है। आज रात 9:30 बजे आपकी बिजली काट दी जाएगी। तुरंत बिजली अधिकारी से संपर्क करें: 9811234567 अथवा ऐप डाउनलोड करें: bit.ly/bijli-bill-update")
                             }
                             context.sendBroadcast(simIntent)
-                            Toast.makeText(context, "⚡ Dispatched Hindi Scam! 3-Second Siren & Popup Triggered", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "⚡ Dispatched Hindi Scam! 5-Second Emergency Siren & Popup Triggered", Toast.LENGTH_SHORT).show()
                         },
                         border = BorderStroke(1.dp, RiskCritical.copy(alpha = 0.7f)),
                         shape = RoundedCornerShape(8.dp),
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                     ) {
-                        Text("🇮🇳 Hindi Cut-off [100 - Siren 🔊]", color = RiskCriticalLight, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                        Text("🇮🇳 Hindi Cut-off [100 - Siren 5s 🔊]", color = RiskCriticalLight, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
                     }
 
                     OutlinedButton(
@@ -284,13 +284,13 @@ fun SmishingScreen(
                                 putExtra(SmsReceiver.EXTRA_SIMULATED_MESSAGE, "Dear customer aapka SBI khata aaj raat block kar diya jayega pending KYC ke karan. Turant apna PAN card link kare: http://sbi-kyc-verification.in/update")
                             }
                             context.sendBroadcast(simIntent)
-                            Toast.makeText(context, "⚡ Dispatched Hinglish Scam! 3-Second Siren & Popup Triggered", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "⚡ Dispatched Hinglish Scam! 5-Second Emergency Siren & Popup Triggered", Toast.LENGTH_SHORT).show()
                         },
                         border = BorderStroke(1.dp, Color(0xFFF59E0B).copy(alpha = 0.7f)),
                         shape = RoundedCornerShape(8.dp),
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                     ) {
-                        Text("🗣️ Hinglish KYC [100 - Siren 🔊]", color = Color(0xFFFBBF24), fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                        Text("🗣️ Hinglish KYC [100 - Siren 5s 🔊]", color = Color(0xFFFBBF24), fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
                     }
 
                     OutlinedButton(

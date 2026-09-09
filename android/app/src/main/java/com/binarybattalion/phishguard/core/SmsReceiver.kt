@@ -36,9 +36,9 @@ class SmsReceiver : BroadcastReceiver() {
         // Execute on-device native Smishing forensics
         val analysis = SmishingAnalyzer.analyzeSmishingMessage(sender, body)
 
-        // 0. Trigger 3-second custom siren voice/sound alarm if threat factor exceeds 90
+        // 0. Trigger 5-second emergency siren voice/sound alarm if threat factor exceeds 90
         if (analysis.riskScore > 90) {
-            ThreatSirenPlayer.playSiren(context, 3000L)
+            ThreatSirenPlayer.playSiren(context, 5000L)
         }
 
         // 1. Launch floating side-by-side analysis popup immediately
@@ -104,7 +104,7 @@ class SmsReceiver : BroadcastReceiver() {
             .setContentTitle(alertTitle)
             .setContentText(
                 if (isCriticalSiren) {
-                    "🔊 3-SECOND SIREN TRIGGERED! ${record.threatCategory} (${record.riskScore}/100 Risk)."
+                    "🚨 5-SECOND EMERGENCY SIREN TRIGGERED! ${record.threatCategory} (${record.riskScore}/100 Risk)."
                 } else {
                     "${record.threatCategory} (${record.riskScore}/100 Risk). Tap to inspect evidence."
                 }

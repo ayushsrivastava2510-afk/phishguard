@@ -30,7 +30,7 @@ class PhishGuardApplication : Application() {
             notificationManager.createNotificationChannel(channel)
 
             // 🚨 Critical Siren Notification Channel for Threat Factor > 90
-            val sirenUri = Uri.parse("android.resource://${packageName}/${R.raw.threat_siren_3s}")
+            val sirenUri = Uri.parse("android.resource://${packageName}/${R.raw.threat_siren_5s}")
             val audioAttributes = AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_ALARM)
@@ -41,10 +41,13 @@ class PhishGuardApplication : Application() {
                 "🚨 Critical Threat Siren Alert (>90 Score)",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "High-urgency 3-second siren notification for critical SMS threats with risk score exceeding 90/100"
+                description = "High-urgency 5-second emergency siren notification for critical SMS threats with risk score exceeding 90/100"
                 setSound(sirenUri, audioAttributes)
                 enableVibration(true)
-                vibrationPattern = longArrayOf(0, 350, 150, 350, 150, 350, 150, 350, 150, 350)
+                vibrationPattern = longArrayOf(
+                    0, 350, 150, 350, 150, 350, 150, 350, 150, 350,
+                    150, 350, 150, 350, 150, 350, 150, 350, 150, 350
+                )
                 enableLights(true)
                 lightColor = android.graphics.Color.RED
                 setShowBadge(true)

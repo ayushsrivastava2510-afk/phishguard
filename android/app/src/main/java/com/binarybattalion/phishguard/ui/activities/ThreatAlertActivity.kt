@@ -62,9 +62,9 @@ class ThreatAlertActivity : ComponentActivity() {
         // Analyze or reconstruct record
         val record = SmishingAnalyzer.analyzeSmishingMessage(sender, message)
 
-        // 🔊 If threat score > 90, play custom 3-second emergency siren audio alert
+        // 🔊 If threat score > 90, play custom 5-second emergency siren audio alert
         if (record.riskScore > 90) {
-            ThreatSirenPlayer.playSiren(this, 3000L)
+            ThreatSirenPlayer.playSiren(this, 5000L)
         }
 
         setContent {
@@ -261,13 +261,13 @@ fun ThreatAlertPopup(
                             )
                             Column {
                                 Text(
-                                    text = "🚨 3-SECOND SIREN ALARM TRIGGERED",
+                                    text = "🚨 5-SECOND EMERGENCY SIREN ACTIVATED",
                                     color = RiskCriticalLight,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.ExtraBold
                                 )
                                 Text(
-                                    text = "Threat factor (${record.riskScore}/100) exceeds safety threshold (>90). Custom audio alarm played for 3 seconds.",
+                                    text = "Threat factor (${record.riskScore}/100) exceeds safety threshold (>90). Emergency siren alarm played for 5 seconds.",
                                     color = TextSecondary,
                                     fontSize = 9.5.sp
                                 )

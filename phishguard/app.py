@@ -2993,8 +2993,8 @@ def render_smishing_sentinel(sound_alert):
             if sms_score > 90:
                 siren_badge_html = f"""
                 <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; border-radius: 8px; padding: 8px 12px; font-size: 0.76rem; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 1.1rem;">🔊</span>
-                    <span><b>3-SECOND SIREN ALARM:</b> Threat factor ({sms_score}/100) exceeds safety threshold (&gt;90). Custom audio siren &amp; haptic pulses triggered on PhishGuard Mobile App.</span>
+                    <span style="font-size: 1.1rem;">🚨</span>
+                    <span><b>5-SECOND EMERGENCY SIREN:</b> Threat factor ({sms_score}/100) exceeds safety threshold (&gt;90). Rapid emergency yelp siren &amp; haptic pulses triggered on PhishGuard Mobile App.</span>
                 </div>
                 """
             st.markdown(

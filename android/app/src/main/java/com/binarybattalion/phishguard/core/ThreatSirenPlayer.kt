@@ -17,12 +17,12 @@ import com.binarybattalion.phishguard.R
 /**
  * Singleton controller that manages high-priority audio & haptic alerts
  * for incoming SMS messages evaluated with a critical threat score exceeding 90/100.
- * Automatically enforces a strict 3.0-second playback duration.
+ * Automatically enforces a strict 5.0-second playback duration.
  */
 object ThreatSirenPlayer {
 
     private const val TAG = "ThreatSirenPlayer"
-    const val SIREN_DURATION_MS = 3000L
+    const val SIREN_DURATION_MS = 5000L
 
     private var mediaPlayer: MediaPlayer? = null
     private var isPlaying = false
@@ -31,7 +31,7 @@ object ThreatSirenPlayer {
 
     /**
      * Plays the emergency siren audio and fires a synchronized haptic pulse pattern.
-     * Guaranteed to stop automatically after [durationMs] (default: 3000 ms).
+     * Guaranteed to stop automatically after [durationMs] (default: 5000 ms).
      */
     @Synchronized
     fun playSiren(context: Context, durationMs: Long = SIREN_DURATION_MS) {
@@ -46,11 +46,11 @@ object ThreatSirenPlayer {
             isPlaying = true
             val appContext = context.applicationContext
 
-            // 1. Trigger synchronized emergency vibration pattern
+            // 1. Trigger synchronized emergency vibration pattern for 5 seconds
             triggerVibration(appContext)
 
-            // 2. Initialize and start MediaPlayer
-            val player = MediaPlayer.create(appContext, R.raw.threat_siren_3s)
+            // 2. Initialize and start MediaPlayer with the 5-second emergency audio
+            val player = MediaPlayer.create(appContext, R.raw.threat_siren_5s)
 
             if (player != null) {
                 mediaPlayer = player
@@ -71,15 +71,15 @@ object ThreatSirenPlayer {
                     true
                 }
                 player.start()
-                Log.i(TAG, "🚨 3-second threat siren started")
+                Log.i(TAG, "🚨 5-second emergency siren started")
             } else {
-                Log.w(TAG, "MediaPlayer.create returned null for R.raw.threat_siren_3s, using tone fallback")
+                Log.w(TAG, "MediaPlayer.create returned null for R.raw.threat_siren_5s, using tone fallback")
                 fallbackTone(durationMs)
             }
 
-            // 3. Enforce strict 3.0-second auto-stop
+            // 3. Enforce strict 5.0-second auto-stop
             val runnable = Runnable {
-                Log.i(TAG, "Siren 3-second timer expired; stopping playback")
+                Log.i(TAG, "Siren 5-second timer expired; stopping playback")
                 stop()
             }
             stopRunnable = runnable
@@ -109,8 +109,11 @@ object ThreatSirenPlayer {
 
     private fun triggerVibration(context: Context) {
         try {
-            // Rapid multi-pulse emergency warning pattern over 3 seconds
-            val pattern = longArrayOf(0, 350, 150, 350, 150, 350, 150, 350, 150, 350)
+            // Rapid multi-pulse emergency warning pattern spanning full 5 seconds
+            val pattern = longArrayOf(
+                0, 350, 150, 350, 150, 350, 150, 350, 150, 350,
+                150, 350, 150, 350, 150, 350, 150, 350, 150, 350
+            )
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
                 manager?.defaultVibrator?.vibrate(VibrationEffect.createWaveform(pattern, -1))
