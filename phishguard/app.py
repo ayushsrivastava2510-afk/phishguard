@@ -479,41 +479,142 @@ if is_dark:
     }
 
     /* ========================================================================= */
-    /* TEXT INPUTS & TEXTAREAS IN DARK MODE (Fix white background on textarea)   */
+    /* TEXT INPUTS & TEXTAREAS IN DARK MODE (Modern Streamlit 1.40+ & BaseWeb)   */
     /* ========================================================================= */
-    div[data-baseweb="input"],
-    div[data-baseweb="base-input"],
-    div[data-baseweb="textarea"] {
+    /* Form Widget Labels */
+    label[data-testid="stWidgetLabel"],
+    label[data-testid="stWidgetLabel"] p,
+    label[data-testid="stWidgetLabel"] span,
+    label[data-testid="stWidgetLabel"] div,
+    div.stTextArea label,
+    div.stTextArea label p,
+    div.stTextInput label,
+    div.stTextInput label p {
+        color: #e2e8f0 !important;
+        font-weight: 600 !important;
+        font-size: 0.88rem !important;
+        letter-spacing: 0.02em !important;
+    }
+
+    /* Text Area Containers */
+    div[data-testid="stTextArea"],
+    div.stTextArea {
+        background-color: transparent !important;
+    }
+    div[data-testid="stTextAreaRootElement"],
+    div.stTextArea > div:not([data-testid="stWidgetLabel"]),
+    div[data-testid="stTextArea"] > div:not([data-testid="stWidgetLabel"]),
+    div[data-baseweb="textarea"],
+    div.e1wz7dbj1 {
         background: #0f172a !important;
         background-color: #0f172a !important;
-        border: 1px solid rgba(255, 255, 255, 0.16) !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
         border-radius: 10px !important;
         color: #f8fafc !important;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35) !important;
     }
-    div[data-baseweb="input"]:focus-within,
-    div[data-baseweb="base-input"]:focus-within,
-    div[data-baseweb="textarea"]:focus-within {
+    div[data-testid="stTextAreaRootElement"]:focus-within,
+    div.stTextArea > div:not([data-testid="stWidgetLabel"]):focus-within,
+    div[data-baseweb="textarea"]:focus-within,
+    div.e1wz7dbj1:focus-within {
         border-color: #4d65ff !important;
-        box-shadow: 0 0 0 2px rgba(77, 101, 255, 0.25) !important;
+        box-shadow: 0 0 0 2px rgba(77, 101, 255, 0.3) !important;
     }
+
+    /* Text Area Text Field */
+    div[data-testid="stTextAreaRootElement"] textarea,
+    div.stTextArea textarea,
+    div[data-baseweb="textarea"] textarea,
+    textarea.e1wz7dbj2,
+    textarea {
+        background: transparent !important;
+        background-color: transparent !important;
+        color: #f8fafc !important;
+        -webkit-text-fill-color: #f8fafc !important;
+        font-size: 0.92rem !important;
+        font-family: inherit !important;
+        line-height: 1.5 !important;
+        caret-color: #38bdf8 !important;
+    }
+    div[data-testid="stTextAreaRootElement"] textarea::placeholder,
+    div.stTextArea textarea::placeholder,
+    div[data-baseweb="textarea"] textarea::placeholder,
+    textarea::placeholder {
+        color: #64748b !important;
+        -webkit-text-fill-color: #64748b !important;
+    }
+
+    /* Text Input Containers */
+    div[data-testid="stTextInput"],
+    div.stTextInput {
+        background-color: transparent !important;
+    }
+    div[data-testid="stTextInputRootElement"],
+    div.stTextInput > div:not([data-testid="stWidgetLabel"]),
+    div[data-testid="stTextInput"] > div:not([data-testid="stWidgetLabel"]),
+    div[data-baseweb="input"],
+    div[data-baseweb="base-input"],
+    div.eqy66r52 {
+        background: #0f172a !important;
+        background-color: #0f172a !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        border-radius: 10px !important;
+        color: #f8fafc !important;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35) !important;
+    }
+    div[data-testid="stTextInputRootElement"]:focus-within,
+    div.stTextInput > div:not([data-testid="stWidgetLabel"]):focus-within,
+    div[data-baseweb="input"]:focus-within,
+    div.eqy66r52:focus-within {
+        border-color: #4d65ff !important;
+        box-shadow: 0 0 0 2px rgba(77, 101, 255, 0.3) !important;
+    }
+
+    /* Text Input Field */
+    div[data-testid="stTextInputRootElement"] input,
+    div.stTextInput input,
+    input[data-testid="stTextInputField"],
     div[data-baseweb="input"] input,
     div[data-baseweb="base-input"] input,
-    div[data-baseweb="textarea"] textarea,
-    textarea,
+    input.eqy66r53,
     input[type="text"] {
         background: transparent !important;
         background-color: transparent !important;
         color: #f8fafc !important;
+        -webkit-text-fill-color: #f8fafc !important;
         font-size: 0.92rem !important;
         font-family: inherit !important;
+        caret-color: #38bdf8 !important;
     }
-    div[data-baseweb="input"] input::placeholder,
-    div[data-baseweb="textarea"] textarea::placeholder,
-    textarea::placeholder {
+    div[data-testid="stTextInputRootElement"] input::placeholder,
+    input[data-testid="stTextInputField"]::placeholder,
+    input::placeholder {
         color: #64748b !important;
+        -webkit-text-fill-color: #64748b !important;
     }
-    div[data-baseweb="select"] > div {
+
+    /* Helper & Instruction Text */
+    div[data-testid="InputInstructions"],
+    div[data-testid="InputInstructions"] > span {
+        color: #94a3b8 !important;
+    }
+
+    /* Number Input */
+    div[data-testid="stNumberInputContainer"] {
+        background: #0f172a !important;
+        background-color: #0f172a !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        border-radius: 10px !important;
+    }
+    div[data-testid="stNumberInputContainer"] input {
+        color: #f8fafc !important;
+        -webkit-text-fill-color: #f8fafc !important;
+        caret-color: #38bdf8 !important;
+    }
+
+    /* Dropdown / Selectbox */
+    div[data-baseweb="select"] > div,
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
         background-color: #0f172a !important;
         border-color: rgba(255, 255, 255, 0.16) !important;
         color: #f1f5f9 !important;
