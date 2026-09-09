@@ -393,8 +393,18 @@ fun SmishingScreen(
                         currentAnalysis = SmishingAnalyzer.analyzeSmishingMessage(benchmark.senderId, benchmark.text)
                     },
                     label = {
+                        val chipLabel = when (benchmark.id) {
+                            "hindi_electricity_sms" -> "🇮🇳 Hindi Power Cut"
+                            "hinglish_sbi_sms" -> "🗣️ Hinglish SBI Block"
+                            "sbi_kyc_sms" -> "1. SBI KYC"
+                            "electricity_sms" -> "2. Power Cut"
+                            "echallan_apk_sms" -> "3. E-Challan APK"
+                            "job_scam_sms" -> "4. Telegram Job"
+                            "legit_otp_sms" -> "7. Safe OTP"
+                            else -> benchmark.title.substringBefore(":")
+                        }
                         Text(
-                            text = benchmark.title.substringBefore(":"),
+                            text = chipLabel,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                             fontSize = 12.sp
                         )
@@ -507,17 +517,34 @@ fun SmishingScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .background(Color(0x264D65FF), RoundedCornerShape(6.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "CURRENTLY ANALYZING",
-                            color = PrimaryCobaltLight,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0x264D65FF), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "CURRENTLY ANALYZING",
+                                color = PrimaryCobaltLight,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        if (currentAnalysis.vernacularInfo.isVernacular) {
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Box(
+                                modifier = Modifier
+                                    .background(Color(0x26F59E0B), RoundedCornerShape(6.dp))
+                                    .padding(horizontal = 6.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = if (currentAnalysis.vernacularInfo.languageCode == "hi") "🇮🇳 HINDI SCRIPT" else "🗣️ HINGLISH",
+                                    color = Color(0xFFFBBF24),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
                     }
                     Text(
                         text = "Case: ${currentAnalysis.caseId}",
@@ -685,6 +712,40 @@ fun SmishingScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         DetailRow("Primary Threat Category", currentAnalysis.threatCategory)
                         DetailRow("Urgency Level", currentAnalysis.urgencyLevel)
+                        if (currentAnalysis.vernacularInfo.isVernacular) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = Color(0x20F59E0B)),
+                                border = BorderStroke(1.dp, Color(0x50F59E0B)),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(10.dp)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text("🇮🇳 Vernacular Intelligence Detected", color = Color(0xFFFBBF24), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text("(${currentAnalysis.vernacularInfo.detectedLanguage})", color = TextSecondary, fontSize = 10.sp)
+                                    }
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "\"${currentAnalysis.vernacularInfo.englishMeaning}\"",
+                                        color = TextPrimary,
+                                        fontSize = 11.sp,
+                                        lineHeight = 15.sp,
+                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                                    )
+                                    if (currentAnalysis.vernacularInfo.matchedKeywords.isNotEmpty()) {
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = "Threat Cues: ${currentAnalysis.vernacularInfo.matchedKeywords.joinToString(", ")}",
+                                            color = Color(0xFFFBBF24),
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                    }
+                                }
+                            }
+                        }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text("Message Body Under Inspection:", color = TextTertiary, fontWeight = FontWeight.Bold, fontSize = 11.sp)
                         Box(

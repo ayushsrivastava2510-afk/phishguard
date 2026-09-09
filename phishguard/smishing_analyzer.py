@@ -185,62 +185,247 @@ def extract_and_analyze_urls(text):
     return analysis
 
 
+# =========================================================================
+# VERNACULAR & HINGLISH TELEMETRY PATTERNS (INDIA-SPECIFIC CYBER FRAUD)
+# =========================================================================
+DEVANAGARI_REGEX = re.compile(r"[\u0900-\u097F]")
+TAMIL_REGEX = re.compile(r"[\u0B80-\u0BFF]")
+TELUGU_REGEX = re.compile(r"[\u0C00-\u0C7F]")
+BENGALI_REGEX = re.compile(r"[\u0980-\u09FF]")
+
+# Common Hinglish (Romanized Hindi) threat tokens
+HINGLISH_THREAT_KEYWORDS = {
+    "bijli", "bijlee", "line cut", "kaat diya", "kat diya", "kat jayega", "kaat di jayegi",
+    "power office", "bill update nahi", "aaj raat", "khata", "khaata", "band ho jayega",
+    "block ho gaya", "pan card link", "pan update", "yono block", "turant link open",
+    "turant", "tatkal", "tatkaal", "sampark karein", "sampark kare", "call karein",
+    "adhikari", "afsar", "badhai ho", "badhai", "inaam", "inam", "lottery lag gayi",
+    "raashi", "subsidy manzoor", "pm kisan", "pm awas", "claim karein", "yojana labh",
+    "gaadi ka challan", "challan pending", "court summon", "police karwayi", "jurmana"
+}
+
+
+def detect_script_and_language(text):
+    """
+    Identifies the script and linguistic style of the SMS text:
+      - Hindi (Devanagari)
+      - Hinglish (Code-mixed Romanized Hindi)
+      - Tamil / Telugu / Bengali (Indic Regional)
+      - English (Standard Latin)
+    """
+    raw = str(text or "").strip()
+    if not raw:
+        return {
+            "detected_language": "English",
+            "language_code": "en",
+            "script_type": "Latin (Standard)",
+            "is_vernacular": False,
+            "regional_family": "Indo-European / English"
+        }
+
+    # 1. Devanagari Script (Hindi / Marathi)
+    devanagari_chars = len(DEVANAGARI_REGEX.findall(raw))
+    if devanagari_chars >= 3 or (devanagari_chars > 0 and len(raw) < 20):
+        is_marathi = any(mw in raw for mw in ["आहे", "झाले", "करा", "नाही", "माहिती"])
+        lang_title = "Marathi (Devanagari Script)" if is_marathi else "Hindi (Devanagari Script)"
+        lang_code = "mr" if is_marathi else "hi"
+        return {
+            "detected_language": lang_title,
+            "language_code": lang_code,
+            "script_type": "Devanagari Script (Unicode U+0900-U+097F)",
+            "is_vernacular": True,
+            "regional_family": "Indo-Aryan (Official Scheduled Language)"
+        }
+
+    # 2. Other Indic Regional Scripts
+    if TAMIL_REGEX.search(raw):
+        return {
+            "detected_language": "Tamil (தமிழ் Script)",
+            "language_code": "ta",
+            "script_type": "Tamil Script (Unicode U+0B80-U+0BFF)",
+            "is_vernacular": True,
+            "regional_family": "Dravidian (Classical Indian Language)"
+        }
+    if TELUGU_REGEX.search(raw):
+        return {
+            "detected_language": "Telugu (తెలుగు Script)",
+            "language_code": "te",
+            "script_type": "Telugu Script (Unicode U+0C00-U+0C7F)",
+            "is_vernacular": True,
+            "regional_family": "Dravidian (Classical Indian Language)"
+        }
+    if BENGALI_REGEX.search(raw):
+        return {
+            "detected_language": "Bengali (বাংলা Script)",
+            "language_code": "bn",
+            "script_type": "Bengali Script (Unicode U+0980-U+09FF)",
+            "is_vernacular": True,
+            "regional_family": "Indo-Aryan (Official Scheduled Language)"
+        }
+
+    # 3. Hinglish (Latin Script transliteration of Hindi / Regional dialects)
+    text_lower = raw.lower()
+    matched_hinglish = [kw for kw in HINGLISH_THREAT_KEYWORDS if kw in text_lower]
+    if len(matched_hinglish) >= 1:
+        return {
+            "detected_language": "Hinglish (Romanized Hindi)",
+            "language_code": "hinglish",
+            "script_type": "Latin Script (Transliterated Vernacular)",
+            "is_vernacular": True,
+            "regional_family": "Code-Mixed Indo-Aryan / English"
+        }
+
+    return {
+        "detected_language": "English",
+        "language_code": "en",
+        "script_type": "Latin (Standard)",
+        "is_vernacular": False,
+        "regional_family": "Standard English"
+    }
+
+
 def classify_sms_intent(text, sender_id):
     """
-    Classifies the social engineering intent and psychological urgency
-    mechanisms within the SMS text.
+    Classifies the social engineering intent, psychological urgency
+    mechanisms, and vernacular/Hinglish semantics within the SMS text.
     """
     text_lower = text.lower()
+    raw_text = text
+    lang_info = detect_script_and_language(text)
+
     cues_detected = []
+    matched_vernacular_tokens = []
     category = "General Communication"
     urgency_level = "Normal"
     risk_boost = 0
+    english_forensic_meaning = "Routine conversational or informational SMS message."
+
+    # Define multilingual token lexicons
+    bank_en = ["kyc", "pan card", "aadhaar", "yono", "debit card block", "account suspend", "account close", "sbi"]
+    bank_hi = ["खाता ब्लॉक", "खाता बंद", "पैन कार्ड अपडेट", "केवाईसी लंबित", "योनो ब्लॉक", "तुरंत अपडेट करें", "खाता चालू", "डेबिट कार्ड ब्लॉक", "खाता निष्क्रय"]
+    bank_hing = ["khata block", "khata band", "pan card link", "pan link", "kyc update", "yono block", "debit card block", "khata chalu", "turant link open", "account block ho"]
+
+    elec_en = ["electricity", "power will be disconnect", "power office", "bill update", "line cut", "tonight 9:30"]
+    elec_hi = ["बिजली बिल", "बिजली काट", "पावर कट", "लाइन कट", "बिल अपडेट", "आज रात 9:30", "बिजली अधिकारी", "पावर ऑफिस", "विद्युत", "ऊर्जा"]
+    elec_hing = ["bijli", "bijlee", "line cut", "kat jayega", "kaat diya", "power office", "bill update nahi", "aaj raat 9:30", "aaj raat 9 baje", "officer ko call"]
+
+    gov_en = ["pm kisan", "pm awas", "subsidy approved", "congratulations lottery", "prize claim", "government benefit"]
+    gov_hi = ["पीएम किसान", "पीएम आवास", "सब्सिडी स्वीकृत", "बधाई हो", "लॉटरी", "इनाम", "राशि प्राप्त करें", "योजना लाभ", "सरकारी अनुदान"]
+    gov_hing = ["pm kisan", "pm awas", "subsidy manzoor", "badhai ho", "lottery lag gayi", "inaam", "inam", "raashi prapt", "claim karein", "yojana labh"]
+
+    chal_en = ["challan", "parivahan", "traffic police", "vehicle fine", "court summon"]
+    chal_hi = ["ट्रैफिक पुलिस", "ई-चालान", "कोर्ट समन", "वाहन जुर्माना", "गिरफ्तारी वारंट", "तुरंत भरें", "चालान लंबित"]
+    chal_hing = ["traffic police", "e-challan", "court summon", "gaadi ka challan", "gaadi challan", "jurmana", "police karwayi", "challan pending"]
+
+    job_en = ["earn daily", "part-time job", "part time job", "work from home", "review hotel", "like youtube", "telegram vip", "daily income"]
+    job_hi = ["पार्ट टाइम जॉब", "घर बैठे कमाएं", "दैनिक आय", "टेलीग्राम कार्य", "होटल रिव्यू"]
+    job_hing = ["part-time job", "ghar baithe kamaye", "daily kamaye", "telegram task"]
+
+    otp_en = ["is your otp", "one time password", "debited by", "credited with", "txn of inr", "card ending"]
+    otp_hi = ["आपका ओटीपी है", "ओटीपी किसी से साझा न करें", "बैंक कभी ओटीपी नहीं मांगता", "खाते से निकाले गए"]
+    otp_hing = ["aapka otp hai", "kisi ko na batayein", "otp share na karein", "bank kabhi otp nahi mangta"]
+
+    urgency_en = ["urgent", "immediately", "act today", "pay today", "blocked today", "suspended today", "expire today", "due today", "tonight 9:30", "disconnect tonight", "within 24 hours", "within 2 hours", "last notice", "final warning"]
+    urgency_hi = ["तुरंत", "तत्काल", "आज ही", "24 घंटे", "आज रात", "अंतिम चेतावनी", "समय सीमा"]
+    urgency_hing = ["turant", "tatkal", "tatkaal", "aaj hi", "24 ghante", "aaj raat", "last warning", "aaj sham"]
 
     # 1. Banking / YONO KYC Suspension Panic
-    if any(k in text_lower for k in ["kyc", "pan card", "aadhaar", "yono", "debit card block", "account suspend", "account close", "sbi"]):
+    if any(k in text_lower for k in bank_en) or any(k in raw_text for k in bank_hi) or any(k in text_lower for k in bank_hing):
         cues_detected.append("Banking KYC Account Suspension Coercion")
-        category = "Financial / Banking KYC Fraud"
+        category = "Financial / Banking KYC Fraud (बैंक खाता एवं केवाईसी धोखाधड़ी)"
         urgency_level = "Critical"
         risk_boost += 35
+        english_forensic_meaning = "Coercive banking freeze threat: victim is told their account is suspended or blocked due to pending KYC/PAN verification."
+        for tk in bank_hi:
+            if tk in raw_text: matched_vernacular_tokens.append(tk)
+        for tk in bank_hing:
+            if tk in text_lower: matched_vernacular_tokens.append(tk)
 
     # 2. Electricity Bill Power Disconnection Threat
-    elif any(k in text_lower for k in ["electricity", "power will be disconnect", "power office", "bill update", "line cut", "tonight 9:30"]):
+    elif any(k in text_lower for k in elec_en) or any(k in raw_text for k in elec_hi) or any(k in text_lower for k in elec_hing):
         cues_detected.append("Essential Utility (Electricity) Cut-off Intimidation")
-        category = "Utility & Electricity Disconnection Scam"
+        category = "Utility & Electricity Disconnection Scam (बिजली बिल धोखाधड़ी)"
         urgency_level = "Critical"
         risk_boost += 40
+        english_forensic_meaning = "Urgent utility power cut-off scare: victim is intimidated with imminent electricity disconnection tonight unless they call or pay immediately."
+        for tk in elec_hi:
+            if tk in raw_text: matched_vernacular_tokens.append(tk)
+        for tk in elec_hing:
+            if tk in text_lower: matched_vernacular_tokens.append(tk)
 
-    # 3. Traffic E-Challan / Court Summons
-    elif any(k in text_lower for k in ["challan", "parivahan", "traffic police", "vehicle fine", "court summon"]):
-        cues_detected.append("Government Penalty & Legal Intimidation")
-        category = "Traffic E-Challan Malware Dropper"
+    # 3. Government Scheme & Subsidy Lottery Lure
+    elif any(k in text_lower for k in gov_en) or any(k in raw_text for k in gov_hi) or any(k in text_lower for k in gov_hing):
+        cues_detected.append("Fake Government Scheme / Subsidy Lottery Lure")
+        category = "Govt Scheme / Subsidy Impersonation (सरकारी योजना व लॉटरी प्रलोभन)"
         urgency_level = "High"
         risk_boost += 35
+        english_forensic_meaning = "Advance-fee / fake government scheme subsidy approval lure harvesting personal or banking information."
+        for tk in gov_hi:
+            if tk in raw_text: matched_vernacular_tokens.append(tk)
+        for tk in gov_hing:
+            if tk in text_lower: matched_vernacular_tokens.append(tk)
 
-    # 4. Part-time Job / VIP Task Fraud
-    elif any(k in text_lower for k in ["earn daily", "part-time job", "part time job", "work from home", "review hotel", "like youtube", "telegram vip", "daily income"]):
+    # 4. Traffic E-Challan / Police Intimidation
+    elif any(k in text_lower for k in chal_en) or any(k in raw_text for k in chal_hi) or any(k in text_lower for k in chal_hing):
+        cues_detected.append("Government Penalty & Legal Intimidation")
+        category = "Traffic E-Challan Legal Coercion (ट्रैफिक चालान व पुलिस नोटिस)"
+        urgency_level = "High"
+        risk_boost += 35
+        english_forensic_meaning = "Government penalty intimidation: victim is threatened with court summons or vehicle impounding over unpaid traffic challan."
+        for tk in chal_hi:
+            if tk in raw_text: matched_vernacular_tokens.append(tk)
+        for tk in chal_hing:
+            if tk in text_lower: matched_vernacular_tokens.append(tk)
+
+    # 5. Part-Time Job / Task Investment Fraud
+    elif any(k in text_lower for k in job_en) or any(k in raw_text for k in job_hi) or any(k in text_lower for k in job_hing):
         cues_detected.append("Work-From-Home Task Investment Fraud")
         category = "Part-Time Job / Task Investment Scam"
         urgency_level = "Medium"
         risk_boost += 30
+        english_forensic_meaning = "Advance-fee task fraud promising daily earnings for liking videos or rating hotels via Telegram."
+        for tk in job_hi:
+            if tk in raw_text: matched_vernacular_tokens.append(tk)
+        for tk in job_hing:
+            if tk in text_lower: matched_vernacular_tokens.append(tk)
 
-    # 5. Legitimate Transactional OTP or Debit Alert
-    elif any(k in text_lower for k in ["is your otp", "one time password", "debited by", "credited with", "txn of inr", "card ending"]):
+    # 6. Legitimate Transactional OTP or Debit Alert
+    elif any(k in text_lower for k in otp_en) or any(k in raw_text for k in otp_hi) or any(k in text_lower for k in otp_hing):
         cues_detected.append("Authentic Transactional / OTP Pattern")
-        category = "Transactional Banking Alert"
+        category = "Transactional Banking Alert (प्रमाणित बैंक ओटीपी)"
         urgency_level = "Normal"
         risk_boost = 0
+        english_forensic_meaning = "Standard transactional alert containing one-time authorization code with security confidentiality warnings."
+        for tk in otp_hi:
+            if tk in raw_text: matched_vernacular_tokens.append(tk)
+        for tk in otp_hing:
+            if tk in text_lower: matched_vernacular_tokens.append(tk)
 
-    # Coercive urgency cues check (distinguishes artificial panic from casual conversational words)
-    if any(u in text_lower for u in ["urgent", "immediately", "act today", "pay today", "blocked today", "suspended today", "expire today", "due today", "tonight 9:30", "disconnect tonight", "within 24 hours", "within 2 hours", "last notice", "final warning"]):
+    # Coercive Urgency Cues Check
+    if any(u in text_lower for u in urgency_en) or any(u in raw_text for u in urgency_hi) or any(u in text_lower for u in urgency_hing):
         cues_detected.append("Artificial Time-Pressure Constraint")
         risk_boost += 15
+        for tk in urgency_hi:
+            if tk in raw_text: matched_vernacular_tokens.append(tk)
+        for tk in urgency_hing:
+            if tk in text_lower: matched_vernacular_tokens.append(tk)
+
+    vernacular_info = {
+        "detected_language": lang_info["detected_language"],
+        "language_code": lang_info["language_code"],
+        "script_type": lang_info["script_type"],
+        "is_vernacular": lang_info["is_vernacular"],
+        "regional_family": lang_info["regional_family"],
+        "matched_keywords": list(dict.fromkeys(matched_vernacular_tokens)),
+        "english_meaning": english_forensic_meaning,
+    }
 
     return {
         "primary_category": category,
         "urgency_level": urgency_level,
         "cues_detected": cues_detected,
         "intent_risk_boost": risk_boost,
+        "vernacular_info": vernacular_info,
     }
 
 
@@ -256,6 +441,11 @@ def generate_chakshu_complaint_draft(smishing_record):
     score = smishing_record["risk_score"]
     case_id = smishing_record["case_id"]
     timestamp = smishing_record["timestamp"]
+    v_info = smishing_record.get("vernacular_info", {})
+    lang_str = v_info.get("detected_language", "English")
+    script_str = v_info.get("script_type", "Latin (Standard)")
+    meaning_str = v_info.get("english_meaning", "N/A")
+    vernacular_tokens = ", ".join(v_info.get("matched_keywords", [])) or "None (English syntax)"
 
     draft = (
         f"INCIDENT REPORT FOR Sanchar Saathi (Chakshu) & National Cyber Crime Helpline (1930)\n"
@@ -267,6 +457,10 @@ def generate_chakshu_complaint_draft(smishing_record):
         f"Offending Sender ID / SIM  : {sid}\n"
         f"Incident Category          : {cat}\n"
         f"TRAI DLT Compliance Status : {'VIOLATION (Unauthenticated Route)' if not smishing_record['sender_info']['is_dlt_compliant'] else 'Registered Header Abuse'}\n\n"
+        f"Linguistic & Vernacular Telemetry:\n"
+        f"  - Detected Language / Script : {lang_str} ({script_str})\n"
+        f"  - Vernacular Alarm Keywords  : {vernacular_tokens}\n"
+        f"  - Plain-English Translation  : {meaning_str}\n\n"
         f"Extracted Malicious URLs / Indicators:\n"
     )
     for u in smishing_record["url_info"].get("urls", []):
@@ -298,6 +492,7 @@ def analyze_smishing_message(sender_id, message_text):
     sender_res = validate_sender_id(sender_id)
     url_res = extract_and_analyze_urls(message_text)
     intent_res = classify_sms_intent(message_text, sender_id)
+    v_info = intent_res.get("vernacular_info", {})
 
     # Check if this is a personal 10-digit number AND casual P2P conversation
     is_personal_p2p = (
@@ -341,6 +536,10 @@ def analyze_smishing_message(sender_id, message_text):
         action_msg = "✅ VERIFIED SAFE: Person-to-Person (P2P) message. Exempt from commercial DLT regulations." if is_personal_p2p else "✅ VERIFIED SAFE: Dispatched via registered TRAI DLT commercial entity; standard alert."
 
     all_flags = sender_res["red_flags"] + url_res["red_flags"]
+    if v_info.get("is_vernacular"):
+        all_flags.append(f"Vernacular Telemetry: Intercepted in <b>{v_info.get('detected_language')}</b> ({v_info.get('script_type')}).")
+        all_flags.append(f"Forensic Translation: <i>\"{v_info.get('english_meaning')}\"</i>")
+
     for cue in intent_res["cues_detected"]:
         if "Authentic" not in cue:
             all_flags.append(f"Social Engineering: {cue}")
@@ -376,6 +575,7 @@ def analyze_smishing_message(sender_id, message_text):
         "url_info": url_res,
         "all_red_flags": all_flags,
         "evidence_hash": sha256_hash,
+        "vernacular_info": v_info,
         "transformer_label": nlp_res["label"],
         "transformer_confidence": nlp_res["confidence"],
         "model_name": nlp_res["model_name"],
@@ -388,7 +588,8 @@ def analyze_smishing_message(sender_id, message_text):
 
 
 # --------------------------------------------------------------------
-# 5 Built-in Real-World Smishing Demonstration Benchmark Scenarios
+# 7 Built-in Real-World Smishing Demonstration Benchmark Scenarios
+# (Includes English, Hindi Devanagari, and Hinglish vectors)
 # --------------------------------------------------------------------
 SMISHING_BENCHMARKS = [
     {
@@ -420,8 +621,22 @@ SMISHING_BENCHMARKS = [
         "description": "Cross-border virtual number from Indonesia (+62) pushing task-based crypto and advance-fee investment fraud.",
     },
     {
+        "id": "hindi_electricity_sms",
+        "title": "🚨 Scenario 5: 🇮🇳 Hindi Electricity Disconnection Panic",
+        "sender_id": "+91 98712 34567",
+        "text": "प्रिय उपभोक्ता, आपका बिजली बिल अपडेट नहीं हुआ है। आज रात 9:30 बजे बिजली काट दी जाएगी। तुरंत बिजली अधिकारी 9871234567 पर संपर्क करें या बिल अपडेट करें: bit.ly/bijli-bill-update",
+        "description": "Devanagari script electricity cut-off intimidation deployed across rural/semi-urban belts in northern & central India.",
+    },
+    {
+        "id": "hinglish_sbi_sms",
+        "title": "🚨 Scenario 6: 🗣️ Hinglish SBI KYC Account Suspension",
+        "sender_id": "+91 91234 88990",
+        "text": "Dear customer aapka SBI khata aaj raat 12 baje block kar diya jayega kyonki PAN card link nahi hai. Turant apna khata chalu rakhne ke liye yahan update karein: bit.ly/sbi-pan-khata",
+        "description": "Code-mixed Hinglish SMS exploiting KYC panic to steal banking credentials from mobile users.",
+    },
+    {
         "id": "legit_otp_sms",
-        "title": "🟢 Scenario 5: Verified Bank Transaction OTP (Safe)",
+        "title": "🟢 Scenario 7: Verified Bank Transaction OTP (Safe)",
         "sender_id": "AD-HDFCBK",
         "text": "847291 is your OTP for purchase of INR 2,499.00 at FLIPKART using HDFC Bank Credit Card ending 7041. Valid for 10 mins. Do not share OTP with anyone. Bank never calls for OTP.",
         "description": "Authentic transactional SMS compliant with TRAI DLT alphanumeric regulations (AD-HDFCBK) containing no external URLs.",

@@ -2650,8 +2650,9 @@ def render_smishing_sentinel(sound_alert):
         unsafe_allow_html=True,
     )
 
-    # 5 Smishing Scenario Buttons
-    s_col1, s_col2, s_col3, s_col4, s_col5 = st.columns(5)
+    # 7 Smishing Scenario Buttons (English + Vernacular India-Specific)
+    st.markdown("<div style='font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.05em;'>🌐 English Attack Vectors</div>", unsafe_allow_html=True)
+    s_col1, s_col2, s_col3, s_col4 = st.columns(4)
     cur_sms_id = st.session_state.get("active_sms_scenario", "sbi_kyc_sms")
 
     with s_col1:
@@ -2695,7 +2696,7 @@ def render_smishing_sentinel(sound_alert):
 
     with s_col4:
         act = (cur_sms_id == "job_scam_sms")
-        if st.button("⚠️ Task Scam" + ("  ✓" if act else ""), use_container_width=True, type="primary" if act else "secondary", help=SMISHING_BENCHMARKS[3]["description"]):
+        if st.button("⚠️ Telegram Task" + ("  ✓" if act else ""), use_container_width=True, type="primary" if act else "secondary", help=SMISHING_BENCHMARKS[3]["description"]):
             b = SMISHING_BENCHMARKS[3]
             st.session_state.active_sms_scenario = b["id"]
             rec = analyze_smishing_message(b["sender_id"], b["text"])
@@ -2706,10 +2707,39 @@ def render_smishing_sentinel(sound_alert):
                 st.session_state.sms_history.append({"id": rec["case_id"], "sender": b["sender_id"], "risk_score": rec["risk_score"], "threat": rec["threat_category"]})
             st.rerun()
 
-    with s_col5:
-        act = (cur_sms_id == "legit_otp_sms")
-        if st.button("🟢 Legitimate OTP" + ("  ✓" if act else ""), use_container_width=True, type="primary" if act else "secondary", help=SMISHING_BENCHMARKS[4]["description"]):
+    st.markdown("<div style='font-size: 0.72rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; margin-top: 6px; margin-bottom: 5px; letter-spacing: 0.05em;'>🇮🇳 Vernacular & Hinglish Cyber Defense Vectors</div>", unsafe_allow_html=True)
+    v_col1, v_col2, v_col3 = st.columns([1.3, 1.3, 1.1])
+
+    with v_col1:
+        act = (cur_sms_id == "hindi_electricity_sms")
+        if st.button("⚡ बिजली कट-ऑफ (Hindi)" + ("  ✓" if act else ""), use_container_width=True, type="primary" if act else "secondary", help=SMISHING_BENCHMARKS[4]["description"]):
             b = SMISHING_BENCHMARKS[4]
+            st.session_state.active_sms_scenario = b["id"]
+            rec = analyze_smishing_message(b["sender_id"], b["text"])
+            rec["scenario_title"] = b["title"]
+            rec["scenario_desc"] = b["description"]
+            st.session_state.last_sms_analysis = rec
+            if not any(item["id"] == rec["case_id"] for item in st.session_state.sms_history):
+                st.session_state.sms_history.append({"id": rec["case_id"], "sender": b["sender_id"], "risk_score": rec["risk_score"], "threat": rec["threat_category"]})
+            st.rerun()
+
+    with v_col2:
+        act = (cur_sms_id == "hinglish_sbi_sms")
+        if st.button("🗣️ खाता ब्लॉक / PAN (Hinglish)" + ("  ✓" if act else ""), use_container_width=True, type="primary" if act else "secondary", help=SMISHING_BENCHMARKS[5]["description"]):
+            b = SMISHING_BENCHMARKS[5]
+            st.session_state.active_sms_scenario = b["id"]
+            rec = analyze_smishing_message(b["sender_id"], b["text"])
+            rec["scenario_title"] = b["title"]
+            rec["scenario_desc"] = b["description"]
+            st.session_state.last_sms_analysis = rec
+            if not any(item["id"] == rec["case_id"] for item in st.session_state.sms_history):
+                st.session_state.sms_history.append({"id": rec["case_id"], "sender": b["sender_id"], "risk_score": rec["risk_score"], "threat": rec["threat_category"]})
+            st.rerun()
+
+    with v_col3:
+        act = (cur_sms_id == "legit_otp_sms")
+        if st.button("🟢 Legitimate OTP (Safe)" + ("  ✓" if act else ""), use_container_width=True, type="primary" if act else "secondary", help=SMISHING_BENCHMARKS[6]["description"]):
+            b = SMISHING_BENCHMARKS[6]
             st.session_state.active_sms_scenario = b["id"]
             rec = analyze_smishing_message(b["sender_id"], b["text"])
             rec["scenario_title"] = b["title"]
@@ -2861,7 +2891,7 @@ def render_smishing_sentinel(sound_alert):
                     <div class="metric-title">Smishing Risk Score</div>
                     <div style="position: relative; width: 112px; height: 112px; margin: 4px 0;">
                         <svg width="112" height="112" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="42" stroke="' + ('rgba(255,255,255,0.08)' if is_dark else '#e2e8f0') + '" stroke-width="8" fill="transparent"/>
+                            <circle cx="50" cy="50" r="42" stroke="{'rgba(255,255,255,0.08)' if is_dark else '#e2e8f0'}" stroke-width="8" fill="transparent"/>
                             <circle cx="50" cy="50" r="42" stroke="{s_gauge_color}" stroke-width="8" fill="transparent"
                                 stroke-dasharray="{s_circumference}" stroke-dashoffset="{s_stroke_offset}"
                                 stroke-linecap="round" transform="rotate(-90 50 50)"
@@ -2872,7 +2902,7 @@ def render_smishing_sentinel(sound_alert):
                             <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 600;">/ 100</div>
                         </div>
                     </div>
-                    <div><span class="metric-badge {s_badge}">{s_verdict}</span></div>
+                    <div><span class="metric-badge {s_badge_cls}">{s_verdict}</span></div>
                     <div style="font-size: 0.72rem; color: #64748b; margin-top: 8px;">Case: <code>{sms_data.get('case_id')}</code></div>
                 </div>
                 """,
@@ -2896,35 +2926,58 @@ def render_smishing_sentinel(sound_alert):
             else:
                 reason_s_link = f"✅ <b>No Hyperlinks:</b> Message contains zero external or obfuscated web URLs."
 
-            if sms_data.get("urgency_level") in ["Urgent", "High"]:
+            if sms_data.get("urgency_level") in ["Urgent", "High", "Critical"]:
                 reason_s_psych = f"❌ <b>High Urgency Coercion:</b> Employs psychological panic (account freeze, bill cut-off, legal warrant)."
             else:
                 reason_s_psych = f"✅ <b>Standard Tone:</b> Routine informational or multi-factor authentication dispatch."
-                sfa_bg = "rgba(15, 23, 42, 0.72)" if is_dark else "#ffffff"
-                sfa_title = "#ffffff" if is_dark else "#0f172a"
-                sfa_sub = "#94a3b8" if is_dark else "#64748b"
-                sfa_body = "#e2e8f0" if is_dark else "#334155"
 
-                st.markdown(
-                    f"""
-                    <div class="metric-card" style="padding: 20px 24px; border-left: 4px solid {s_border_accent}; background: {sfa_bg};">
-                        <div class="sub-head-top" style="margin-bottom: 4px;">Forensic Assessment</div>
-                        <div style="font-size: 1.25rem; font-weight: 800; color: {sfa_title}; margin-bottom: 2px;">
-                            {sms_data['threat_category']}
-                        </div>
-                        <div style="font-size: 0.82rem; color: {sfa_sub}; margin-bottom: 14px;">
-                            <b>Urgency Level:</b> <span style="color: #ef4444; font-weight: 600;">{sms_data['urgency_level'].upper()}</span> &bull; 
-                            <b>Sender Route:</b> {sms_sender['sender_type']}
-                        </div>
-                        <div style="font-size: 0.88rem; line-height: 1.65; color: {sfa_body};">
-                            <div style="margin-bottom: 8px;">{reason_s_sender}</div>
-                            <div style="margin-bottom: 8px;">{reason_s_link}</div>
-                            <div>{reason_s_psych}</div>
-                        </div>
+            # Vernacular Telemetry Breakdown
+            v_info = sms_data.get("vernacular_info", {})
+            vernacular_card_html = ""
+            fallback_tks_html = '<span style="color:#64748b;">Heuristic syntax match</span>'
+            if v_info and v_info.get("is_vernacular"):
+                tks_badges = "".join(f'<span style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #fbbf24; font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; margin-right: 4px; font-weight: 600;">{tk}</span>' for tk in v_info.get("matched_keywords", []))
+                vernacular_card_html = f"""
+                <div style="margin-top: 12px; padding: 10px 14px; background: rgba(16, 185, 129, 0.08); border-left: 3px solid #10b981; border-radius: 8px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; flex-wrap: wrap; gap: 4px;">
+                        <span style="font-size: 0.74rem; font-weight: 700; color: #34d399; text-transform: uppercase; letter-spacing: 0.04em;">🇮🇳 Vernacular Intelligence Detected</span>
+                        <span style="font-size: 0.72rem; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.12); padding: 2px 8px; border-radius: 4px;">{v_info.get('detected_language')}</span>
                     </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
+                    <div style="font-size: 0.82rem; color: #cbd5e1; margin-bottom: 6px; line-height: 1.45;">
+                        <b>Plain-English Translation:</b> <i>"{v_info.get('english_meaning')}"</i>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                        <span style="font-size: 0.70rem; color: #94a3b8; font-weight: 600;">Alarm Cues:</span> {tks_badges or fallback_tks_html}
+                    </div>
+                </div>
+                """
+
+            sfa_bg = "rgba(15, 23, 42, 0.72)" if is_dark else "#ffffff"
+            sfa_title = "#ffffff" if is_dark else "#0f172a"
+            sfa_sub = "#94a3b8" if is_dark else "#64748b"
+            sfa_body = "#e2e8f0" if is_dark else "#334155"
+
+            st.markdown(
+                f"""
+                <div class="metric-card" style="padding: 20px 24px; border-left: 4px solid {s_border_accent}; background: {sfa_bg};">
+                    <div class="sub-head-top" style="margin-bottom: 4px;">Forensic Assessment</div>
+                    <div style="font-size: 1.20rem; font-weight: 800; color: {sfa_title}; margin-bottom: 2px;">
+                        {sms_data['threat_category']}
+                    </div>
+                    <div style="font-size: 0.82rem; color: {sfa_sub}; margin-bottom: 12px;">
+                        <b>Urgency Level:</b> <span style="color: #ef4444; font-weight: 600;">{sms_data['urgency_level'].upper()}</span> &bull; 
+                        <b>Sender Route:</b> {sms_sender['sender_type']}
+                    </div>
+                    <div style="font-size: 0.88rem; line-height: 1.65; color: {sfa_body};">
+                        <div style="margin-bottom: 8px;">{reason_s_sender}</div>
+                        <div style="margin-bottom: 8px;">{reason_s_link}</div>
+                        <div>{reason_s_psych}</div>
+                    </div>
+                    {vernacular_card_html}
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
         with scol_action:
             st.markdown(
@@ -2954,6 +3007,7 @@ def render_smishing_sentinel(sound_alert):
                 type="primary" if sms_score >= 50 else "secondary",
                 key="btn_download_chakshu"
             )
+
 
         # 4 Advanced Smishing Deep Dive Tabs
         st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
@@ -3056,6 +3110,46 @@ def render_smishing_sentinel(sound_alert):
                 """,
                 unsafe_allow_html=True,
             )
+
+            v_info = sms_data.get("vernacular_info", {})
+            if v_info and v_info.get("is_vernacular"):
+                st.markdown("#### 🇮🇳 Vernacular & Linguistic Forensic Decomposition")
+                vl1, vl2 = st.columns(2)
+                with vl1:
+                    st.markdown(
+                        f"""
+                        <div class="metric-card" style="padding: 14px 18px;">
+                            <div class="metric-title">Script & Language Architecture</div>
+                            <div style="font-size: 1.05rem; font-weight: 700; color: #34d399; margin-bottom: 4px;">
+                                {v_info.get('detected_language')}
+                            </div>
+                            <div style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.5;">
+                                <b>Script Family:</b> {v_info.get('script_type')}<br/>
+                                <b>Linguistic Group:</b> {v_info.get('regional_family')}<br/>
+                                <b>Target Demographic:</b> Indian Regional / Vernacular Population
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                with vl2:
+                    tks_badges = "".join(f'<span style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #fbbf24; font-size: 0.76rem; padding: 3px 8px; border-radius: 4px; margin: 2px 4px 2px 0; display: inline-block; font-weight: 600;">{tk}</span>' for tk in v_info.get("matched_keywords", []))
+                    fallback_cue_html = '<span style="color:#64748b;">Heuristic syntax match</span>'
+                    st.markdown(
+                        f"""
+                        <div class="metric-card" style="padding: 14px 18px;">
+                            <div class="metric-title">Plain-English Forensic Translation</div>
+                            <div style="font-size: 0.86rem; color: #f8fafc; font-style: italic; margin-bottom: 8px; line-height: 1.5;">
+                                "{v_info.get('english_meaning')}"
+                            </div>
+                            <div>
+                                <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 600;">Detected Threat Cues:</span><br/>
+                                {tks_badges or fallback_cue_html}
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
 
             # DistilBERT Explainable AI (XAI) Token Attribution
             attributions = sms_data.get("token_attributions", [])

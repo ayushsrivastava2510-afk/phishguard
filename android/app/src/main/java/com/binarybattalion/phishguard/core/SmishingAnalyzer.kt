@@ -192,6 +192,82 @@ object SmishingAnalyzer {
         )
     }
 
+    private val DEVANAGARI_REGEX = Pattern.compile("[\\u0900-\\u097F]")
+    private val HINGLISH_MARKERS = listOf(
+        "bijli", "bijli bill", "khata", "kat jayega", "turant", "sampark kare",
+        "link open", "dhyan de", "badhai ho", "yojana", "rashan", "police chalan",
+        "katwa lijiye", "band kar diya", "chalega", "aaj raat", "shulk", "suvidha",
+        "rupya", "paise", "naukri", "kamaye", "karen", "sampark", "paisa", "aapka",
+        "bheje", "deve", "dekh", "kijiye", "bandh", "adhikari"
+    )
+
+    fun detectScriptAndLanguage(text: String): VernacularInfo {
+        var devanagariCount = 0
+        val matcher = DEVANAGARI_REGEX.matcher(text)
+        while (matcher.find()) {
+            devanagariCount++
+        }
+
+        val textLower = text.lowercase(Locale.ROOT)
+        val matchedHinglish = HINGLISH_MARKERS.filter { textLower.contains(it) }
+
+        val isHindi = devanagariCount >= 3
+        val isHinglish = !isHindi && (matchedHinglish.size >= 2 || (matchedHinglish.size >= 1 && (textLower.contains("sbi") || textLower.contains("kyc") || textLower.contains("bill") || textLower.contains("power") || textLower.contains("khata"))))
+
+        val detectedLang = when {
+            isHindi -> "Hindi (Devanagari Script)"
+            isHinglish -> "Hinglish (Romanized Hindi)"
+            else -> "English"
+        }
+        val langCode = when {
+            isHindi -> "hi"
+            isHinglish -> "hi-Latn"
+            else -> "en"
+        }
+        val scriptType = when {
+            isHindi -> "Devanagari Script (Unicode U+0900-U+097F)"
+            isHinglish -> "Romanized Indic (Hinglish)"
+            else -> "Latin (Standard)"
+        }
+
+        val matchedCues = mutableListOf<String>()
+        if (isHindi) {
+            val devanagariKeywords = listOf("बिजली बिल", "बिजली काट", "बिल अपडेट", "आज रात 9:30", "बिजली अधिकारी", "तुरंत", "आज रात", "खाता", "केवाईसी", "पैन कार्ड", "ब्लॉक", "ई-चालान", "नौकरी")
+            devanagariKeywords.forEach { kw ->
+                if (text.contains(kw)) matchedCues.add(kw)
+            }
+        }
+        matchedHinglish.forEach { kw ->
+            if (!matchedCues.contains(kw)) matchedCues.add(kw)
+        }
+
+        val meaning = when {
+            textLower.contains("bijli") || text.contains("बिजली") || textLower.contains("power") ->
+                "Urgent utility power cut-off scare: victim is intimidated with imminent electricity disconnection tonight unless they call or pay immediately."
+            textLower.contains("khata") || text.contains("खाता") || textLower.contains("kyc") || textLower.contains("pan") || text.contains("केवाईसी") ->
+                "Coercive banking freeze threat: victim is told their account is suspended or blocked due to pending KYC/PAN verification."
+            textLower.contains("challan") || text.contains("चालान") ->
+                "Law enforcement intimidation notice: victim is coerced into paying a fake traffic violation or fine under threat of court action."
+            textLower.contains("kamaye") || text.contains("नौकरी") || textLower.contains("naukri") ->
+                "Task fraud and work-from-home lure offering unrealistic daily earnings for simple mobile tasks."
+            textLower.contains("otp") || text.contains("ओटीपी") ->
+                "Authentic one-time password (OTP) notification dispatched for security verification."
+            isHindi || isHinglish ->
+                "Regional vernacular communication detected; context analyzed for deceptive intent patterns."
+            else ->
+                "Standard English transmission."
+        }
+
+        return VernacularInfo(
+            detectedLanguage = detectedLang,
+            languageCode = langCode,
+            scriptType = scriptType,
+            isVernacular = isHindi || isHinglish,
+            matchedKeywords = matchedCues,
+            englishMeaning = meaning
+        )
+    }
+
     fun classifySmsIntent(text: String, senderId: String): IntentAnalysis {
         val textLower = text.lowercase(Locale.ROOT)
         val cues = mutableListOf<String>()
@@ -199,34 +275,40 @@ object SmishingAnalyzer {
         var urgency = "Normal"
         var riskBoost = 0
 
-        if (listOf("kyc", "pan card", "aadhaar", "yono", "debit card block", "account suspend", "account close", "sbi").any { textLower.contains(it) }) {
+        val isBanking = listOf("kyc", "pan card", "aadhaar", "yono", "debit card block", "account suspend", "account close", "sbi", "khata", "khata block", "pan link", "aadhaar link", "खाता", "केवाईसी", "आधार", "पैन कार्ड", "ब्लॉक", "बैंक").any { textLower.contains(it) || text.contains(it) }
+        val isUtility = listOf("electricity", "power will be disconnect", "power office", "bill update", "line cut", "tonight 9:30", "bijli", "bijli bill", "kat jayega", "power cut", "बिजली", "बिल", "काट", "विद्युत", "अधिकारी", "आज रात").any { textLower.contains(it) || text.contains(it) }
+        val isChallan = listOf("challan", "parivahan", "traffic police", "vehicle fine", "court summon", "police chalan", "ई-चालान", "चालान", "जुर्माना", "ट्रैफिक पुलिस").any { textLower.contains(it) || text.contains(it) }
+        val isTask = listOf("earn daily", "part-time job", "part time job", "work from home", "review hotel", "like youtube", "telegram vip", "daily income", "naukri", "kamaye", "roj kamaye", "घर बैठे", "नौकरी", "कमाएं").any { textLower.contains(it) || text.contains(it) }
+        val isOtp = listOf("is your otp", "one time password", "debited by", "credited with", "txn of inr", "card ending", "सुरक्षित ओटीपी", "का ओटीपी", "otp hai").any { textLower.contains(it) || text.contains(it) }
+
+        if (isBanking) {
             cues.add("Banking KYC Account Suspension Coercion")
             category = "Financial / Banking KYC Fraud"
             urgency = "Critical"
             riskBoost += 35
-        } else if (listOf("electricity", "power will be disconnect", "power office", "bill update", "line cut", "tonight 9:30").any { textLower.contains(it) }) {
+        } else if (isUtility) {
             cues.add("Essential Utility (Electricity) Cut-off Intimidation")
             category = "Utility & Electricity Disconnection Scam"
             urgency = "Critical"
             riskBoost += 40
-        } else if (listOf("challan", "parivahan", "traffic police", "vehicle fine", "court summon").any { textLower.contains(it) }) {
+        } else if (isChallan) {
             cues.add("Government Penalty & Legal Intimidation")
             category = "Traffic E-Challan Malware Dropper"
             urgency = "High"
             riskBoost += 35
-        } else if (listOf("earn daily", "part-time job", "part time job", "work from home", "review hotel", "like youtube", "telegram vip", "daily income").any { textLower.contains(it) }) {
+        } else if (isTask) {
             cues.add("Work-From-Home Task Investment Fraud")
             category = "Part-Time Job / Task Investment Scam"
             urgency = "Medium"
             riskBoost += 30
-        } else if (listOf("is your otp", "one time password", "debited by", "credited with", "txn of inr", "card ending").any { textLower.contains(it) }) {
+        } else if (isOtp) {
             cues.add("Authentic Transactional / OTP Pattern")
             category = "Transactional Banking Alert"
             urgency = "Normal"
             riskBoost = 0
         }
 
-        if (listOf("urgent", "immediately", "act today", "pay today", "blocked today", "suspended today", "expire today", "due today", "tonight 9:30", "disconnect tonight", "within 24 hours", "within 2 hours", "last notice", "final warning").any { textLower.contains(it) }) {
+        if (listOf("urgent", "immediately", "act today", "pay today", "blocked today", "suspended today", "expire today", "due today", "tonight 9:30", "disconnect tonight", "within 24 hours", "within 2 hours", "last notice", "final warning", "turant", "aaj raat", "turant sampark", "jald", "kare", "तुरंत", "आज रात", "अंतिम चेतावनी", "तत्काल").any { textLower.contains(it) || text.contains(it) }) {
             cues.add("Artificial Time-Pressure Constraint")
             riskBoost += 15
         }
@@ -243,6 +325,7 @@ object SmishingAnalyzer {
         val senderRes = validateSenderId(senderId)
         val urlRes = extractAndAnalyzeUrls(messageText)
         val intentRes = classifySmsIntent(messageText, senderId)
+        val vernacularRes = detectScriptAndLanguage(messageText)
 
         val isPersonalP2P = !senderRes.isDltCompliant &&
                 senderRes.senderType.contains("Personal 10-Digit") &&
@@ -298,6 +381,10 @@ object SmishingAnalyzer {
             allFlags.add("Social Engineering: $it")
         }
 
+        if (vernacularRes.isVernacular) {
+            allFlags.add("Vernacular Intelligence: SMS dispatched in ${vernacularRes.detectedLanguage} leveraging regional panic cues.")
+        }
+
         val caseId = "SMS-2026-${(System.currentTimeMillis() % 100000).toString().padStart(5, '0')}"
         val sha256 = sha256("$senderId:$messageText")
         val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss 'IST'", Locale.getDefault()).format(Date())
@@ -316,7 +403,8 @@ object SmishingAnalyzer {
             allRedFlags = allFlags,
             evidenceHash = sha256,
             timestamp = timestamp,
-            chakshuDraft = ""
+            chakshuDraft = "",
+            vernacularInfo = vernacularRes
         )
 
         val draft = generateChakshuComplaintDraft(partialRecord)
@@ -331,6 +419,7 @@ object SmishingAnalyzer {
         }
         val urlsList = if (r.urlInfo.urls.isNotEmpty()) r.urlInfo.urls.joinToString("\n") { "  - Malicious Link: $it" } else "  - None detected"
         val flagsList = if (r.allRedFlags.isNotEmpty()) r.allRedFlags.joinToString("\n") { "  * $it" } else "  * No anomalies detected"
+        val cuesList = if (r.vernacularInfo.matchedKeywords.isNotEmpty()) r.vernacularInfo.matchedKeywords.joinToString(", ") else "None"
 
         return """
 INCIDENT REPORT FOR Sanchar Saathi (Chakshu) & National Cyber Crime Helpline (1930)
@@ -342,6 +431,11 @@ Assessed Risk Score        : ${r.riskScore} / 100 (${r.verdict})
 Offending Sender ID / SIM  : ${r.senderId}
 Incident Category          : ${r.threatCategory}
 TRAI DLT Compliance Status : $dltStatus
+
+Language & Script Telemetry:
+  - Detected Language      : ${r.vernacularInfo.detectedLanguage} (${r.vernacularInfo.scriptType})
+  - Vernacular Threat Cues : $cuesList
+  - Plain-English Meaning  : ${r.vernacularInfo.englishMeaning}
 
 Extracted Malicious URLs / Indicators:
 $urlsList
@@ -395,8 +489,22 @@ Cryptographic SHA-256 Digest: ${r.evidenceHash}
             description = "Cross-border virtual number from Indonesia (+62) pushing task-based crypto and advance-fee investment fraud."
         ),
         SmishingBenchmark(
+            id = "hindi_electricity_sms",
+            title = "Scenario 5: 🇮🇳 Hindi Electricity Disconnection Scam",
+            senderId = "+91 98112 34567",
+            text = "प्रिय उपभोक्ता, आपका बिजली बिल अपडेट नहीं हुआ है। आज रात 9:30 बजे आपकी बिजली काट दी जाएगी। तुरंत बिजली अधिकारी से संपर्क करें: 9811234567 अथवा ऐप डाउनलोड करें: bit.ly/bijli-bill-update",
+            description = "High-pressure Hindi Devanagari urgency threat threatening immediate power disconnection tonight with a fraudulent contact and bit.ly link."
+        ),
+        SmishingBenchmark(
+            id = "hinglish_sbi_sms",
+            title = "Scenario 6: 🗣️ Hinglish SBI Account Freeze",
+            senderId = "+91 87654 09876",
+            text = "Dear customer aapka SBI khata aaj raat block kar diya jayega pending KYC ke karan. Turant apna PAN card link kare account chalu rakhne ke liye: http://sbi-kyc-verification.in/update",
+            description = "Deceptive Hinglish (Romanized Hindi) banking phishing attack coercing victim to verify KYC on a spoofed domain under threat of account freeze."
+        ),
+        SmishingBenchmark(
             id = "legit_otp_sms",
-            title = "Scenario 5: Verified Bank Transaction OTP (Safe)",
+            title = "Scenario 7: Verified Bank Transaction OTP (Safe)",
             senderId = "AD-HDFCBK",
             text = "847291 is your OTP for purchase of INR 2,499.00 at FLIPKART using HDFC Bank Credit Card ending 7041. Valid for 10 mins. Do not share OTP with anyone. Bank never calls for OTP.",
             description = "Authentic transactional SMS compliant with TRAI DLT alphanumeric regulations (AD-HDFCBK) containing no external URLs."

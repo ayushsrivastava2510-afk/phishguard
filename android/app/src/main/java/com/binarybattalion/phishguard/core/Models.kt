@@ -26,6 +26,15 @@ data class IntentAnalysis(
     val intentRiskBoost: Int
 )
 
+data class VernacularInfo(
+    val detectedLanguage: String = "English",
+    val languageCode: String = "en",
+    val scriptType: String = "Latin (Standard)",
+    val isVernacular: Boolean = false,
+    val matchedKeywords: List<String> = emptyList(),
+    val englishMeaning: String = ""
+)
+
 data class SmishingRecord(
     val caseId: String,
     val channel: String = "Mobile SMS (GSM/LTE Telemetry)",
@@ -41,7 +50,8 @@ data class SmishingRecord(
     val allRedFlags: List<String>,
     val evidenceHash: String,
     val timestamp: String,
-    val chakshuDraft: String
+    val chakshuDraft: String,
+    val vernacularInfo: VernacularInfo = VernacularInfo()
 )
 
 data class SmishingBenchmark(
