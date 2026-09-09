@@ -30,6 +30,12 @@ from quishing_detector import (
     generate_qr_image_bytes,
     BENCHMARK_SCENARIOS as QUISHING_BENCHMARKS,
 )
+import child_safety_analyzer
+import importlib
+try:
+    importlib.reload(child_safety_analyzer)
+except Exception:
+    pass
 from child_safety_analyzer import analyze_child_safety_url, CHILD_SAFETY_BENCHMARKS
 from origin_intel import analyze_origin
 from attribution_graph import (
@@ -3587,14 +3593,14 @@ Generated autonomously by PhishGuard Autonomous SOC Sentinel
 
 def render_child_safety_sentinel(sound_alert: bool = False):
     # Session state initialization for PIN-protected Parental Control Study Mode
-    if "parent_pin" not in st.session_state:
-        st.session_state.parent_pin = "1234"
-    if "is_parent_unlocked" not in st.session_state:
-        st.session_state.is_parent_unlocked = False
-    if "parental_control_active" not in st.session_state:
-        st.session_state.parental_control_active = True
-    if "parent_custom_blocklist" not in st.session_state:
+    if not isinstance(st.session_state.get("parent_custom_blocklist"), list):
         st.session_state.parent_custom_blocklist = ["instagram.com", "youtube.com", "roblox.com", "snapchat.com", "netflix.com"]
+    if not isinstance(st.session_state.get("parental_control_active"), bool):
+        st.session_state.parental_control_active = True
+    if not isinstance(st.session_state.get("parent_pin"), str):
+        st.session_state.parent_pin = "1234"
+    if not isinstance(st.session_state.get("is_parent_unlocked"), bool):
+        st.session_state.is_parent_unlocked = False
 
     st.markdown(
         """
@@ -3806,12 +3812,23 @@ def render_child_safety_sentinel(sound_alert: bool = False):
     target_ctx = cs_ctx_input.strip()
 
     if target_url:
-        cs_res = analyze_child_safety_url(
-            target_url,
-            target_ctx,
-            custom_blocklist=st.session_state.parent_custom_blocklist,
-            is_parental_control_active=st.session_state.parental_control_active,
-        )
+        try:
+            cs_res = analyze_child_safety_url(
+                target_url,
+                target_ctx,
+                custom_blocklist=st.session_state.parent_custom_blocklist,
+                is_parental_control_active=st.session_state.parental_control_active,
+            )
+        except TypeError:
+            import importlib
+            import child_safety_analyzer
+            importlib.reload(child_safety_analyzer)
+            cs_res = child_safety_analyzer.analyze_child_safety_url(
+                target_url,
+                target_ctx,
+                custom_blocklist=st.session_state.parent_custom_blocklist,
+                is_parental_control_active=st.session_state.parental_control_active,
+            )
         is_blocked = cs_res["is_blocked"]
         is_parent_blocked = cs_res.get("is_parent_blocked", False)
         safety_score = cs_res["safety_score"]

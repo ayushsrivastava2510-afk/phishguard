@@ -68,8 +68,10 @@ SUSPICIOUS_TLDS = {".xyz", ".top", ".tk", ".ml", ".cf", ".gq", ".buzz", ".work",
 def analyze_child_safety_url(
     url: str,
     context_text: str = "",
-    custom_blocklist: List[str] = None,
+    custom_blocklist: Any = None,
     is_parental_control_active: bool = True,
+    *args,
+    **kwargs,
 ) -> Dict[str, Any]:
     """
     Analyzes a URL and optional accompanying context for child safety threats,
@@ -80,7 +82,7 @@ def analyze_child_safety_url(
         detected_cues, plain-language reason, and clean browsing guidance.
     """
     t_start = time.perf_counter()
-    cleaned_url = url.strip()
+    cleaned_url = str(url or "").strip()
     if not cleaned_url.startswith(("http://", "https://")):
         cleaned_url = "https://" + cleaned_url
 
@@ -89,16 +91,27 @@ def analyze_child_safety_url(
     path = (parsed.path or "").lower()
     query = (parsed.query or "").lower()
     combined_target = f"{hostname}{path}?{query}".lower()
-    full_context = f"{combined_target} {context_text.lower()}"
+    full_context = f"{combined_target} {str(context_text or '').lower()}"
+
+    # Normalize custom blocklist defensively
+    if custom_blocklist is None:
+        norm_blocklist = []
+    elif isinstance(custom_blocklist, str):
+        norm_blocklist = [custom_blocklist]
+    else:
+        try:
+            norm_blocklist = list(custom_blocklist)
+        except Exception:
+            norm_blocklist = []
 
     # 0. Check Parent Custom Blocklist (Study Mode Enforced via 4-Digit PIN)
-    if is_parental_control_active and custom_blocklist:
-        for raw_blocked in custom_blocklist:
-            if not raw_blocked or not raw_blocked.strip():
+    if bool(is_parental_control_active) and norm_blocklist:
+        for raw_blocked in norm_blocklist:
+            if not raw_blocked or not str(raw_blocked).strip():
                 continue
-            clean_b = raw_blocked.lower().strip()
+            clean_b = str(raw_blocked).lower().strip()
             clean_b = re.sub(r"^https?://", "", clean_b).split("/")[0].lstrip("www.")
-            if hostname == clean_b or hostname.endswith("." + clean_b):
+            if clean_b and (hostname == clean_b or hostname.endswith("." + clean_b)):
                 exec_s = round(time.perf_counter() - t_start, 3)
                 return {
                     "url": url,

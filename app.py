@@ -38,5 +38,11 @@ target_app, target_dir = get_target_app()
 if target_dir not in sys.path:
     sys.path.insert(0, target_dir)
 
+# Purge stale submodule cache from sys.modules so inner module changes take effect immediately
+for mod_name in list(sys.modules.keys()):
+    if mod_name.startswith(("child_safety", "smishing", "quishing", "header_analysis", "origin_intel")):
+        del sys.modules[mod_name]
+
 os.chdir(target_dir)
 runpy.run_path(target_app, run_name="__main__")
+
