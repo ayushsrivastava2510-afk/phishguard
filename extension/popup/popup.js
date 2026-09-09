@@ -210,10 +210,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Clean domain helper
   function sanitizeDomain(raw) {
     if (!raw) return "";
-    return raw.trim().toLowerCase()
-      .replace(/^https?:\/\//, "")
-      .split("/")[0]
-      .replace(/^www\./, "");
+    let clean = String(raw).trim().toLowerCase();
+    clean = clean.replace(/^https?:\/\//i, "");
+    clean = clean.split("/")[0].split("?")[0].split("#")[0].split(":")[0].trim();
+    clean = clean.replace(/^www\d*\./i, "");
+    return clean.trim();
   }
 
   // Add Custom Domain

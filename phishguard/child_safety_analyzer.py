@@ -65,6 +65,21 @@ STRANGER_CHAT_KEYWORDS = [
 SUSPICIOUS_TLDS = {".xyz", ".top", ".tk", ".ml", ".cf", ".gq", ".buzz", ".work", ".site", ".live"}
 
 
+def sanitize_blocked_domain(raw_url_or_domain: str) -> str:
+    """
+    Cleans any arbitrary user input (full URL, domain with www, path, query, port)
+    into a clean, normalized domain string.
+    Never uses lstrip('www.') which corrupts domains starting with 'w' (e.g. whatsapp, wikipedia).
+    """
+    if not raw_url_or_domain:
+        return ""
+    clean = str(raw_url_or_domain).strip().lower()
+    clean = re.sub(r"^https?://", "", clean)
+    clean = clean.split("/")[0].split("?")[0].split("#")[0].split(":")[0].strip()
+    clean = re.sub(r"^www\d*\.", "", clean)
+    return clean.strip()
+
+
 def analyze_child_safety_url(
     url: str,
     context_text: str = "",
@@ -88,6 +103,7 @@ def analyze_child_safety_url(
 
     parsed = urlparse(cleaned_url)
     hostname = (parsed.hostname or "").lower()
+    clean_host = re.sub(r"^www\d*\.", "", hostname)
     path = (parsed.path or "").lower()
     query = (parsed.query or "").lower()
     combined_target = f"{hostname}{path}?{query}".lower()
@@ -109,9 +125,20 @@ def analyze_child_safety_url(
         for raw_blocked in norm_blocklist:
             if not raw_blocked or not str(raw_blocked).strip():
                 continue
-            clean_b = str(raw_blocked).lower().strip()
-            clean_b = re.sub(r"^https?://", "", clean_b).split("/")[0].lstrip("www.")
-            if clean_b and (hostname == clean_b or hostname.endswith("." + clean_b)):
+            clean_b = sanitize_blocked_domain(raw_blocked)
+            if not clean_b:
+                continue
+
+            # Robust matching: exact domain match, subdomain match, or root domain match
+            is_match = (
+                hostname == clean_b
+                or clean_host == clean_b
+                or hostname.endswith("." + clean_b)
+                or clean_host.endswith("." + clean_b)
+                or clean_b.endswith("." + clean_host)
+            )
+
+            if is_match:
                 exec_s = round(time.perf_counter() - t_start, 3)
                 return {
                     "url": url,

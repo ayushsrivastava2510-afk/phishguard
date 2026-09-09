@@ -1,0 +1,12 @@
+{
+  "active": true,
+  "blocklist": [
+    "instagram.com",
+    "youtube.com",
+    "roblox.com",
+    "snapchat.com",
+    "netflix.com",
+    "discord.com"
+  ],
+  "pin": "1234"
+}

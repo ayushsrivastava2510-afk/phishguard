@@ -1,7 +1,16 @@
 // background.js - PhishGuard Service Worker (Manifest V3)
 // Unifies Email Threat Forensics & Parental Control Study Lock Engine
 
-console.log("[PhishGuard Service Worker] Initializing Sentinel & Study Lock v2.0.0");
+console.log("[PhishGuard Service Worker] Initializing Sentinel & Study Lock v2.0.1");
+
+function sanitizeDomain(raw) {
+  if (!raw) return "";
+  let clean = String(raw).trim().toLowerCase();
+  clean = clean.replace(/^https?:\/\//i, "");
+  clean = clean.split("/")[0].split("?")[0].split("#")[0].split(":")[0].trim();
+  clean = clean.replace(/^www\d*\./i, "");
+  return clean.trim();
+}
 
 // Default initial state for Parental Control Study Mode
 const DEFAULT_PARENTAL_STATE = {
@@ -30,16 +39,17 @@ chrome.runtime.onInstalled.addListener(async () => {
 
   const active = existing.parental_control_active !== undefined ? existing.parental_control_active : DEFAULT_PARENTAL_STATE.parental_control_active;
   const pin = existing.parent_pin || DEFAULT_PARENTAL_STATE.parent_pin;
-  const blocklist = existing.parent_custom_blocklist || DEFAULT_PARENTAL_STATE.parent_custom_blocklist;
+  const rawList = existing.parent_custom_blocklist || DEFAULT_PARENTAL_STATE.parent_custom_blocklist;
+  const cleanList = [...new Set(rawList.map(d => sanitizeDomain(d)).filter(Boolean))];
 
   await chrome.storage.local.set({
     parental_control_active: active,
     parent_pin: pin,
-    parent_custom_blocklist: blocklist,
+    parent_custom_blocklist: cleanList,
     temporary_exemptions: existing.temporary_exemptions || {}
   });
 
-  await syncDynamicRules(blocklist, active);
+  await syncDynamicRules(cleanList, active);
 });
 
 // 2. Synchronize Declarative Net Request (DNR) Dynamic Rules at Network Layer
@@ -48,7 +58,10 @@ async function syncDynamicRules(blocklist, isActive) {
     const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
     const existingRuleIds = existingRules.map(r => r.id);
 
-    if (!isActive || !blocklist || blocklist.length === 0) {
+    // Clean and deduplicate domains
+    const cleanList = [...new Set((blocklist || []).map(d => sanitizeDomain(d)).filter(Boolean))];
+
+    if (!isActive || cleanList.length === 0) {
       if (existingRuleIds.length > 0) {
         await chrome.declarativeNetRequest.updateDynamicRules({
           removeRuleIds: existingRuleIds,
@@ -67,11 +80,7 @@ async function syncDynamicRules(blocklist, isActive) {
     const newRules = [];
     let ruleIdCounter = 1;
 
-    for (const domain of blocklist) {
-      if (!domain) continue;
-      const cleanDomain = domain.toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/^www\./, "").trim();
-      if (!cleanDomain) continue;
-
+    for (const cleanDomain of cleanList) {
       // Skip if temporarily exempted by parent
       if (temporary_exemptions[cleanDomain] && temporary_exemptions[cleanDomain] > now) {
         continue;
@@ -124,9 +133,9 @@ async function syncDynamicRules(blocklist, isActive) {
       addRules: newRules
     });
 
-    await chrome.action.setBadgeText({ text: String(blocklist.length) });
+    await chrome.action.setBadgeText({ text: String(cleanList.length) });
     await chrome.action.setBadgeBackgroundColor({ color: "#a855f7" });
-    console.log(`[PhishGuard DNR] Study Lock Active. Deployed ${newRules.length} dynamic filtering rules.`);
+    console.log(`[PhishGuard DNR] Study Lock Active. Deployed ${newRules.length} dynamic filtering rules for ${cleanList.length} domains:`, cleanList);
   } catch (err) {
     console.error("[PhishGuard DNR] Failed to update dynamic rules:", err);
   }
@@ -152,10 +161,11 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
     const now = Date.now();
 
     const targetUrl = new URL(details.url);
-    const host = targetUrl.hostname.toLowerCase().replace(/^www\./, "");
+    const rawHost = targetUrl.hostname.toLowerCase();
+    const cleanHost = sanitizeDomain(rawHost);
 
     // Ignore internal extension pages and local dev tools
-    if (targetUrl.protocol === "chrome-extension:" || host === "localhost" || host === "127.0.0.1" || host === "phishguard-soc.streamlit.app") {
+    if (targetUrl.protocol === "chrome-extension:" || cleanHost === "localhost" || cleanHost === "127.0.0.1" || cleanHost === "phishguard-soc.streamlit.app") {
       return;
     }
 
@@ -164,10 +174,16 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
 
     for (const rawRule of blocklist) {
       if (!rawRule) continue;
-      const cleanRule = rawRule.toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/^www\./, "").trim();
+      const cleanRule = sanitizeDomain(rawRule);
       if (!cleanRule) continue;
 
-      if (host === cleanRule || host.endsWith("." + cleanRule)) {
+      if (
+        rawHost === cleanRule ||
+        cleanHost === cleanRule ||
+        rawHost.endsWith("." + cleanRule) ||
+        cleanHost.endsWith("." + cleanRule) ||
+        cleanRule.endsWith("." + cleanHost)
+      ) {
         if (exemptions[cleanRule] && exemptions[cleanRule] > now) {
           return; // Temporary exemption active
         }
@@ -178,16 +194,21 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
     }
 
     if (isBlocked) {
-      console.warn(`[PhishGuard Navigation] Enforcing Study Lock on tab ${details.tabId} for domain: ${host}`);
+      const finalDomain = matchedDomain || cleanHost;
+      console.warn(`[PhishGuard Navigation] Enforcing Study Lock on tab ${details.tabId} for domain: ${finalDomain}`);
 
-      // Update block statistics
+      // Update block statistics and store last blocked domain for blocked.html display
       const stats = data.block_stats || { total_blocked: 0 };
       stats.total_blocked = (stats.total_blocked || 0) + 1;
-      stats.last_blocked_domain = host;
-      await chrome.storage.local.set({ block_stats: stats });
+      stats.last_blocked_domain = finalDomain;
+      await chrome.storage.local.set({
+        block_stats: stats,
+        last_blocked_domain: finalDomain,
+        last_blocked_time: Date.now()
+      });
 
       // Redirect tab to blocked screen
-      const blockUrl = chrome.runtime.getURL(`blocked.html?blocked=${encodeURIComponent(host)}`);
+      const blockUrl = chrome.runtime.getURL(`blocked.html?blocked=${encodeURIComponent(finalDomain)}`);
       await chrome.tabs.update(details.tabId, { url: blockUrl });
     }
   } catch (err) {
@@ -285,11 +306,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         "parent_custom_blocklist",
         "block_stats"
       ]);
+      const rawList = data.parent_custom_blocklist || DEFAULT_PARENTAL_STATE.parent_custom_blocklist;
+      const cleanList = [...new Set(rawList.map(d => sanitizeDomain(d)).filter(Boolean))];
+
       sendResponse({
         status: "success",
         data: {
           active: data.parental_control_active !== false,
-          blocklist: data.parent_custom_blocklist || DEFAULT_PARENTAL_STATE.parent_custom_blocklist,
+          blocklist: cleanList,
           stats: data.block_stats || { total_blocked: 0 }
         }
       });
@@ -314,7 +338,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const updates = {};
 
       if (payload.active !== undefined) updates.parental_control_active = Boolean(payload.active);
-      if (payload.blocklist !== undefined) updates.parent_custom_blocklist = payload.blocklist;
+      if (payload.blocklist !== undefined && Array.isArray(payload.blocklist)) {
+        updates.parent_custom_blocklist = [...new Set(payload.blocklist.map(d => sanitizeDomain(d)).filter(Boolean))];
+      }
       if (payload.pin !== undefined && String(payload.pin).trim().length === 4) updates.parent_pin = String(payload.pin).trim();
 
       await chrome.storage.local.set(updates);
@@ -330,7 +356,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // D. Study Lock: Allow Temporary Break
   if (request.action === "allow_temporary_break") {
     (async () => {
-      const domain = (request.domain || "").toLowerCase().replace(/^www\./, "");
+      const domain = sanitizeDomain(request.domain || "");
       const durationMs = (request.durationMinutes || 15) * 60 * 1000;
       const { temporary_exemptions = {}, parent_custom_blocklist = [], parental_control_active = true } = await chrome.storage.local.get([
         "temporary_exemptions",

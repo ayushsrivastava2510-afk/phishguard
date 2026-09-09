@@ -4006,16 +4006,106 @@ Generated autonomously by PhishGuard Autonomous SOC Sentinel
                     )
 
 
+PARENTAL_RULES_PATH = os.path.join(os.path.dirname(__file__), "data", "parental_rules.json")
+
+def sanitize_blocked_domain(raw_url_or_domain: str) -> str:
+    """
+    Cleans any arbitrary user input (full URL, domain with www, path, query, port)
+    into a clean, normalized domain string.
+    Never uses lstrip('www.') which corrupts domains starting with 'w' (e.g. whatsapp, wikipedia).
+    """
+    if not raw_url_or_domain:
+        return ""
+    clean = str(raw_url_or_domain).strip().lower()
+    clean = re.sub(r"^https?://", "", clean)
+    clean = clean.split("/")[0].split("?")[0].split("#")[0].split(":")[0].strip()
+    clean = re.sub(r"^www\d*\.", "", clean)
+    return clean.strip()
+
+def load_parental_rules():
+    default_rules = {
+        "active": True,
+        "blocklist": ["instagram.com", "youtube.com", "roblox.com", "snapchat.com", "netflix.com", "discord.com"],
+        "pin": "1234"
+    }
+    try:
+        if os.path.exists(PARENTAL_RULES_PATH):
+            with open(PARENTAL_RULES_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    raw_bl = data.get("blocklist", default_rules["blocklist"])
+                    clean_bl = list(dict.fromkeys([sanitize_blocked_domain(d) for d in raw_bl if sanitize_blocked_domain(d)]))
+                    return {
+                        "active": bool(data.get("active", True)),
+                        "blocklist": clean_bl or default_rules["blocklist"],
+                        "pin": str(data.get("pin", "1234"))
+                    }
+    except Exception:
+        pass
+    return default_rules
+
+def save_parental_rules(blocklist, active=True, pin="1234"):
+    try:
+        os.makedirs(os.path.dirname(PARENTAL_RULES_PATH), exist_ok=True)
+        clean_list = list(dict.fromkeys([sanitize_blocked_domain(d) for d in blocklist if sanitize_blocked_domain(d)]))
+        data = {
+            "active": bool(active),
+            "blocklist": clean_list,
+            "pin": str(pin)
+        }
+        with open(PARENTAL_RULES_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+    except Exception:
+        pass
+
 def render_child_safety_sentinel(sound_alert: bool = False):
-    # Session state initialization for PIN-protected Parental Control Study Mode
+    # Persistent Parental Control & Study Mode Configuration
+    p_rules = load_parental_rules()
     if not isinstance(st.session_state.get("parent_custom_blocklist"), list):
-        st.session_state.parent_custom_blocklist = ["instagram.com", "youtube.com", "roblox.com", "snapchat.com", "netflix.com"]
+        st.session_state.parent_custom_blocklist = p_rules["blocklist"]
     if not isinstance(st.session_state.get("parental_control_active"), bool):
-        st.session_state.parental_control_active = True
+        st.session_state.parental_control_active = p_rules["active"]
     if not isinstance(st.session_state.get("parent_pin"), str):
-        st.session_state.parent_pin = "1234"
+        st.session_state.parent_pin = p_rules["pin"]
     if not isinstance(st.session_state.get("is_parent_unlocked"), bool):
         st.session_state.is_parent_unlocked = False
+
+    # Ensure all domains in blocklist are strictly sanitized
+    st.session_state.parent_custom_blocklist = list(dict.fromkeys([
+        sanitize_blocked_domain(d) for d in st.session_state.parent_custom_blocklist if sanitize_blocked_domain(d)
+    ]))
+
+    # Real-Time Automatic Synchronization Bridge to Chrome Extension
+    sync_payload = {
+        "active": bool(st.session_state.parental_control_active),
+        "blocklist": st.session_state.parent_custom_blocklist,
+        "pin": str(st.session_state.parent_pin)
+    }
+    st.markdown(
+        f"""
+        <div id="phishguard-parental-bridge"
+             data-active="{'true' if sync_payload['active'] else 'false'}"
+             data-blocklist='{json.dumps(sync_payload['blocklist'])}'
+             data-pin="{sync_payload['pin']}"
+             data-synced-count="{len(sync_payload['blocklist'])}"
+             style="display:none;"></div>
+        """,
+        unsafe_allow_html=True
+    )
+    import streamlit.components.v1 as components
+    components.html(
+        f"""
+        <script>
+        try {{
+            const payload = {json.dumps(sync_payload)};
+            window.parent.postMessage({{ type: "PHISHGUARD_SYNC_BLOCKLIST", payload: payload }}, "*");
+            window.top.postMessage({{ type: "PHISHGUARD_SYNC_BLOCKLIST", payload: payload }}, "*");
+        }} catch(e) {{}}
+        </script>
+        """,
+        height=0,
+        width=0,
+    )
 
     st.markdown(
         """
@@ -4099,6 +4189,7 @@ def render_child_safety_sentinel(sound_alert: bool = False):
                 )
                 if new_toggle != st.session_state.parental_control_active:
                     st.session_state.parental_control_active = new_toggle
+                    save_parental_rules(st.session_state.parent_custom_blocklist, st.session_state.parental_control_active, st.session_state.parent_pin)
                     st.rerun()
             with p_col2:
                 if st.button("🔒 Lock Controls", use_container_width=True, key="btn_relock_parent"):
@@ -4112,18 +4203,17 @@ def render_child_safety_sentinel(sound_alert: bool = False):
             with add_col1:
                 new_site_input = st.text_input(
                     "Add domain or website to block",
-                    placeholder="e.g. discord.com, twitch.tv, reddit.com",
+                    placeholder="e.g. discord.com, twitch.tv, reddit.com, https://www.facebook.com",
                     key="input_new_blocked_site",
                     label_visibility="collapsed"
                 )
             with add_col2:
                 if st.button("➕ Add to Blocklist", use_container_width=True, key="btn_add_blocked_site"):
                     if new_site_input and new_site_input.strip():
-                        import re
-                        raw_s = new_site_input.strip().lower()
-                        clean_s = re.sub(r"^https?://", "", raw_s).split("/")[0].lstrip("www.")
+                        clean_s = sanitize_blocked_domain(new_site_input)
                         if clean_s and clean_s not in st.session_state.parent_custom_blocklist:
                             st.session_state.parent_custom_blocklist.append(clean_s)
+                            save_parental_rules(st.session_state.parent_custom_blocklist, st.session_state.parental_control_active, st.session_state.parent_pin)
                             st.success(f"Added '{clean_s}' to study blocklist!")
                             st.rerun()
 
@@ -4141,8 +4231,10 @@ def render_child_safety_sentinel(sound_alert: bool = False):
             for i, (label, domain) in enumerate(presets):
                 with qp_cols[i]:
                     if st.button(label, use_container_width=True, key=f"btn_preset_{domain}"):
-                        if domain not in st.session_state.parent_custom_blocklist:
-                            st.session_state.parent_custom_blocklist.append(domain)
+                        clean_p = sanitize_blocked_domain(domain)
+                        if clean_p and clean_p not in st.session_state.parent_custom_blocklist:
+                            st.session_state.parent_custom_blocklist.append(clean_p)
+                            save_parental_rules(st.session_state.parent_custom_blocklist, st.session_state.parental_control_active, st.session_state.parent_pin)
                             st.rerun()
 
             # Display active blocked chips with delete buttons
@@ -4154,6 +4246,7 @@ def render_child_safety_sentinel(sound_alert: bool = False):
                     with chip_cols[col_idx]:
                         if st.button(f"✕ {domain}", key=f"btn_del_block_{domain}_{idx}", help=f"Click to remove {domain} from blocklist"):
                             st.session_state.parent_custom_blocklist.remove(domain)
+                            save_parental_rules(st.session_state.parent_custom_blocklist, st.session_state.parental_control_active, st.session_state.parent_pin)
                             st.rerun()
             else:
                 st.info("No custom websites currently blocked.")
