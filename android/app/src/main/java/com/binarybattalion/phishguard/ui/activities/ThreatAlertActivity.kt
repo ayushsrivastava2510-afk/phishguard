@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import com.binarybattalion.phishguard.MainActivity
 import com.binarybattalion.phishguard.core.SmishingAnalyzer
 import com.binarybattalion.phishguard.core.SmishingRecord
+import com.binarybattalion.phishguard.core.ThreatSirenPlayer
 import com.binarybattalion.phishguard.ui.theme.*
 
 class ThreatAlertActivity : ComponentActivity() {
@@ -61,11 +62,17 @@ class ThreatAlertActivity : ComponentActivity() {
         // Analyze or reconstruct record
         val record = SmishingAnalyzer.analyzeSmishingMessage(sender, message)
 
+        // 🔊 If threat score > 90, play custom 3-second emergency siren audio alert
+        if (record.riskScore > 90) {
+            ThreatSirenPlayer.playSiren(this, 3000L)
+        }
+
         setContent {
             PhishGuardTheme(darkTheme = true) {
                 ThreatAlertPopup(
                     record = record,
                     onOpenSoc = {
+                        ThreatSirenPlayer.stop()
                         val mainIntent = Intent(this, MainActivity::class.java).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
                             putExtra("EXTRA_INCOMING_CASE_ID", record.caseId)
@@ -75,10 +82,23 @@ class ThreatAlertActivity : ComponentActivity() {
                         startActivity(mainIntent)
                         finish()
                     },
-                    onDismiss = { finish() }
+                    onDismiss = {
+                        ThreatSirenPlayer.stop()
+                        finish()
+                    }
                 )
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        ThreatSirenPlayer.stop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        ThreatSirenPlayer.stop()
     }
 
     companion object {
@@ -216,6 +236,42 @@ fun ThreatAlertPopup(
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold
                             )
+                        }
+                    }
+                }
+
+                if (record.riskScore > 90) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(RiskCritical.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                            .border(1.dp, RiskCriticalLight.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.VolumeUp,
+                                contentDescription = null,
+                                tint = RiskCriticalLight,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Column {
+                                Text(
+                                    text = "🚨 3-SECOND SIREN ALARM TRIGGERED",
+                                    color = RiskCriticalLight,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                                Text(
+                                    text = "Threat factor (${record.riskScore}/100) exceeds safety threshold (>90). Custom audio alarm played for 3 seconds.",
+                                    color = TextSecondary,
+                                    fontSize = 9.5.sp
+                                )
+                            }
                         }
                     }
                 }

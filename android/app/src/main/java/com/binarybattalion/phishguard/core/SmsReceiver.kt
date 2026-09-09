@@ -36,6 +36,11 @@ class SmsReceiver : BroadcastReceiver() {
         // Execute on-device native Smishing forensics
         val analysis = SmishingAnalyzer.analyzeSmishingMessage(sender, body)
 
+        // 0. Trigger 3-second custom siren voice/sound alarm if threat factor exceeds 90
+        if (analysis.riskScore > 90) {
+            ThreatSirenPlayer.playSiren(context, 3000L)
+        }
+
         // 1. Launch floating side-by-side analysis popup immediately
         try {
             ThreatAlertActivity.launch(context, analysis.senderId, analysis.rawMessage)
@@ -76,7 +81,17 @@ class SmsReceiver : BroadcastReceiver() {
         )
 
         val isThreat = record.riskScore >= 35
-        val alertTitle = if (record.riskScore >= 70) {
+        val isCriticalSiren = record.riskScore > 90
+
+        val channelId = if (isCriticalSiren) {
+            PhishGuardApplication.CRITICAL_SIREN_CHANNEL_ID
+        } else {
+            PhishGuardApplication.THREAT_CHANNEL_ID
+        }
+
+        val alertTitle = if (isCriticalSiren) {
+            "🚨 CRITICAL SIREN ALARM (>90): ${record.senderId}"
+        } else if (record.riskScore >= 70) {
             "🚨 CRITICAL SMISHING DETECTED: ${record.senderId}"
         } else if (isThreat) {
             "⚠️ SUSPICIOUS SMS FLAGGED: ${record.senderId}"
@@ -84,10 +99,16 @@ class SmsReceiver : BroadcastReceiver() {
             "🟢 VERIFIED SAFE SMS: ${record.senderId}"
         }
 
-        val builder = NotificationCompat.Builder(context, PhishGuardApplication.THREAT_CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(alertTitle)
-            .setContentText("${record.threatCategory} (${record.riskScore}/100 Risk). Tap to inspect evidence.")
+            .setContentText(
+                if (isCriticalSiren) {
+                    "🔊 3-SECOND SIREN TRIGGERED! ${record.threatCategory} (${record.riskScore}/100 Risk)."
+                } else {
+                    "${record.threatCategory} (${record.riskScore}/100 Risk). Tap to inspect evidence."
+                }
+            )
             .setStyle(
                 NotificationCompat.BigTextStyle()
                     .bigText(

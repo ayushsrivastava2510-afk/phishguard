@@ -2989,11 +2989,20 @@ def render_smishing_sentinel(sound_alert):
             )
 
         with scol_action:
+            siren_badge_html = ""
+            if sms_score > 90:
+                siren_badge_html = f"""
+                <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; border-radius: 8px; padding: 8px 12px; font-size: 0.76rem; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.1rem;">🔊</span>
+                    <span><b>3-SECOND SIREN ALARM:</b> Threat factor ({sms_score}/100) exceeds safety threshold (&gt;90). Custom audio siren &amp; haptic pulses triggered on PhishGuard Mobile App.</span>
+                </div>
+                """
             st.markdown(
                 f"""
                 <div class="metric-card" style="padding: 18px 20px; justify-content: space-between;">
                     <div>
                         <div class="metric-title">Recommended Action</div>
+                        {siren_badge_html}
                         <div style="background: {s_action_bg}; border: 1px solid {s_action_border}; color: {s_action_color}; border-radius: 10px; padding: 12px 14px; font-size: 0.82rem; font-weight: 600; line-height: 1.45; margin-bottom: 12px;">
                             {s_action_msg}
                         </div>
