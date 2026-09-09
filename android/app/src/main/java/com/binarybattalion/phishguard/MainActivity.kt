@@ -27,13 +27,14 @@ import androidx.core.content.ContextCompat
 import com.binarybattalion.phishguard.core.SentinelService
 import com.binarybattalion.phishguard.core.SmishingAnalyzer
 import com.binarybattalion.phishguard.core.SmishingRecord
+import com.binarybattalion.phishguard.ui.screens.ChildSafetyScreen
 import com.binarybattalion.phishguard.ui.screens.EmailScreen
 import com.binarybattalion.phishguard.ui.screens.QuishingScreen
 import com.binarybattalion.phishguard.ui.screens.SmishingScreen
 import com.binarybattalion.phishguard.ui.theme.*
 
 enum class ThreatVector {
-    SMS, EMAIL, QUISHING
+    SMS, EMAIL, QUISHING, CHILD_SAFETY
 }
 
 class MainActivity : ComponentActivity() {
@@ -218,12 +219,13 @@ fun MainAppScaffold(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Button(
                     onClick = { activeVector = ThreatVector.SMS },
                     modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 2.dp, vertical = 6.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (activeVector == ThreatVector.SMS) PrimaryCobalt else CardDark,
                         contentColor = if (activeVector == ThreatVector.SMS) Color.White else TextSecondary
@@ -232,7 +234,8 @@ fun MainAppScaffold(
                 ) {
                     Text(
                         text = "📱 SMS" + if (activeVector == ThreatVector.SMS) " ✓" else "",
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
+                        maxLines = 1,
                         fontWeight = if (activeVector == ThreatVector.SMS) FontWeight.Bold else FontWeight.Medium
                     )
                 }
@@ -240,6 +243,7 @@ fun MainAppScaffold(
                 Button(
                     onClick = { activeVector = ThreatVector.EMAIL },
                     modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 2.dp, vertical = 6.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (activeVector == ThreatVector.EMAIL) PrimaryCobalt else CardDark,
                         contentColor = if (activeVector == ThreatVector.EMAIL) Color.White else TextSecondary
@@ -248,7 +252,8 @@ fun MainAppScaffold(
                 ) {
                     Text(
                         text = "📧 Mail" + if (activeVector == ThreatVector.EMAIL) " ✓" else "",
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
+                        maxLines = 1,
                         fontWeight = if (activeVector == ThreatVector.EMAIL) FontWeight.Bold else FontWeight.Medium
                     )
                 }
@@ -256,6 +261,7 @@ fun MainAppScaffold(
                 Button(
                     onClick = { activeVector = ThreatVector.QUISHING },
                     modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 2.dp, vertical = 6.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (activeVector == ThreatVector.QUISHING) PrimaryCobalt else CardDark,
                         contentColor = if (activeVector == ThreatVector.QUISHING) Color.White else TextSecondary
@@ -263,9 +269,28 @@ fun MainAppScaffold(
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Text(
-                        text = "🎯 QR/UPI" + if (activeVector == ThreatVector.QUISHING) " ✓" else "",
-                        fontSize = 11.sp,
+                        text = "🎯 QR" + if (activeVector == ThreatVector.QUISHING) " ✓" else "",
+                        fontSize = 10.sp,
+                        maxLines = 1,
                         fontWeight = if (activeVector == ThreatVector.QUISHING) FontWeight.Bold else FontWeight.Medium
+                    )
+                }
+
+                Button(
+                    onClick = { activeVector = ThreatVector.CHILD_SAFETY },
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 2.dp, vertical = 6.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (activeVector == ThreatVector.CHILD_SAFETY) PrimaryCobalt else CardDark,
+                        contentColor = if (activeVector == ThreatVector.CHILD_SAFETY) Color.White else TextSecondary
+                    ),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text(
+                        text = "👨‍👩‍👧 Kids" + if (activeVector == ThreatVector.CHILD_SAFETY) " ✓" else "",
+                        fontSize = 10.sp,
+                        maxLines = 1,
+                        fontWeight = if (activeVector == ThreatVector.CHILD_SAFETY) FontWeight.Bold else FontWeight.Medium
                     )
                 }
             }
@@ -274,6 +299,7 @@ fun MainAppScaffold(
                 ThreatVector.SMS -> SmishingScreen(initialRecord = initialRecord)
                 ThreatVector.EMAIL -> EmailScreen()
                 ThreatVector.QUISHING -> QuishingScreen()
+                ThreatVector.CHILD_SAFETY -> ChildSafetyScreen()
             }
         }
     }

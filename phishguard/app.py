@@ -29,6 +29,7 @@ from quishing_detector import (
     generate_qr_image_bytes,
     BENCHMARK_SCENARIOS as QUISHING_BENCHMARKS,
 )
+from child_safety_analyzer import analyze_child_safety_url, CHILD_SAFETY_BENCHMARKS
 from origin_intel import analyze_origin
 from attribution_graph import (
     build_attribution_graph,
@@ -1316,7 +1317,7 @@ with st.sidebar:
     st.markdown("---")
 
     st.subheader("🛡️ Threat Vector Ingress")
-    side_c1, side_c2, side_c3 = st.columns(3)
+    side_c1, side_c2 = st.columns(2)
     with side_c1:
         s_email_cls = "primary" if st.session_state.get("threat_vector", "email") == "email" else "secondary"
         if st.button("📧 Mail", type=s_email_cls, use_container_width=True, key="side_vec_email"):
@@ -1329,11 +1330,19 @@ with st.sidebar:
             st.session_state.threat_vector = "sms"
             st.query_params["vector"] = "sms"
             st.rerun()
+
+    side_c3, side_c4 = st.columns(2)
     with side_c3:
         s_q_cls = "primary" if st.session_state.get("threat_vector", "email") == "quishing" else "secondary"
         if st.button("🎯 QR/UPI", type=s_q_cls, use_container_width=True, key="side_vec_quishing"):
             st.session_state.threat_vector = "quishing"
             st.query_params["vector"] = "quishing"
+            st.rerun()
+    with side_c4:
+        s_cs_cls = "primary" if st.session_state.get("threat_vector", "email") == "child_safety" else "secondary"
+        if st.button("👨‍👩‍👧 Kids", type=s_cs_cls, use_container_width=True, key="side_vec_child_safety"):
+            st.session_state.threat_vector = "child_safety"
+            st.query_params["vector"] = "child_safety"
             st.rerun()
 
     st.markdown("---")
@@ -3535,8 +3544,245 @@ Generated autonomously by PhishGuard Autonomous SOC Sentinel
                 )
 
 
-# Multi-Vector Sentinel Switcher (Email • SMS • Quishing / UPI)
-col_v1, col_v2, col_v3 = st.columns(3)
+def render_child_safety_sentinel(sound_alert: bool = False):
+    st.markdown(
+        """
+        <div style="margin-bottom: 16px;">
+            <span class="sub-head-top">🛡️ Autonomous Minor Protection</span>
+            <h2 style="margin: 4px 0 6px 0; font-weight: 800; font-size: 1.8rem; letter-spacing: -0.02em;">
+                👨‍👩‍👧 Child Safe Browsing & Parental Control Sentinel
+            </h2>
+            <div style="font-size: 0.88rem; color: #94a3b8;">
+                Guards children and teenagers against predatory gaming currency phishing (Free Fire Diamonds, Roblox Robux, BGMI UC), illegal underage betting apps, and age-inappropriate adult content.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # 1-Click Interactive Kid-Safety Benchmarks
+    st.markdown("##### 🎯 1-Click Child Safety & Threat Benchmark Scenarios")
+    col_b1, col_b2, col_b3, col_b4 = st.columns(4)
+
+    if "cs_target_url" not in st.session_state:
+        st.session_state.cs_target_url = CHILD_SAFETY_BENCHMARKS[0]["url"]
+        st.session_state.cs_context = CHILD_SAFETY_BENCHMARKS[0]["context"]
+
+    with col_b1:
+        if st.button("🎮 Free Fire Diamond Trap", use_container_width=True, key="btn_cs_bm1"):
+            st.session_state.cs_target_url = CHILD_SAFETY_BENCHMARKS[0]["url"]
+            st.session_state.cs_context = CHILD_SAFETY_BENCHMARKS[0]["context"]
+            st.rerun()
+
+    with col_b2:
+        if st.button("🎰 Mahadev Betting App", use_container_width=True, key="btn_cs_bm2"):
+            st.session_state.cs_target_url = CHILD_SAFETY_BENCHMARKS[1]["url"]
+            st.session_state.cs_context = CHILD_SAFETY_BENCHMARKS[1]["context"]
+            st.rerun()
+
+    with col_b3:
+        if st.button("💬 Stranger Video Chat", use_container_width=True, key="btn_cs_bm3"):
+            st.session_state.cs_target_url = CHILD_SAFETY_BENCHMARKS[2]["url"]
+            st.session_state.cs_context = CHILD_SAFETY_BENCHMARKS[2]["context"]
+            st.rerun()
+
+    with col_b4:
+        if st.button("📚 Khan Academy (Safe)", use_container_width=True, key="btn_cs_bm4"):
+            st.session_state.cs_target_url = CHILD_SAFETY_BENCHMARKS[3]["url"]
+            st.session_state.cs_context = CHILD_SAFETY_BENCHMARKS[3]["context"]
+            st.rerun()
+
+    st.markdown("<div style='margin-bottom: 14px;'></div>", unsafe_allow_html=True)
+
+    # Ingress Form
+    with st.container():
+        st.markdown(
+            """
+            <div class="metric-card" style="padding: 16px 20px; margin-bottom: 18px;">
+                <div class="metric-title" style="margin-bottom: 6px;">URL / Link Forensics for Minor Protection</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        cs_url_input = st.text_input(
+            "Target Web Link / Domain Under Audit",
+            value=st.session_state.get("cs_target_url", "https://garena-freefire-unlimited-diamonds.xyz/claim?gift=10000"),
+            key="cs_main_url_input"
+        )
+        cs_ctx_input = st.text_input(
+            "Ad Headline or Accompanying Message Context",
+            value=st.session_state.get("cs_context", "Free Fire Season 48 Mega Giveaway! Claim 10,000 Free Diamonds immediately!"),
+            key="cs_main_ctx_input"
+        )
+
+        run_cs = st.button("🔍 Run Autonomous Child Safety Forensics", type="primary", use_container_width=True, key="btn_run_cs")
+
+    target_url = cs_url_input.strip()
+    target_ctx = cs_ctx_input.strip()
+
+    if target_url:
+        cs_res = analyze_child_safety_url(target_url, target_ctx)
+        is_blocked = cs_res["is_blocked"]
+        safety_score = cs_res["safety_score"]
+
+        # Alert Sound Trigger
+        if is_blocked and sound_alert:
+            st.markdown(
+                """
+                <script>
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(440, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } catch(e) {}
+                </script>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        # 1. Action Banner
+        if is_blocked:
+            st.markdown(
+                f"""
+                <div style="background: rgba(239, 68, 68, 0.15); border: 1.5px solid #ef4444; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #f87171;">
+                            🛑 ACCESS BLOCKED FOR CHILD SAFETY
+                        </div>
+                        <div style="font-size: 0.9rem; color: #fecaca; margin-top: 4px;">
+                            {cs_res['verdict']} &bull; Age Rating: <b>{cs_res['age_rating']}</b>
+                        </div>
+                    </div>
+                    <div style="background: #ef4444; color: #ffffff; padding: 6px 14px; border-radius: 8px; font-weight: 800; font-size: 0.85rem;">
+                        SAFETY SCORE: {safety_score}/100
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                f"""
+                <div style="background: rgba(16, 185, 129, 0.15); border: 1.5px solid #10b981; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #34d399;">
+                            ✅ APPROVED (SAFE FOR CHILDREN & STUDENTS)
+                        </div>
+                        <div style="font-size: 0.9rem; color: #a7f3d0; margin-top: 4px;">
+                            {cs_res['verdict']} &bull; Age Rating: <b>{cs_res['age_rating']}</b>
+                        </div>
+                    </div>
+                    <div style="background: #10b981; color: #ffffff; padding: 6px 14px; border-radius: 8px; font-weight: 800; font-size: 0.85rem;">
+                        SAFETY SCORE: {safety_score}/100
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        # 2. Key Metrics
+        m1, m2, m3 = st.columns(3)
+        with m1:
+            st.markdown(
+                f"""
+                <div class="metric-card">
+                    <div class="metric-title">Safety Score</div>
+                    <div class="metric-val" style="color: {'#ef4444' if is_blocked else '#10b981'};">{safety_score} / 100</div>
+                    <div class="metric-sub">0 = High Hazard, 100 = Certified Safe</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with m2:
+            st.markdown(
+                f"""
+                <div class="metric-card">
+                    <div class="metric-title">Age Appropriateness Rating</div>
+                    <div class="metric-val" style="font-size: 1.15rem; color: {'#fbbf24' if is_blocked else '#38bdf8'};">{cs_res['age_rating']}</div>
+                    <div class="metric-sub">Content restriction classification</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with m3:
+            st.markdown(
+                f"""
+                <div class="metric-card">
+                    <div class="metric-title">Assessed Threat Category</div>
+                    <div class="metric-val" style="font-size: 1.1rem; color: #f8fafc;">{cs_res['primary_category']}</div>
+                    <div class="metric-sub">Primary risk vector</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("<div style='margin-bottom: 16px;'></div>", unsafe_allow_html=True)
+
+        # 3. Forensic Details & Parental Guidance
+        c_left, c_right = st.columns([1.2, 0.8])
+        with c_left:
+            cue_badges = "".join(f'<span style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #fbbf24; font-size: 0.76rem; padding: 3px 8px; border-radius: 4px; margin: 2px 4px 2px 0; display: inline-block; font-weight: 600;">{cue}</span>' for cue in cs_res["matched_cues"])
+            fallback_cues = '<span style="color:#64748b;">No malicious keywords detected</span>'
+            st.markdown(
+                f"""
+                <div class="metric-card" style="padding: 18px 22px;">
+                    <div class="metric-title">Why This Content is Flagged</div>
+                    <div style="font-size: 0.95rem; color: #f8fafc; margin-bottom: 12px; line-height: 1.5;">
+                        {cs_res['reason']}
+                    </div>
+                    <div style="font-size: 0.85rem; color: #fbbf24; font-weight: 700; margin-bottom: 8px;">
+                        Parental Action Advisory:
+                    </div>
+                    <div style="font-size: 0.86rem; color: #cbd5e1; margin-bottom: 14px; line-height: 1.5;">
+                        {cs_res['recommended_action']}
+                    </div>
+                    <div>
+                        <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">Detected Hazard Indicators:</span><br/>
+                        {cue_badges or fallback_cues}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        with c_right:
+            st.markdown(
+                """
+                <div class="metric-card" style="padding: 18px 22px;">
+                    <div class="metric-title">Home Router & Family DNS Shield</div>
+                    <div style="font-size: 0.84rem; color: #cbd5e1; margin-bottom: 10px; line-height: 1.45;">
+                        Block adult portals and cyber traps across all family devices (tablets, smart TVs, child phones) at the Wi-Fi router level with zero app installations:
+                    </div>
+                    <div style="background: #0f172a; border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;">
+                        <div style="font-size: 0.72rem; color: #38bdf8; font-weight: 700;">CLOUDFLARE FAMILIES DNS</div>
+                        <div style="font-family: monospace; font-size: 0.85rem; color: #f8fafc; margin-top: 2px;">
+                            Primary: 1.1.1.3<br/>
+                            Secondary: 1.0.0.3
+                        </div>
+                    </div>
+                    <div style="background: #0f172a; border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 10px 12px;">
+                        <div style="font-size: 0.72rem; color: #34d399; font-weight: 700;">CLEANBROWSING FAMILY FILTER</div>
+                        <div style="font-family: monospace; font-size: 0.85rem; color: #f8fafc; margin-top: 2px;">
+                            Primary: 185.228.168.168
+                        </div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+
+# Multi-Vector Sentinel Switcher (Email • SMS • Quishing • Child Safe)
+col_v1, col_v2, col_v3, col_v4 = st.columns(4)
 cur_vec = st.session_state.get("threat_vector", "email")
 
 with col_v1:
@@ -3555,9 +3801,16 @@ with col_v2:
 
 with col_v3:
     v3_style = "primary" if cur_vec == "quishing" else "secondary"
-    if st.button("🎯 UPI / QR Quishing Sentinel" + ("  (Active)" if cur_vec == "quishing" else ""), type=v3_style, use_container_width=True, key="top_vec_quishing"):
+    if st.button("🎯 UPI / QR Quishing" + ("  (Active)" if cur_vec == "quishing" else ""), type=v3_style, use_container_width=True, key="top_vec_quishing"):
         st.session_state.threat_vector = "quishing"
         st.query_params["vector"] = "quishing"
+        st.rerun()
+
+with col_v4:
+    v4_style = "primary" if cur_vec == "child_safety" else "secondary"
+    if st.button("👨‍👩‍👧 Child Safe Sentinel" + ("  (Active)" if cur_vec == "child_safety" else ""), type=v4_style, use_container_width=True, key="top_vec_child_safety"):
+        st.session_state.threat_vector = "child_safety"
+        st.query_params["vector"] = "child_safety"
         st.rerun()
 
 st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
@@ -3566,8 +3819,10 @@ if cur_vec == "email":
     render_email_sentinel(sound_alert, redact_enabled)
 elif cur_vec == "sms":
     render_smishing_sentinel(sound_alert)
-else:
+elif cur_vec == "quishing":
     render_quishing_sentinel(sound_alert)
+else:
+    render_child_safety_sentinel(sound_alert)
 
 # -------------------------------------------------------------
 # Theme-Adaptive Enterprise Footer
