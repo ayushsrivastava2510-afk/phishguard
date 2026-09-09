@@ -1,4 +1,16 @@
-/* popup.css - PhishGuard Sentinel HUD Theme */
+/* popup.css - PhishGuard Sentinel & Study Lock HUD */
+
+:root {
+  --bg-main: #0a0e17;
+  --bg-card: #111827;
+  --purple-accent: #a855f7;
+  --purple-light: #c084fc;
+  --cyan-accent: #38bdf8;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --danger: #ef4444;
+  --success: #10b981;
+}
 
 * {
   box-sizing: border-box;
@@ -7,18 +19,18 @@
 }
 
 body {
-  width: 360px;
-  background-color: #0c0c0e;
-  color: #f8fafc;
+  width: 380px;
+  background-color: var(--bg-main);
+  color: var(--text-main);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 13px;
   line-height: 1.4;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .popup-container {
   padding: 16px;
-  background: radial-gradient(circle at top right, rgba(229, 9, 20, 0.28) 0%, #0c0c0e 65%);
+  background: radial-gradient(circle at top right, rgba(168, 85, 247, 0.22) 0%, #0a0e17 65%);
 }
 
 /* Header */
@@ -26,7 +38,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .brand {
@@ -36,61 +48,519 @@ body {
 }
 
 .shield-badge {
-  font-size: 22px;
-  background: rgba(229, 9, 20, 0.15);
-  border: 1px solid rgba(229, 9, 20, 0.5);
+  font-size: 20px;
+  background: rgba(168, 85, 247, 0.18);
+  border: 1px solid rgba(168, 85, 247, 0.45);
   border-radius: 8px;
   padding: 4px 6px;
-  box-shadow: 0 0 10px rgba(229, 9, 20, 0.3);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
 }
 
 .title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
   color: #ffffff;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
 }
 
 .subtitle {
   font-size: 10px;
-  color: #E50914;
+  color: var(--purple-light);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-/* Status Indicator */
-.status-indicator {
+/* Status Pill */
+.status-pill {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(168, 85, 247, 0.4);
   border-radius: 12px;
   padding: 3px 8px;
   font-size: 10px;
-  color: #94a3b8;
+  font-weight: 700;
+  color: var(--purple-light);
 }
 
-.status-dot {
+.status-pill.inactive {
+  border-color: rgba(148, 163, 184, 0.3);
+  color: var(--text-muted);
+}
+
+.pulse-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background-color: #eab308;
+  background-color: var(--purple-accent);
+  box-shadow: 0 0 6px var(--purple-accent);
 }
 
-.status-online .status-dot {
-  background-color: #10b981;
-  box-shadow: 0 0 6px #10b981;
+.status-pill.inactive .pulse-dot {
+  background-color: #64748b;
+  box-shadow: none;
 }
 
-.status-offline .status-dot {
-  background-color: #ef4444;
-  box-shadow: 0 0 6px #ef4444;
+/* Navigation Tabs */
+.nav-tabs {
+  display: flex;
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 14px;
+  gap: 4px;
 }
 
-/* Context Card */
+.nav-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.nav-tab:hover {
+  color: #ffffff;
+}
+
+.nav-tab.active {
+  background: rgba(168, 85, 247, 0.25);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.2);
+}
+
+/* Tab Panels */
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+/* Study Lock - Locked Screen (Child View) */
+.lock-hero-card {
+  background: rgba(17, 24, 39, 0.7);
+  border: 1.5px solid rgba(168, 85, 247, 0.35);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.lock-icon-wrapper {
+  margin-bottom: 8px;
+}
+
+.big-lock {
+  font-size: 32px;
+  filter: drop-shadow(0 2px 8px rgba(168, 85, 247, 0.5));
+}
+
+.lock-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--purple-light);
+  margin-bottom: 4px;
+}
+
+.lock-desc {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.blocked-count-badge {
+  display: inline-block;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  color: #e9d5ff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+/* PIN Unlock Box */
+.pin-unlock-box {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+}
+
+.pin-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-bottom: 8px;
+}
+
+.pin-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.pin-field {
+  width: 130px;
+  background: #030712;
+  border: 1.5px solid #374151;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 16px;
+  color: #ffffff;
+  text-align: center;
+  letter-spacing: 0.25em;
+  outline: none;
+}
+
+.pin-field:focus {
+  border-color: var(--purple-accent);
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.25);
+}
+
+.btn-unlock {
+  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-unlock:hover {
+  opacity: 0.92;
+}
+
+.pin-error-msg {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--danger);
+  margin-top: 6px;
+  min-height: 14px;
+}
+
+.default-pin-hint {
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+/* Study Lock - Unlocked View (Parent View) */
+.unlocked-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-bottom: 12px;
+}
+
+.admin-badge {
+  color: #6ee7b7;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.btn-sm-relock {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-sm-relock:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border-color: var(--danger);
+}
+
+/* Master Switch Card */
+.control-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.control-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.control-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 20px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #374151;
+  transition: .25s;
+  border-radius: 20px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .25s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--purple-accent);
+}
+
+input:checked + .slider:before {
+  transform: translateX(18px);
+}
+
+/* Add Site Section */
+.add-site-section {
+  margin-bottom: 10px;
+}
+
+.section-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #cbd5e1;
+  margin-bottom: 6px;
+}
+
+.section-label-sm {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.input-row {
+  display: flex;
+  gap: 6px;
+}
+
+.text-input {
+  flex: 1;
+  background: #030712;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 12px;
+  color: #ffffff;
+  outline: none;
+}
+
+.text-input:focus {
+  border-color: var(--purple-accent);
+}
+
+.btn-add {
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid var(--purple-accent);
+  color: #d8b4fe;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-add:hover {
+  background: var(--purple-accent);
+  color: #ffffff;
+}
+
+/* Preset Chips */
+.presets-section {
+  margin-bottom: 12px;
+}
+
+.preset-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.preset-chip {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.preset-chip:hover {
+  background: rgba(168, 85, 247, 0.2);
+  border-color: var(--purple-accent);
+  color: #ffffff;
+}
+
+/* Blocklist Chips */
+.blocklist-section {
+  margin-bottom: 12px;
+}
+
+.chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 110px;
+  overflow-y: auto;
+  padding: 4px;
+  background: rgba(3, 7, 18, 0.4);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.site-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.chip-del-btn {
+  background: transparent;
+  border: none;
+  color: #f87171;
+  font-size: 11px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.chip-del-btn:hover {
+  color: #ffffff;
+}
+
+/* PIN Settings Details */
+.pin-settings-details {
+  background: rgba(17, 24, 39, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-bottom: 12px;
+}
+
+.pin-settings-summary {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+  outline: none;
+}
+
+.pin-change-box {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.text-input-sm {
+  flex: 1;
+  background: #030712;
+  border: 1px solid #374151;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 11px;
+  color: #ffffff;
+  outline: none;
+}
+
+.btn-sm {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-soc-sync {
+  width: 100%;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #7dd3fc;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-soc-sync:hover {
+  background: rgba(56, 189, 248, 0.2);
+  color: #ffffff;
+}
+
+/* Mail Sentinel (Preserved) */
 .context-card {
   background: rgba(20, 20, 25, 0.9);
   border: 1px solid rgba(229, 9, 20, 0.25);
@@ -122,7 +592,6 @@ body {
   text-overflow: ellipsis;
 }
 
-/* Buttons */
 .btn-primary {
   width: 100%;
   display: flex;
@@ -142,14 +611,8 @@ body {
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
-  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.5);
+  opacity: 0.92;
   transform: translateY(-1px);
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .btn-secondary {
@@ -175,7 +638,6 @@ body {
   color: #ffffff;
 }
 
-/* Results Card */
 .results-card {
   margin-top: 12px;
   background: rgba(15, 23, 42, 0.95);

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Lock Enforced — PhishGuard Parental Control</title>
+  <link rel="stylesheet" href="blocked.css">
+</head>
+<body>
+  <div class="block-container">
+    <!-- Glowing Shield Icon -->
+    <div class="shield-container">
+      <div class="shield-glow"></div>
+      <div class="shield-icon">
+        <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <rect x="9" y="11" width="6" height="5" rx="1"/>
+          <path d="M10 11V9a2 2 0 1 1 4 0v2"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Alert Badge -->
+    <div class="badge-lock">
+      <span class="pulse-dot"></span>
+      <span>STUDY MODE ACTIVE &bull; ZERO-TOLERANCE BLOCK</span>
+    </div>
+
+    <!-- Main Title -->
+    <h1 class="title">Access Blocked by Parental Control</h1>
+    <p class="subtitle">
+      <span class="domain-tag" id="blocked-domain">Distraction Website</span> has been locked by your parent to protect your focus during study hours.
+    </p>
+
+    <!-- Motivation Card -->
+    <div class="motivation-card">
+      <div class="card-icon">💡</div>
+      <div class="card-content">
+        <div class="quote-text" id="quote-text">
+          "Focus on your goals. Every distraction avoided today is an achievement tomorrow."
+        </div>
+        <div class="quote-author">— PhishGuard Study Shield</div>
+      </div>
+    </div>
+
+    <!-- Educational Portal Recommendations -->
+    <div class="edu-section">
+      <div class="edu-title">Approved Safe Educational Portals:</div>
+      <div class="edu-links">
+        <a href="https://www.khanacademy.org" class="edu-pill" target="_blank">📚 Khan Academy</a>
+        <a href="https://ncert.nic.in" class="edu-pill" target="_blank">📖 NCERT e-Books</a>
+        <a href="https://www.wikipedia.org" class="edu-pill" target="_blank">🌐 Wikipedia</a>
+        <a href="https://scratch.mit.edu" class="edu-pill" target="_blank">💻 Scratch Coding</a>
+        <a href="https://www.duolingo.com" class="edu-pill" target="_blank">🦉 Duolingo</a>
+      </div>
+    </div>
+
+    <!-- Parent Override Accordion -->
+    <div class="override-card">
+      <div class="override-header" id="override-toggle">
+        <div class="override-title-group">
+          <span class="key-icon">🔑</span>
+          <span class="override-title">Parent Emergency Override</span>
+        </div>
+        <span class="toggle-arrow" id="toggle-arrow">▼</span>
+      </div>
+
+      <div class="override-body" id="override-body" style="display: none;">
+        <p class="override-desc">
+          Are you the parent? Enter your secret 4-digit PIN to temporarily grant a 15-minute study break or manage rules.
+        </p>
+        <div class="pin-group">
+          <input type="password" id="override-pin" maxlength="4" placeholder="••••" class="pin-input" autocomplete="off" pattern="[0-9]*" inputmode="numeric">
+          <button id="btn-submit-override" class="btn-override">Unlock</button>
+        </div>
+        <div id="pin-feedback" class="pin-feedback"></div>
+      </div>
+    </div>
+
+    <!-- Footer / SOC Link -->
+    <div class="footer">
+      <span>PhishGuard Child Protection Engine</span>
+      <span>&bull;</span>
+      <a href="http://localhost:8501" target="_blank" class="footer-link">PhishGuard Web SOC</a>
+      <span>&bull;</span>
+      <a href="https://phishguard-soc.streamlit.app" target="_blank" class="footer-link">Cloud Sentinel</a>
+    </div>
+  </div>
+
+  <script src="blocked.js"></script>
+</body>
+</html>

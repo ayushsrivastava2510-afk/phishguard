@@ -3,80 +3,190 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PhishGuard Mail Sentinel</title>
+  <title>PhishGuard Sentinel & Study Lock</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <div class="popup-container">
-    <!-- Header -->
-    <div class="header">
+    <!-- Main Header -->
+    <header class="header">
       <div class="brand">
         <div class="shield-badge">🛡️</div>
         <div>
           <div class="title">PhishGuard Sentinel</div>
-          <div class="subtitle">AI Forensic & Origin Tracer</div>
+          <div class="subtitle">Parental Study Lock & Threat Defense</div>
         </div>
       </div>
-      <div id="bridge-status" class="status-indicator">
-        <span class="status-dot"></span>
-        <span id="status-text">Checking SOC...</span>
+      <div id="status-pill" class="status-pill active">
+        <span class="pulse-dot"></span>
+        <span id="status-pill-text">LOCKED</span>
       </div>
-    </div>
+    </header>
 
-    <!-- Active Tab Context -->
-    <div class="context-card" id="context-card">
-      <div class="context-header">
-        <span id="active-client-icon">📧</span>
-        <span id="active-client-name" class="client-name">Detecting Mail Client...</span>
-      </div>
-      <div id="active-email-subject" class="subject-preview">Open an email in Gmail or Outlook to audit</div>
-    </div>
-
-    <!-- Main Action Button -->
-    <button id="scan-now-btn" class="btn-primary">
-      <span class="btn-icon">⚡</span>
-      <span id="btn-text">Audit Active Email Now</span>
-    </button>
-
-    <!-- Scan Results Card (Initially hidden) -->
-    <div id="results-card" class="results-card" style="display: none;">
-      <div class="verdict-banner" id="verdict-banner">
-        <div class="score-circle" id="score-circle">--</div>
-        <div class="verdict-details">
-          <div class="verdict-title" id="verdict-title">ANALYZING</div>
-          <div class="threat-category" id="threat-category">Please wait...</div>
-        </div>
-      </div>
-
-      <div class="intel-grid">
-        <div class="intel-item">
-          <div class="intel-label">Origin IP</div>
-          <div class="intel-value" id="intel-ip">—</div>
-        </div>
-        <div class="intel-item">
-          <div class="intel-label">Geolocation</div>
-          <div class="intel-value" id="intel-geo">—</div>
-        </div>
-        <div class="intel-item">
-          <div class="intel-label">Infrastructure</div>
-          <div class="intel-value" id="intel-infra">—</div>
-        </div>
-        <div class="intel-item">
-          <div class="intel-label">Chain of Custody</div>
-          <div class="intel-value" id="intel-hash">SHA-256</div>
-        </div>
-      </div>
-
-      <button id="open-soc-btn" class="btn-secondary">
-        <span>🚀 Open Full 3D SOC Dashboard</span>
+    <!-- Mode Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="nav-tab active" id="tab-btn-study">
+        <span>🛡️ Study Lock</span>
       </button>
-    </div>
+      <button class="nav-tab" id="tab-btn-mail">
+        <span>📧 Mail Sentinel</span>
+      </button>
+    </nav>
 
-    <!-- Footer -->
-    <div class="footer">
+    <!-- ==================== TAB 1: STUDY LOCK ==================== -->
+    <section id="tab-content-study" class="tab-pane active">
+      <!-- 1. LOCKED VIEW (Child Screen / Default) -->
+      <div id="study-locked-view" class="view-panel">
+        <div class="lock-hero-card">
+          <div class="lock-icon-wrapper">
+            <span class="big-lock">🔒</span>
+          </div>
+          <div class="lock-title">Study Lock is Active</div>
+          <div class="lock-desc">
+            Restricted websites are blocked at the network level. Controls are locked behind the parent's secret 4-digit PIN.
+          </div>
+          <div class="blocked-count-badge">
+            <span id="active-sites-count">6</span> websites currently locked
+          </div>
+        </div>
+
+        <div class="pin-unlock-box">
+          <label class="pin-label" for="parent-pin-input">Enter Parent 4-Digit PIN to Manage:</label>
+          <div class="pin-row">
+            <input type="password" id="parent-pin-input" maxlength="4" placeholder="••••" class="pin-field" autocomplete="off" pattern="[0-9]*" inputmode="numeric">
+            <button id="btn-unlock-controls" class="btn-unlock">Unlock</button>
+          </div>
+          <div id="popup-pin-error" class="pin-error-msg"></div>
+          <div class="default-pin-hint">Default initial PIN is <b>1234</b></div>
+        </div>
+      </div>
+
+      <!-- 2. UNLOCKED VIEW (Parent Administration) -->
+      <div id="study-unlocked-view" class="view-panel" style="display: none;">
+        <!-- Top Action Bar -->
+        <div class="unlocked-header">
+          <span class="admin-badge">🔓 Parent Controls Unlocked</span>
+          <button id="btn-relock" class="btn-sm-relock">🔒 Relock</button>
+        </div>
+
+        <!-- Master Switch -->
+        <div class="control-card">
+          <div class="control-label-group">
+            <div class="control-title">Study Lock Protection</div>
+            <div class="control-sub">Zero-tolerance network block on distractions</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="master-toggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- Add Website Form -->
+        <div class="add-site-section">
+          <label class="section-label">Block New Website / Domain:</label>
+          <div class="input-row">
+            <input type="text" id="new-domain-input" placeholder="e.g. reddit.com, twitch.tv" class="text-input">
+            <button id="btn-add-domain" class="btn-add">➕ Add</button>
+          </div>
+        </div>
+
+        <!-- Quick Presets -->
+        <div class="presets-section">
+          <div class="section-label-sm">Quick Add Popular Distractions:</div>
+          <div class="preset-chips">
+            <button class="preset-chip" data-domain="instagram.com">📸 Instagram</button>
+            <button class="preset-chip" data-domain="youtube.com">▶️ YouTube</button>
+            <button class="preset-chip" data-domain="roblox.com">🎮 Roblox</button>
+            <button class="preset-chip" data-domain="snapchat.com">👻 Snapchat</button>
+            <button class="preset-chip" data-domain="netflix.com">🎬 Netflix</button>
+            <button class="preset-chip" data-domain="discord.com">💬 Discord</button>
+            <button class="preset-chip" data-domain="reddit.com">🤖 Reddit</button>
+            <button class="preset-chip" data-domain="tiktok.com">🎵 TikTok</button>
+          </div>
+        </div>
+
+        <!-- Active Blocklist -->
+        <div class="blocklist-section">
+          <div class="section-label-sm">Currently Blocked Websites:</div>
+          <div id="blocklist-chips" class="chips-container">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- PIN Settings Expander -->
+        <details class="pin-settings-details">
+          <summary class="pin-settings-summary">⚙️ Change Parent 4-Digit PIN</summary>
+          <div class="pin-change-box">
+            <input type="password" id="new-pin-input" maxlength="4" placeholder="New 4-digit PIN" class="text-input-sm">
+            <button id="btn-change-pin" class="btn-sm">Save PIN</button>
+          </div>
+          <div id="change-pin-msg" class="pin-error-msg"></div>
+        </details>
+
+        <!-- Web SOC Sync Button -->
+        <button id="btn-sync-soc" class="btn-soc-sync">
+          <span>🔄 Sync with PhishGuard Web SOC</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: MAIL SENTINEL ==================== -->
+    <section id="tab-content-mail" class="tab-pane" style="display: none;">
+      <!-- Active Tab Context -->
+      <div class="context-card" id="context-card">
+        <div class="context-header">
+          <span id="active-client-icon">📧</span>
+          <span id="active-client-name" class="client-name">Detecting Mail Client...</span>
+        </div>
+        <div id="active-email-subject" class="subject-preview">Open an email in Gmail or Outlook to audit</div>
+      </div>
+
+      <!-- Main Action Button -->
+      <button id="scan-now-btn" class="btn-primary">
+        <span class="btn-icon">⚡</span>
+        <span id="btn-text">Audit Active Email Now</span>
+      </button>
+
+      <!-- Scan Results Card -->
+      <div id="results-card" class="results-card" style="display: none;">
+        <div class="verdict-banner" id="verdict-banner">
+          <div class="score-circle" id="score-circle">--</div>
+          <div class="verdict-details">
+            <div class="verdict-title" id="verdict-title">ANALYZING</div>
+            <div class="threat-category" id="threat-category">Please wait...</div>
+          </div>
+        </div>
+
+        <div class="intel-grid">
+          <div class="intel-item">
+            <div class="intel-label">Origin IP</div>
+            <div class="intel-value" id="intel-ip">—</div>
+          </div>
+          <div class="intel-item">
+            <div class="intel-label">Geolocation</div>
+            <div class="intel-value" id="intel-geo">—</div>
+          </div>
+          <div class="intel-item">
+            <div class="intel-label">Infrastructure</div>
+            <div class="intel-value" id="intel-infra">—</div>
+          </div>
+          <div class="intel-item">
+            <div class="intel-label">Chain of Custody</div>
+            <div class="intel-value" id="intel-hash">SHA-256</div>
+          </div>
+        </div>
+
+        <button id="open-soc-btn" class="btn-secondary">
+          <span>🚀 Open Full 3D SOC Dashboard</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Popup Footer -->
+    <footer class="footer">
       <span>SIH 2026 &bull; Binary Battalion</span>
       <a href="http://localhost:8501" target="_blank" class="footer-link">SOC Web</a>
-    </div>
+    </footer>
   </div>
 
   <script src="popup.js"></script>

@@ -1,9 +1,201 @@
 // background.js - PhishGuard Service Worker (Manifest V3)
+// Unifies Email Threat Forensics & Parental Control Study Lock Engine
 
-chrome.runtime.onInstalled.addListener(() => {
-  console.log("PhishGuard Mail Sentinel extension initialized.");
+console.log("[PhishGuard Service Worker] Initializing Sentinel & Study Lock v2.0.0");
+
+// Default initial state for Parental Control Study Mode
+const DEFAULT_PARENTAL_STATE = {
+  parental_control_active: true,
+  parent_pin: "1234",
+  parent_custom_blocklist: [
+    "instagram.com",
+    "youtube.com",
+    "roblox.com",
+    "snapchat.com",
+    "netflix.com",
+    "discord.com"
+  ],
+  temporary_exemptions: {},
+  block_stats: { total_blocked: 0, last_blocked_domain: null }
+};
+
+// 1. Initialize persistent storage and sync dynamic rules on install/startup
+chrome.runtime.onInstalled.addListener(async () => {
+  const existing = await chrome.storage.local.get([
+    "parental_control_active",
+    "parent_pin",
+    "parent_custom_blocklist",
+    "temporary_exemptions"
+  ]);
+
+  const active = existing.parental_control_active !== undefined ? existing.parental_control_active : DEFAULT_PARENTAL_STATE.parental_control_active;
+  const pin = existing.parent_pin || DEFAULT_PARENTAL_STATE.parent_pin;
+  const blocklist = existing.parent_custom_blocklist || DEFAULT_PARENTAL_STATE.parent_custom_blocklist;
+
+  await chrome.storage.local.set({
+    parental_control_active: active,
+    parent_pin: pin,
+    parent_custom_blocklist: blocklist,
+    temporary_exemptions: existing.temporary_exemptions || {}
+  });
+
+  await syncDynamicRules(blocklist, active);
 });
 
+// 2. Synchronize Declarative Net Request (DNR) Dynamic Rules at Network Layer
+async function syncDynamicRules(blocklist, isActive) {
+  try {
+    const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
+    const existingRuleIds = existingRules.map(r => r.id);
+
+    if (!isActive || !blocklist || blocklist.length === 0) {
+      if (existingRuleIds.length > 0) {
+        await chrome.declarativeNetRequest.updateDynamicRules({
+          removeRuleIds: existingRuleIds,
+          addRules: []
+        });
+      }
+      await chrome.action.setBadgeText({ text: "OFF" });
+      await chrome.action.setBadgeBackgroundColor({ color: "#64748b" });
+      console.log("[PhishGuard DNR] Study Lock Inactive. All dynamic rules cleared.");
+      return;
+    }
+
+    const { temporary_exemptions = {} } = await chrome.storage.local.get("temporary_exemptions");
+    const now = Date.now();
+
+    const newRules = [];
+    let ruleIdCounter = 1;
+
+    for (const domain of blocklist) {
+      if (!domain) continue;
+      const cleanDomain = domain.toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/^www\./, "").trim();
+      if (!cleanDomain) continue;
+
+      // Skip if temporarily exempted by parent
+      if (temporary_exemptions[cleanDomain] && temporary_exemptions[cleanDomain] > now) {
+        continue;
+      }
+
+      // Rule A: Main Frame Navigation -> Redirect to Block Page
+      newRules.push({
+        id: ruleIdCounter++,
+        priority: 1,
+        action: {
+          type: "redirect",
+          redirect: {
+            extensionPath: "/blocked.html"
+          }
+        },
+        condition: {
+          urlFilter: `||${cleanDomain}`,
+          resourceTypes: ["main_frame"]
+        }
+      });
+
+      // Rule B: Sub-resources (Images, Scripts, XHR, Websockets, Iframes) -> Block completely
+      newRules.push({
+        id: ruleIdCounter++,
+        priority: 1,
+        action: {
+          type: "block"
+        },
+        condition: {
+          urlFilter: `||${cleanDomain}`,
+          resourceTypes: [
+            "sub_frame",
+            "stylesheet",
+            "script",
+            "image",
+            "font",
+            "object",
+            "xmlhttprequest",
+            "ping",
+            "media",
+            "websocket",
+            "other"
+          ]
+        }
+      });
+    }
+
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: existingRuleIds,
+      addRules: newRules
+    });
+
+    await chrome.action.setBadgeText({ text: String(blocklist.length) });
+    await chrome.action.setBadgeBackgroundColor({ color: "#a855f7" });
+    console.log(`[PhishGuard DNR] Study Lock Active. Deployed ${newRules.length} dynamic filtering rules.`);
+  } catch (err) {
+    console.error("[PhishGuard DNR] Failed to update dynamic rules:", err);
+  }
+}
+
+// 3. Navigation-Layer Fallback (Intercepts before DNS/navigation starts)
+chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
+  if (details.frameId !== 0) return; // Only main frame
+
+  try {
+    const data = await chrome.storage.local.get([
+      "parental_control_active",
+      "parent_custom_blocklist",
+      "temporary_exemptions",
+      "block_stats"
+    ]);
+
+    const isActive = data.parental_control_active !== false;
+    if (!isActive) return;
+
+    const blocklist = data.parent_custom_blocklist || DEFAULT_PARENTAL_STATE.parent_custom_blocklist;
+    const exemptions = data.temporary_exemptions || {};
+    const now = Date.now();
+
+    const targetUrl = new URL(details.url);
+    const host = targetUrl.hostname.toLowerCase().replace(/^www\./, "");
+
+    // Ignore internal extension pages and local dev tools
+    if (targetUrl.protocol === "chrome-extension:" || host === "localhost" || host === "127.0.0.1" || host === "phishguard-soc.streamlit.app") {
+      return;
+    }
+
+    let isBlocked = false;
+    let matchedDomain = "";
+
+    for (const rawRule of blocklist) {
+      if (!rawRule) continue;
+      const cleanRule = rawRule.toLowerCase().replace(/^https?:\/\//, "").split("/")[0].replace(/^www\./, "").trim();
+      if (!cleanRule) continue;
+
+      if (host === cleanRule || host.endsWith("." + cleanRule)) {
+        if (exemptions[cleanRule] && exemptions[cleanRule] > now) {
+          return; // Temporary exemption active
+        }
+        isBlocked = true;
+        matchedDomain = cleanRule;
+        break;
+      }
+    }
+
+    if (isBlocked) {
+      console.warn(`[PhishGuard Navigation] Enforcing Study Lock on tab ${details.tabId} for domain: ${host}`);
+
+      // Update block statistics
+      const stats = data.block_stats || { total_blocked: 0 };
+      stats.total_blocked = (stats.total_blocked || 0) + 1;
+      stats.last_blocked_domain = host;
+      await chrome.storage.local.set({ block_stats: stats });
+
+      // Redirect tab to blocked screen
+      const blockUrl = chrome.runtime.getURL(`blocked.html?blocked=${encodeURIComponent(host)}`);
+      await chrome.tabs.update(details.tabId, { url: blockUrl });
+    }
+  } catch (err) {
+    // Ignore URL parse errors on internal chrome:// URLs
+  }
+});
+
+// 4. In-Browser Email Forensic Fallback Engine (Preserved from Mail Sentinel)
 function runClientSideForensics(details) {
   const text = ((details.subject || "") + " " + (details.body || "")).toLowerCase();
   const fromEmail = (details.from_email || "").toLowerCase();
@@ -12,34 +204,29 @@ function runClientSideForensics(details) {
   let category = "Safe Communication";
   let redFlags = [];
 
-  // Banking / KYC Fraud
   if (text.includes("kyc") || text.includes("pan card") || text.includes("aadhaar") || text.includes("debit card blocked") || text.includes("net banking") || text.includes("sbi")) {
     riskScore += 46;
     category = "Financial / Banking KYC Fraud";
     redFlags.push("Coercive bank KYC / identity verification trigger detected.");
   }
 
-  // Credential Harvesting
   if (text.includes("password expired") || text.includes("login attempt") || text.includes("reset your password") || text.includes("mfa verification") || text.includes("account suspended")) {
     riskScore += 42;
     if (category === "Safe Communication") category = "Credential Harvesting / Account Takeover";
     redFlags.push("Credential harvesting / account suspension cue detected.");
   }
 
-  // BEC / Payment Diversion
   if (text.includes("wire transfer") || text.includes("payment diversion") || text.includes("swift code") || text.includes("routing number") || text.includes("invoice attached")) {
     riskScore += 44;
     category = "Business Email Compromise (BEC)";
     redFlags.push("Unauthorized wire transfer / payment diversion language detected.");
   }
 
-  // Urgency & Coercion
   if (text.includes("urgent") || text.includes("within 24 hours") || text.includes("immediately") || text.includes("act now") || text.includes("final notice")) {
     riskScore += 24;
     redFlags.push("Psychological urgency / panic coercion cue detected.");
   }
 
-  // Domain Spoofing / Lookalike
   if (fromEmail.includes("sbi") && !fromEmail.endsWith("@sbi.co.in")) {
     riskScore += 35;
     redFlags.push("Unauthenticated domain impersonating State Bank of India.");
@@ -87,9 +274,80 @@ function runClientSideForensics(details) {
   };
 }
 
-// Listen for messages from content scripts or popup
+// 5. Unified Runtime Message Router
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  // 1. Perform Forensic Scan (tries local bridge; falls back to in-browser heuristics)
+  // A. Study Lock: Get Parental State
+  if (request.action === "get_parental_state") {
+    (async () => {
+      const data = await chrome.storage.local.get([
+        "parental_control_active",
+        "parent_pin",
+        "parent_custom_blocklist",
+        "block_stats"
+      ]);
+      sendResponse({
+        status: "success",
+        data: {
+          active: data.parental_control_active !== false,
+          blocklist: data.parent_custom_blocklist || DEFAULT_PARENTAL_STATE.parent_custom_blocklist,
+          stats: data.block_stats || { total_blocked: 0 }
+        }
+      });
+    })();
+    return true;
+  }
+
+  // B. Study Lock: Verify PIN
+  if (request.action === "verify_pin") {
+    (async () => {
+      const { parent_pin = "1234" } = await chrome.storage.local.get("parent_pin");
+      const isValid = String(request.pin).trim() === String(parent_pin).trim();
+      sendResponse({ status: "success", valid: isValid });
+    })();
+    return true;
+  }
+
+  // C. Study Lock: Update Parental State (From Popup or SOC)
+  if (request.action === "set_parental_state" || request.action === "sync_from_soc") {
+    (async () => {
+      const payload = request.payload || request.data || {};
+      const updates = {};
+
+      if (payload.active !== undefined) updates.parental_control_active = Boolean(payload.active);
+      if (payload.blocklist !== undefined) updates.parent_custom_blocklist = payload.blocklist;
+      if (payload.pin !== undefined && String(payload.pin).trim().length === 4) updates.parent_pin = String(payload.pin).trim();
+
+      await chrome.storage.local.set(updates);
+
+      const updated = await chrome.storage.local.get(["parent_custom_blocklist", "parental_control_active"]);
+      await syncDynamicRules(updated.parent_custom_blocklist, updated.parental_control_active);
+
+      sendResponse({ status: "success", message: "Study Lock state updated and DNR rules synchronized." });
+    })();
+    return true;
+  }
+
+  // D. Study Lock: Allow Temporary Break
+  if (request.action === "allow_temporary_break") {
+    (async () => {
+      const domain = (request.domain || "").toLowerCase().replace(/^www\./, "");
+      const durationMs = (request.durationMinutes || 15) * 60 * 1000;
+      const { temporary_exemptions = {}, parent_custom_blocklist = [], parental_control_active = true } = await chrome.storage.local.get([
+        "temporary_exemptions",
+        "parent_custom_blocklist",
+        "parental_control_active"
+      ]);
+
+      temporary_exemptions[domain] = Date.now() + durationMs;
+      await chrome.storage.local.set({ temporary_exemptions });
+      await syncDynamicRules(parent_custom_blocklist, parental_control_active);
+
+      sendResponse({ status: "success", expiresAt: temporary_exemptions[domain] });
+    })();
+    return true;
+  }
+
+  // E. Mail Sentinel: Perform Scan
   if (request.action === "perform_scan") {
     (async () => {
       try {
@@ -103,7 +361,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const data = await resp.json();
         sendResponse({ status: "success", data });
       } catch (err) {
-        // Fallback: Run in-browser forensic engine seamlessly
         const fallbackData = runClientSideForensics(request.details || {});
         sendResponse({ status: "success", data: fallbackData });
       }
@@ -111,7 +368,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 
-  // 2. Check SOC Bridge Status
+  // F. Mail Sentinel: Check SOC Bridge Status
   if (request.action === "check_status") {
     (async () => {
       try {
@@ -120,14 +377,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const data = await resp.json();
         sendResponse({ status: "success", data, mode: "local" });
       } catch (err) {
-        // Connected to Cloud SOC
         sendResponse({ status: "success", mode: "cloud", url: "https://phishguard-soc.streamlit.app" });
       }
     })();
     return true;
   }
 
-  // 3. Open SOC Dashboard (prioritizes live cloud deployment)
+  // G. Mail Sentinel: Open SOC Dashboard
   if (request.action === "open_dashboard") {
     (async () => {
       try {
@@ -141,7 +397,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 
-  // 4. Save Scan Result to Storage
+  // H. Mail Sentinel: Save Scan Result to Storage
   if (request.action === "save_scan_result") {
     (async () => {
       try {

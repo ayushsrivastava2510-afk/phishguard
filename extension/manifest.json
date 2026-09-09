@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "PhishGuard Mail Sentinel",
-  "version": "1.0.0",
-  "description": "1-Click AI Email Threat Detection, Geolocation & Forensic Scanner for Gmail & Outlook.",
+  "name": "PhishGuard Sentinel — Security & Study Lock",
+  "version": "2.0.0",
+  "description": "Autonomous AI Cyber Threat Sentinel & Parental Control Study Lock. Blocks distractions at network level and audits email phishing.",
   "icons": {
     "16": "icons/icon-16.png",
     "48": "icons/icon-48.png",
@@ -10,7 +10,7 @@
   },
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "PhishGuard Mail Sentinel",
+    "default_title": "PhishGuard Sentinel & Study Lock",
     "default_icon": {
       "16": "icons/icon-16.png",
       "48": "icons/icon-48.png",
@@ -18,12 +18,15 @@
     }
   },
   "permissions": [
-    "activeTab",
+    "declarativeNetRequest",
     "storage",
     "tabs",
-    "scripting"
+    "webNavigation",
+    "scripting",
+    "alarms"
   ],
   "host_permissions": [
+    "<all_urls>",
     "*://mail.google.com/*",
     "*://outlook.live.com/*",
     "*://outlook.office.com/*",
@@ -37,7 +40,43 @@
   "background": {
     "service_worker": "background.js"
   },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "blocked.html",
+        "blocked.css",
+        "blocked.js",
+        "icons/icon-16.png",
+        "icons/icon-48.png",
+        "icons/icon-128.png"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "content_scripts": [
+    {
+      "matches": [
+        "http://localhost:8501/*",
+        "http://127.0.0.1:8501/*",
+        "https://phishguard-soc.streamlit.app/*"
+      ],
+      "js": ["content/soc_sync.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "exclude_matches": [
+        "http://localhost:8501/*",
+        "http://127.0.0.1:8501/*",
+        "https://phishguard-soc.streamlit.app/*",
+        "*://mail.google.com/*",
+        "*://outlook.live.com/*",
+        "*://outlook.office.com/*",
+        "*://outlook.office365.com/*"
+      ],
+      "js": ["content/enforcer.js"],
+      "run_at": "document_start"
+    },
     {
       "matches": [
         "*://mail.google.com/*",

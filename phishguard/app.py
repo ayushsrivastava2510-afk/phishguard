@@ -4158,6 +4158,87 @@ def render_child_safety_sentinel(sound_alert: bool = False):
             else:
                 st.info("No custom websites currently blocked.")
 
+            # 🧩 Browser Extension Enforcer Integration
+            st.markdown(
+                """
+                <div style="background: rgba(168, 85, 247, 0.08); border: 1.5px solid rgba(168, 85, 247, 0.35); border-radius: 10px; padding: 14px 16px; margin-top: 16px; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 6px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 1.3rem;">🧩</span>
+                            <div>
+                                <div style="font-weight: 800; color: #e9d5ff; font-size: 0.95rem;">PhishGuard Browser Extension &bull; Study Lock Enforcer</div>
+                                <div style="font-size: 0.78rem; color: #94a3b8;">Enforces zero-tolerance network-layer blocking in Chrome, Brave & Edge. Blocked sites cannot load at any cost.</div>
+                            </div>
+                        </div>
+                        <div style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; border-radius: 6px; padding: 3px 10px; font-size: 0.75rem; font-weight: 700; color: #c084fc;">
+                            MANIFEST V3 &bull; NETWORK LAYER
+                        </div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            ext_col1, ext_col2 = st.columns([1, 1])
+            with ext_col1:
+                if st.button("⚡ Push Blocklist to Browser Extension", type="primary", use_container_width=True, key="btn_push_extension_sync"):
+                    import json
+                    sync_payload = {
+                        "active": bool(st.session_state.parental_control_active),
+                        "blocklist": list(st.session_state.parent_custom_blocklist),
+                        "pin": str(st.session_state.parent_pin)
+                    }
+                    st.markdown(
+                        f"""
+                        <script>
+                        try {{
+                            window.postMessage({{
+                                type: "PHISHGUARD_SYNC_BLOCKLIST",
+                                payload: {json.dumps(sync_payload)}
+                            }}, "*");
+                        }} catch(e) {{}}
+                        </script>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                    st.success(f"✅ Dispatched sync signal! Extension updated with {len(st.session_state.parent_custom_blocklist)} blocked domains.")
+
+            with ext_col2:
+                import os, zipfile, io
+                zip_buffer = io.BytesIO()
+                ext_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "extension")
+                if not os.path.exists(ext_dir):
+                    ext_dir = os.path.join(os.getcwd(), "extension")
+                
+                if os.path.exists(ext_dir):
+                    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+                        for root, _, files in os.walk(ext_dir):
+                            for file in files:
+                                full_p = os.path.join(root, file)
+                                rel_p = os.path.relpath(full_p, ext_dir)
+                                zf.write(full_p, rel_p)
+                    st.download_button(
+                        label="📥 Download Extension Package (ZIP)",
+                        data=zip_buffer.getvalue(),
+                        file_name="PhishGuard-Study-Lock-Extension.zip",
+                        mime="application/zip",
+                        use_container_width=True,
+                        key="btn_dl_extension_zip"
+                    )
+                else:
+                    st.button("📥 Download Extension Package (ZIP)", disabled=True, use_container_width=True)
+
+            with st.expander("📖 How to Install Extension in Chrome / Brave / Edge (30 Seconds)", expanded=False):
+                st.markdown(
+                    """
+                    1. **Download & Extract:** Click **📥 Download Extension Package (ZIP)** above and unzip it to any folder (or use the `extension/` folder directly).
+                    2. **Open Extensions Page:** In Google Chrome, Brave, or Edge, navigate to `chrome://extensions` (or `edge://extensions`).
+                    3. **Enable Developer Mode:** Turn ON the **Developer mode** toggle in the top-right corner.
+                    4. **Load Unpacked:** Click the **Load unpacked** button in the top-left and select the unzipped `extension` folder.
+                    5. **🔒 Lock Private Windows (Crucial):** Click **Details** on *PhishGuard Sentinel* and toggle **"Allow in Incognito"** so private browsing tabs are locked too!
+                    """
+                )
+
             st.markdown("<div style='margin-bottom: 14px;'></div>", unsafe_allow_html=True)
 
     # 1-Click Interactive Kid-Safety Benchmarks
