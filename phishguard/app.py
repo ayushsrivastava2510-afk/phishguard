@@ -15,8 +15,13 @@ Featuring:
 """
 
 import os
+import sys
 import re
 import json
+import io
+import zipfile
+import socket
+import threading
 import time
 from datetime import datetime
 import joblib
@@ -24,6 +29,11 @@ import streamlit as st
 import pandas as pd
 import pydeck as pdk
 import streamlit.components.v1 as components
+import importlib
+try:
+    import bridge_server
+except Exception:
+    bridge_server = None
 from header_analysis import parse_eml_bytes, analyze_headers, get_body_text, scan_email_for_quishing
 from quishing_detector import (
     decode_qr_from_bytes,
@@ -89,8 +99,8 @@ st.set_page_config(
 
 # Auto-start Chrome Extension SOC Bridge on port 8765 if not already active
 def _ensure_bridge_server_active():
-    import socket
-    import threading
+    if not bridge_server:
+        return
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         s.settimeout(0.3)
@@ -101,7 +111,6 @@ def _ensure_bridge_server_active():
         pass
 
     try:
-        import bridge_server
         t = threading.Thread(target=bridge_server.run_bridge_server, daemon=True)
         t.start()
         print("[PhishGuard] Auto-started Chrome Extension SOC Bridge on http://127.0.0.1:8765")
@@ -1316,8 +1325,6 @@ elif os.path.exists(LIVE_SCAN_PATH):
 # Cache extension zip generation in memory
 @st.cache_data
 def get_extension_zip_package():
-    import io
-    import zipfile
     base_dir = os.path.dirname(os.path.abspath(__file__))
     candidates = [
         os.path.abspath(os.path.join(base_dir, "..", "extension")),
@@ -4015,7 +4022,6 @@ def sanitize_blocked_domain(raw_url_or_domain: str) -> str:
     into a clean, normalized domain string.
     Never uses lstrip('www.') which corrupts domains starting with 'w' (e.g. whatsapp, wikipedia).
     """
-    import re
     if not raw_url_or_domain:
         return ""
     clean = str(raw_url_or_domain).strip().lower()
@@ -4094,7 +4100,6 @@ def render_child_safety_sentinel(sound_alert: bool = False):
         """,
         unsafe_allow_html=True
     )
-    import streamlit.components.v1 as components
     components.html(
         f"""
         <script>
@@ -4277,7 +4282,6 @@ def render_child_safety_sentinel(sound_alert: bool = False):
             ext_col1, ext_col2 = st.columns([1, 1])
             with ext_col1:
                 if st.button("⚡ Push Blocklist to Browser Extension", type="primary", use_container_width=True, key="btn_push_extension_sync"):
-                    import json
                     sync_payload = {
                         "active": bool(st.session_state.parental_control_active),
                         "blocklist": list(st.session_state.parent_custom_blocklist),
@@ -4299,7 +4303,6 @@ def render_child_safety_sentinel(sound_alert: bool = False):
                     st.success(f"✅ Dispatched sync signal! Extension updated with {len(st.session_state.parent_custom_blocklist)} blocked domains.")
 
             with ext_col2:
-                import os, zipfile, io
                 zip_buffer = io.BytesIO()
                 ext_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "extension")
                 if not os.path.exists(ext_dir):
@@ -4411,8 +4414,6 @@ def render_child_safety_sentinel(sound_alert: bool = False):
                 is_parental_control_active=st.session_state.parental_control_active,
             )
         except TypeError:
-            import importlib
-            import child_safety_analyzer
             importlib.reload(child_safety_analyzer)
             cs_res = child_safety_analyzer.analyze_child_safety_url(
                 target_url,
