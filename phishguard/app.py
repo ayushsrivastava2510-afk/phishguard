@@ -312,38 +312,93 @@ if is_dark:
         box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
     }
 
-    div.stButton > button[kind="primary"], div[data-testid="stDownloadButton"] > button[kind="primary"] {
+    /* ========================================================================= */
+    /* ULTRA-ROBUST BUTTON THEMING (DARK MODE)                                  */
+    /* ========================================================================= */
+    /* Primary Action Buttons */
+    button[data-testid="baseButton-primary"],
+    button[data-testid="stBaseButton-primary"],
+    button[kind="primary"],
+    div[data-testid="stButton"] button[kind="primary"],
+    div.stButton button[kind="primary"],
+    div[data-testid="stDownloadButton"] button[kind="primary"] {
         background: linear-gradient(135deg, #4d65ff 0%, #3b49df 100%) !important;
+        background-color: #4d65ff !important;
         color: #ffffff !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        font-weight: 600 !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        font-weight: 700 !important;
         letter-spacing: 0.01em !important;
         border-radius: 10px !important;
         padding: 8px 20px !important;
-        box-shadow: 0 4px 16px rgba(77, 101, 255, 0.35) !important;
+        box-shadow: 0 4px 18px rgba(77, 101, 255, 0.45) !important;
         transition: all 0.2s ease !important;
     }
-    div.stButton > button[kind="primary"]:hover, div[data-testid="stDownloadButton"] > button[kind="primary"]:hover {
+    button[data-testid="baseButton-primary"]:hover,
+    button[data-testid="stBaseButton-primary"]:hover,
+    button[kind="primary"]:hover,
+    div[data-testid="stButton"] button[kind="primary"]:hover,
+    div.stButton button[kind="primary"]:hover {
         background: linear-gradient(135deg, #5c72ff 0%, #4757ea 100%) !important;
-        box-shadow: 0 6px 24px rgba(77, 101, 255, 0.55) !important;
+        box-shadow: 0 6px 24px rgba(77, 101, 255, 0.65) !important;
         transform: translateY(-2px) !important;
     }
-    div.stButton > button:not([kind="primary"]), div[data-testid="stDownloadButton"] > button:not([kind="primary"]) {
-        background: rgba(30, 41, 59, 0.75) !important;
-        color: #e2e8f0 !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        border-radius: 10px !important;
-        font-weight: 500 !important;
-        transition: all 0.2s ease !important;
-    }
-    div.stButton > button:not([kind="primary"]):hover, div[data-testid="stDownloadButton"] > button:not([kind="primary"]):hover {
-        border-color: #4d65ff !important;
+    button[data-testid="baseButton-primary"] p,
+    button[data-testid="stBaseButton-primary"] p,
+    button[kind="primary"] p {
         color: #ffffff !important;
-        background: rgba(43, 58, 85, 0.9) !important;
-        box-shadow: 0 0 14px rgba(77, 101, 255, 0.3) !important;
-        transform: translateY(-1px) !important;
+        font-weight: 700 !important;
     }
 
+    /* Secondary / Default State Buttons (Overriding light theme white injection) */
+    button[data-testid="baseButton-secondary"],
+    button[data-testid="stBaseButton-secondary"],
+    button[kind="secondary"],
+    div[data-testid="stButton"] button:not([kind="primary"]),
+    div.stButton button:not([kind="primary"]),
+    div[data-testid="stDownloadButton"] button:not([kind="primary"]),
+    div[data-testid="stButton"] button,
+    div.stButton button {
+        background: #1e293b !important;
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border: 1px solid rgba(255, 255, 255, 0.16) !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+        transition: all 0.2s ease !important;
+    }
+    button[data-testid="baseButton-secondary"]:hover,
+    button[data-testid="stBaseButton-secondary"]:hover,
+    button[kind="secondary"]:hover,
+    div[data-testid="stButton"] button:not([kind="primary"]):hover,
+    div.stButton button:not([kind="primary"]):hover,
+    div[data-testid="stDownloadButton"] button:not([kind="primary"]):hover {
+        background: #334155 !important;
+        background-color: #334155 !important;
+        border-color: #4d65ff !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 16px rgba(77, 101, 255, 0.35) !important;
+        transform: translateY(-1px) !important;
+    }
+    button[data-testid="baseButton-secondary"] p,
+    button[data-testid="stBaseButton-secondary"] p,
+    button[kind="secondary"] p,
+    div[data-testid="stButton"] button p,
+    div.stButton button p,
+    button[data-testid="baseButton-secondary"] span,
+    button[data-testid="stBaseButton-secondary"] span {
+        color: #f1f5f9 !important;
+        font-weight: 600 !important;
+    }
+
+    /* ========================================================================= */
+    /* SEGMENTED TABS (DARK MODE)                                               */
+    /* ========================================================================= */
+    div[data-baseweb="tab-list"] {
+        background: rgba(15, 23, 42, 0.85) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 8px 8px 0 0 !important;
+    }
     button[data-baseweb="tab"] {
         color: #94a3b8 !important;
         font-weight: 600 !important;
@@ -353,56 +408,114 @@ if is_dark:
     }
     button[data-baseweb="tab"]:hover {
         color: #ffffff !important;
-        background: rgba(255, 255, 255, 0.07) !important;
+        background: rgba(255, 255, 255, 0.08) !important;
     }
     button[data-baseweb="tab"][aria-selected="true"] {
-        color: #ffffff !important;
+        color: #38bdf8 !important;
         background: rgba(77, 101, 255, 0.2) !important;
-        border-bottom: 2px solid #4d65ff !important;
+        border-bottom: 2px solid #38bdf8 !important;
+    }
+    button[data-baseweb="tab"][aria-selected="true"] p,
+    button[data-baseweb="tab"][aria-selected="true"] span {
+        color: #38bdf8 !important;
+        font-weight: 700 !important;
     }
     div[data-baseweb="tab-highlight"] {
-        background-color: #4d65ff !important;
+        background-color: #38bdf8 !important;
     }
 
-    /* Expanders in Dark Mode */
-    div[data-testid="stExpander"] {
-        background: rgba(15, 23, 42, 0.75) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    /* ========================================================================= */
+    /* EXPANDERS IN DARK MODE (Fix washed-out white summary bar)                 */
+    /* ========================================================================= */
+    div[data-testid="stExpander"],
+    details[data-testid="stExpander"] {
+        background: #0f172a !important;
+        background-color: #0f172a !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
         border-radius: 14px !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+        overflow: hidden !important;
     }
+    div[data-testid="stExpander"] details,
+    div[data-testid="stExpander"] details[open] {
+        background: #0f172a !important;
+        background-color: #0f172a !important;
+        border-radius: 14px !important;
+    }
+    div[data-testid="stExpander"] summary,
     div[data-testid="stExpander"] details summary {
-        color: #f1f5f9 !important;
+        background: #1e293b !important;
+        background-color: #1e293b !important;
+        color: #f8fafc !important;
+        border-radius: 14px !important;
+        padding: 12px 18px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        transition: all 0.2s ease !important;
     }
-    div[data-testid="stExpander"] details summary p {
-        color: #f1f5f9 !important;
-        font-weight: 600 !important;
+    div[data-testid="stExpander"] summary:hover,
+    div[data-testid="stExpander"] details summary:hover {
+        background: #334155 !important;
+        background-color: #334155 !important;
+        color: #ffffff !important;
     }
+    div[data-testid="stExpander"] summary p,
+    div[data-testid="stExpander"] details summary p,
+    div[data-testid="stExpander"] summary span,
+    div[data-testid="stExpander"] details summary span {
+        color: #f8fafc !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+    }
+    div[data-testid="stExpander"] summary svg,
     div[data-testid="stExpander"] details summary svg {
-        fill: #60a5fa !important;
+        fill: #38bdf8 !important;
+        color: #38bdf8 !important;
     }
     div[data-testid="stExpander"] div[data-testid="stExpanderDetails"] {
+        background: #0b1120 !important;
+        background-color: #0b1120 !important;
         border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding: 16px !important;
     }
 
-    /* Streamlit Native Inputs in Dark Mode */
-    div[data-baseweb="input"], div[data-baseweb="base-input"] {
+    /* ========================================================================= */
+    /* TEXT INPUTS & TEXTAREAS IN DARK MODE (Fix white background on textarea)   */
+    /* ========================================================================= */
+    div[data-baseweb="input"],
+    div[data-baseweb="base-input"],
+    div[data-baseweb="textarea"] {
+        background: #0f172a !important;
         background-color: #0f172a !important;
-        border-color: rgba(255, 255, 255, 0.14) !important;
-        border-radius: 8px !important;
-        color: #f1f5f9 !important;
+        border: 1px solid rgba(255, 255, 255, 0.16) !important;
+        border-radius: 10px !important;
+        color: #f8fafc !important;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
     }
-    div[data-baseweb="input"] input, div[data-baseweb="base-input"] input, textarea {
+    div[data-baseweb="input"]:focus-within,
+    div[data-baseweb="base-input"]:focus-within,
+    div[data-baseweb="textarea"]:focus-within {
+        border-color: #4d65ff !important;
+        box-shadow: 0 0 0 2px rgba(77, 101, 255, 0.25) !important;
+    }
+    div[data-baseweb="input"] input,
+    div[data-baseweb="base-input"] input,
+    div[data-baseweb="textarea"] textarea,
+    textarea,
+    input[type="text"] {
+        background: transparent !important;
         background-color: transparent !important;
-        color: #f1f5f9 !important;
-        font-size: 0.9rem !important;
+        color: #f8fafc !important;
+        font-size: 0.92rem !important;
+        font-family: inherit !important;
     }
-    div[data-baseweb="input"] input::placeholder, textarea::placeholder {
+    div[data-baseweb="input"] input::placeholder,
+    div[data-baseweb="textarea"] textarea::placeholder,
+    textarea::placeholder {
         color: #64748b !important;
     }
     div[data-baseweb="select"] > div {
         background-color: #0f172a !important;
-        border-color: rgba(255, 255, 255, 0.14) !important;
+        border-color: rgba(255, 255, 255, 0.16) !important;
         color: #f1f5f9 !important;
     }
     div[data-baseweb="select"] * {
@@ -410,7 +523,7 @@ if is_dark:
     }
     ul[data-baseweb="menu"] {
         background-color: #0c1220 !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
     }
     li[role="option"] {
         background-color: #0c1220 !important;
@@ -421,22 +534,60 @@ if is_dark:
         color: #38bdf8 !important;
     }
 
-    /* File Uploader in Dark Mode */
+    /* ========================================================================= */
+    /* FILE UPLOADER IN DARK MODE (Fix white file badge chip & text)              */
+    /* ========================================================================= */
     div[data-testid="stFileUploader"] {
-        background: rgba(15, 23, 42, 0.7) !important;
-        border: 1px dashed rgba(77, 101, 255, 0.35) !important;
-        border-radius: 12px !important;
+        background: rgba(15, 23, 42, 0.8) !important;
+        border: 1px dashed rgba(77, 101, 255, 0.45) !important;
+        border-radius: 14px !important;
+        padding: 10px !important;
     }
     div[data-testid="stFileUploader"] section {
-        background: rgba(15, 23, 42, 0.5) !important;
+        background: rgba(15, 23, 42, 0.6) !important;
+        border-radius: 10px !important;
     }
-    div[data-testid="stFileUploader"] * {
+    div[data-testid="stFileUploader"] section > input + div {
         color: #cbd5e1 !important;
     }
+    div[data-testid="stFileUploader"] section button {
+        background: #1e293b !important;
+        color: #f1f5f9 !important;
+        border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    }
+    /* Uploaded file preview list & file chips */
+    div[data-testid="stFileUploaderFile"],
+    div[data-testid="stFileUploaderFileData"],
+    ul[data-testid="stFileUploaderFiles"] > div,
+    ul[data-testid="stFileUploaderFiles"] li {
+        background: #1e293b !important;
+        background-color: #1e293b !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
+        border-radius: 8px !important;
+        color: #f8fafc !important;
+    }
+    div[data-testid="stFileUploaderFile"] *,
+    div[data-testid="stFileUploaderFileData"] *,
+    div[data-testid="stFileUploaderFileName"],
+    ul[data-testid="stFileUploaderFiles"] * {
+        color: #f8fafc !important;
+    }
+    /* Delete / Close icon button inside file uploader */
+    div[data-testid="stFileUploaderDeleteBtn"] button,
+    button[data-testid="stFileUploaderDeleteBtn"] {
+        background: transparent !important;
+        color: #f87171 !important;
+        border: none !important;
+    }
+    div[data-testid="stFileUploaderDeleteBtn"] svg {
+        fill: #f87171 !important;
+    }
 
-    /* Metrics in Dark Mode */
+    /* ========================================================================= */
+    /* METRICS & CARDS IN DARK MODE                                             */
+    /* ========================================================================= */
     div[data-testid="stMetric"] {
-        background: rgba(15, 23, 42, 0.7) !important;
+        background: rgba(15, 23, 42, 0.75) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 12px !important;
         padding: 10px 14px !important;
