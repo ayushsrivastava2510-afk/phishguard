@@ -54,7 +54,7 @@ class SmishingAnalyzerTest {
 
     @Test
     fun testLegitimateDltOtpIsSafe() {
-        val b = SmishingAnalyzer.SMISHING_BENCHMARKS[4]
+        val b = SmishingAnalyzer.SMISHING_BENCHMARKS.first { it.id == "legit_otp_sms" }
         val result = SmishingAnalyzer.analyzeSmishingMessage(b.senderId, b.text)
 
         assertTrue("AD-HDFCBK must be DLT compliant", result.senderInfo.isDltCompliant)

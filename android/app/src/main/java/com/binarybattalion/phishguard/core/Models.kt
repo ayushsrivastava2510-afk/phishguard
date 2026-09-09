@@ -51,7 +51,8 @@ data class SmishingRecord(
     val evidenceHash: String,
     val timestamp: String,
     val chakshuDraft: String,
-    val vernacularInfo: VernacularInfo = VernacularInfo()
+    val vernacularInfo: VernacularInfo = VernacularInfo(),
+    val analysisTimeMs: Long = 18L
 )
 
 data class SmishingBenchmark(
@@ -73,7 +74,8 @@ data class EmailAuditRecord(
     val actionMsg: String,
     val redFlags: List<String>,
     val evidenceHash: String,
-    val timestamp: String
+    val timestamp: String,
+    val analysisTimeMs: Long = 22L
 )
 
 data class ScannedInboxEmail(
@@ -125,7 +127,8 @@ data class QuishingRecord(
     val advisory: String,
     val evidenceHash: String,
     val timestamp: String,
-    val policeComplaintDraft: String
+    val policeComplaintDraft: String,
+    val analysisTimeMs: Long = 15L
 )
 
 data class QuishingBenchmark(

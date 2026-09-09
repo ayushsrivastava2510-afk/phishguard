@@ -489,6 +489,7 @@ def analyze_smishing_message(sender_id, message_text):
     Executes the multi-layer Smishing inspection pipeline and returns
     comprehensive telemetry, risk score, and containment actions.
     """
+    t_start = time.perf_counter()
     sender_res = validate_sender_id(sender_id)
     url_res = extract_and_analyze_urls(message_text)
     intent_res = classify_sms_intent(message_text, sender_id)
@@ -581,6 +582,8 @@ def analyze_smishing_message(sender_id, message_text):
         "model_name": nlp_res["model_name"],
         "nlp_latency_ms": nlp_res["latency_ms"],
         "token_attributions": nlp_res["attributions"],
+        "analysis_time_s": round(time.perf_counter() - t_start, 3),
+        "analysis_time_ms": round((time.perf_counter() - t_start) * 1000, 1),
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S IST"),
     }
     record["chakshu_draft"] = generate_chakshu_complaint_draft(record)

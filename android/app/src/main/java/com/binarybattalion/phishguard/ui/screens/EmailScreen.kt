@@ -502,7 +502,8 @@ fun EmailScreen(modifier: Modifier = Modifier) {
         // 3. CIRCULAR RISK GAUGE
         CircularRiskGauge(
             score = currentAnalysis.riskScore,
-            verdict = currentAnalysis.verdict
+            verdict = currentAnalysis.verdict,
+            analysisTimeMs = currentAnalysis.analysisTimeMs
         )
 
         Spacer(modifier = Modifier.height(14.dp))

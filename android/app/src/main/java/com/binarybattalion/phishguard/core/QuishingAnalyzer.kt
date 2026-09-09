@@ -107,6 +107,7 @@ object QuishingAnalyzer {
      * against Indian financial cyber fraud patterns.
      */
     fun analyzePayload(rawPayload: String, contextClaim: String = ""): QuishingRecord {
+        val startTime = System.nanoTime()
         val trimmed = rawPayload.trim()
         val isUpi = trimmed.startsWith("upi://pay", ignoreCase = true) || trimmed.startsWith("upi://", ignoreCase = true)
         val isUrl = trimmed.startsWith("http://", ignoreCase = true) || trimmed.startsWith("https://", ignoreCase = true) || trimmed.startsWith("www.", ignoreCase = true)
@@ -115,13 +116,15 @@ object QuishingAnalyzer {
         val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss 'IST'", Locale.getDefault()).format(Date())
         val caseId = "QUISH-" + sha256.take(8).uppercase(Locale.ROOT)
 
-        return if (isUpi) {
+        val rec = if (isUpi) {
             analyzeUpiDeeplink(trimmed, contextClaim, caseId, sha256, timestamp)
         } else if (isUrl) {
             analyzeUrlQuish(trimmed, contextClaim, caseId, sha256, timestamp)
         } else {
             analyzePlainTextQuish(trimmed, caseId, sha256, timestamp)
         }
+        val latencyMs = Math.max(1L, (System.nanoTime() - startTime) / 1_000_000L)
+        return rec.copy(analysisTimeMs = latencyMs)
     }
 
     private fun analyzeUpiDeeplink(

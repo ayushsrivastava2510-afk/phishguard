@@ -322,6 +322,7 @@ object SmishingAnalyzer {
     }
 
     fun analyzeSmishingMessage(senderId: String, messageText: String): SmishingRecord {
+        val startTime = System.nanoTime()
         val senderRes = validateSenderId(senderId)
         val urlRes = extractAndAnalyzeUrls(messageText)
         val intentRes = classifySmsIntent(messageText, senderId)
@@ -404,7 +405,8 @@ object SmishingAnalyzer {
             evidenceHash = sha256,
             timestamp = timestamp,
             chakshuDraft = "",
-            vernacularInfo = vernacularRes
+            vernacularInfo = vernacularRes,
+            analysisTimeMs = Math.max(1L, (System.nanoTime() - startTime) / 1_000_000L)
         )
 
         val draft = generateChakshuComplaintDraft(partialRecord)

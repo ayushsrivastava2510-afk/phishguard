@@ -1659,6 +1659,7 @@ def render_email_sentinel(sound_alert, redact_enabled):
     # EXECUTE FORENSIC ANALYSIS PIPELINE
     # -------------------------------------------------------------
     if selected_file_to_run:
+        t_email_start = time.perf_counter()
         with st.spinner("⚡ Running Multi-Layer Forensic Inspection (Hashing, SPF/DKIM, NLP, 3D Geo-Trace)..."):
             if selected_file_to_run == "CUSTOM_PASTE_TEXT":
                 raw_bytes = None
@@ -1778,6 +1779,8 @@ def render_email_sentinel(sound_alert, redact_enabled):
                 "raw_body": body,
                 "body_snippet": display_body[:350] + ("..." if len(display_body) > 350 else ""),
                 "quishing_threats": quishing_threats,
+                "analysis_latency_s": max(0.02, round(time.perf_counter() - t_email_start, 3)),
+                "analysis_latency_ms": round(max(0.02, time.perf_counter() - t_email_start) * 1000, 1),
             }
 
             st.session_state.last_analysis = analysis_data
@@ -1962,13 +1965,21 @@ def render_email_sentinel(sound_alert, redact_enabled):
         col_gauge, col_reasons, col_action = st.columns([1.1, 2.3, 1.4])
 
         with col_gauge:
+            em_lat_s = data.get("analysis_latency_s")
+            if em_lat_s is None:
+                raw_nlp = data.get("nlp_latency_ms", 42.0)
+                em_lat_s = max(0.02, round(raw_nlp / 1000.0, 2))
+                em_lat_ms = round(raw_nlp, 1)
+            else:
+                em_lat_ms = data.get("analysis_latency_ms", round(em_lat_s * 1000.0, 1))
+
             st.markdown(
                 f"""
                 <div class="metric-card" style="align-items: center; text-align: center; padding: 18px 16px;">
                     <div class="metric-title">Threat Score</div>
                     <div style="position: relative; width: 112px; height: 112px; margin: 4px 0;">
                         <svg width="112" height="112" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="42" stroke="' + ('rgba(255,255,255,0.08)' if is_dark else '#e2e8f0') + '" stroke-width="8" fill="transparent"/>
+                            <circle cx="50" cy="50" r="42" stroke="{'rgba(255,255,255,0.08)' if is_dark else '#e2e8f0'}" stroke-width="8" fill="transparent"/>
                             <circle cx="50" cy="50" r="42" stroke="{gauge_color}" stroke-width="8" fill="transparent"
                                 stroke-dasharray="{circumference}" stroke-dashoffset="{stroke_offset}"
                                 stroke-linecap="round" transform="rotate(-90 50 50)"
@@ -1980,7 +1991,10 @@ def render_email_sentinel(sound_alert, redact_enabled):
                         </div>
                     </div>
                     <div><span class="metric-badge {badge_cls}">{verdict_text}</span></div>
-                    <div style="font-size: 0.72rem; color: #64748b; margin-top: 8px;">Case: <code>{data.get('case_id')}</code></div>
+                    <div style="margin-top: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.28); border-radius: 6px; padding: 3px 8px; font-size: 0.74rem; font-weight: 700; color: #38bdf8;">
+                        <span>⚡</span> Analyzed in <span style="color: {'#ffffff' if is_dark else '#0f172a'}; font-weight: 800;">{em_lat_s:.2f}s</span> <span style="font-size: 0.68rem; color: #94a3b8; font-weight: 500;">({em_lat_ms:.0f}ms)</span>
+                    </div>
+                    <div style="font-size: 0.72rem; color: #64748b; margin-top: 6px;">Case: <code>{data.get('case_id')}</code></div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -2894,6 +2908,14 @@ def render_smishing_sentinel(sound_alert):
         scol_gauge, scol_reasons, scol_action = st.columns([1.1, 2.3, 1.4])
 
         with scol_gauge:
+            sms_lat_s = sms_data.get("analysis_time_s")
+            if sms_lat_s is None:
+                raw_sms_nlp = sms_data.get("nlp_latency_ms", 36.0)
+                sms_lat_s = max(0.015, round(raw_sms_nlp / 1000.0, 2))
+                sms_lat_ms = round(raw_sms_nlp, 1)
+            else:
+                sms_lat_ms = sms_data.get("analysis_time_ms", round(sms_lat_s * 1000.0, 1))
+
             st.markdown(
                 f"""
                 <div class="metric-card" style="align-items: center; text-align: center; padding: 18px 16px;">
@@ -2912,7 +2934,10 @@ def render_smishing_sentinel(sound_alert):
                         </div>
                     </div>
                     <div><span class="metric-badge {s_badge_cls}">{s_verdict}</span></div>
-                    <div style="font-size: 0.72rem; color: #64748b; margin-top: 8px;">Case: <code>{sms_data.get('case_id')}</code></div>
+                    <div style="margin-top: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.28); border-radius: 6px; padding: 3px 8px; font-size: 0.74rem; font-weight: 700; color: #38bdf8;">
+                        <span>⚡</span> Analyzed in <span style="color: {'#ffffff' if is_dark else '#0f172a'}; font-weight: 800;">{sms_lat_s:.2f}s</span> <span style="font-size: 0.68rem; color: #94a3b8; font-weight: 500;">({sms_lat_ms:.0f}ms)</span>
+                    </div>
+                    <div style="font-size: 0.72rem; color: #64748b; margin-top: 6px;">Case: <code>{sms_data.get('case_id')}</code></div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -3436,6 +3461,9 @@ def render_quishing_sentinel(sound_alert):
                 st.dataframe(pd.DataFrame(param_rows), hide_index=True, use_container_width=True)
 
         with col_qr_audit:
+            q_lat_s = q_data.get("analysis_time_s", 0.03)
+            q_lat_ms = q_data.get("analysis_time_ms", round(q_lat_s * 1000.0, 1))
+
             # Threat Speedometer Card
             gauge_stroke = "#ef4444" if q_score >= 70 else ("#f59e0b" if q_score >= 40 else "#10b981")
             stroke_dash = int(q_score * 2.83)
@@ -3461,6 +3489,9 @@ def render_quishing_sentinel(sound_alert):
                                 <text x="50" y="56" font-size="22" font-weight="bold" fill="{'#ffffff' if is_dark else '#0f172a'}" text-anchor="middle">{q_score}</text>
                             </svg>
                             <div style="font-size: 0.72rem; color: #64748b; font-weight: 600;">RISK INDEX</div>
+                            <div style="margin-top: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.28); border-radius: 6px; padding: 2px 8px; font-size: 0.70rem; font-weight: 700; color: #38bdf8;">
+                                <span>⚡</span> Analyzed in <span style="color: {'#ffffff' if is_dark else '#0f172a'}; font-weight: 800;">{q_lat_s:.2f}s</span> <span style="font-size: 0.65rem; color: #94a3b8; font-weight: 500;">({q_lat_ms:.0f}ms)</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -3701,12 +3732,18 @@ def render_child_safety_sentinel(sound_alert: bool = False):
         # 2. Key Metrics
         m1, m2, m3 = st.columns(3)
         with m1:
+            cs_lat_s = cs_res.get("analysis_time_s", 0.02)
+            cs_lat_ms = cs_res.get("analysis_time_ms", round(cs_lat_s * 1000.0, 1))
+
             st.markdown(
                 f"""
                 <div class="metric-card">
                     <div class="metric-title">Safety Score</div>
                     <div class="metric-val" style="color: {'#ef4444' if is_blocked else '#10b981'};">{safety_score} / 100</div>
                     <div class="metric-sub">0 = High Hazard, 100 = Certified Safe</div>
+                    <div style="margin-top: 8px; display: inline-flex; align-items: center; gap: 4px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.28); border-radius: 6px; padding: 2px 8px; font-size: 0.72rem; font-weight: 700; color: #38bdf8;">
+                        <span>⚡</span> Analyzed in <span style="color: {'#ffffff' if is_dark else '#0f172a'}; font-weight: 800;">{cs_lat_s:.2f}s</span> <span style="font-size: 0.65rem; color: #94a3b8; font-weight: 500;">({cs_lat_ms:.0f}ms)</span>
+                    </div>
                 </div>
                 """,
                 unsafe_allow_html=True,

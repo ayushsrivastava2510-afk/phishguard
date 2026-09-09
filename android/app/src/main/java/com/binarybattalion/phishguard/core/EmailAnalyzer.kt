@@ -8,6 +8,7 @@ import java.util.Locale
 object EmailAnalyzer {
 
     fun analyzeEmail(subject: String, fromSender: String, bodyText: String): EmailAuditRecord {
+        val startTime = System.nanoTime()
         val sLower = subject.lowercase(Locale.ROOT)
         val bLower = bodyText.lowercase(Locale.ROOT)
         val fLower = fromSender.lowercase(Locale.ROOT)
@@ -75,7 +76,8 @@ object EmailAnalyzer {
             actionMsg = action,
             redFlags = redFlags,
             evidenceHash = sha256,
-            timestamp = timestamp
+            timestamp = timestamp,
+            analysisTimeMs = Math.max(1L, (System.nanoTime() - startTime) / 1_000_000L)
         )
     }
 

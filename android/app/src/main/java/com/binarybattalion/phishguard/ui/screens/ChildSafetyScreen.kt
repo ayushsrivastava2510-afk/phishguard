@@ -406,6 +406,32 @@ fun ChildSafetyScreen(
                     }
                 }
 
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier
+                        .background(Color(0x2638BDF8), RoundedCornerShape(6.dp))
+                        .border(1.dp, Color(0x4D38BDF8), RoundedCornerShape(6.dp))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text("⚡", fontSize = 10.sp)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Analyzed in ", color = AccentCyan, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        text = "${String.format(java.util.Locale.US, "%.2f", currentRecord.analysisTimeMs / 1000f)}s",
+                        color = TextPrimary,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = " (${currentRecord.analysisTimeMs}ms)",
+                        color = AccentCyan.copy(alpha = 0.8f),
+                        fontSize = 9.sp
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {

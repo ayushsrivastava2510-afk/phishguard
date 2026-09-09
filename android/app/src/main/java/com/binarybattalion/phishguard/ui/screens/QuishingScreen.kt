@@ -352,11 +352,33 @@ fun QuishingScreen(
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
-                CircularRiskGauge(
-                    score = currentAnalysis.riskScore,
-                    verdict = currentAnalysis.verdict,
-                    modifier = Modifier.size(76.dp)
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularRiskGauge(
+                        score = currentAnalysis.riskScore,
+                        verdict = currentAnalysis.verdict,
+                        modifier = Modifier.size(76.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .background(PrimaryCobalt.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+                            .border(1.dp, PrimaryCobaltLight.copy(alpha = 0.35f), RoundedCornerShape(4.dp))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text("⚡", fontSize = 8.sp)
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = "Analyzed in ${String.format(java.util.Locale.US, "%.2f", currentAnalysis.analysisTimeMs / 1000f)}s",
+                            color = AccentCyan,
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
 

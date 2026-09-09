@@ -224,6 +224,23 @@ fun ThreatAlertPopup(
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.ExtraBold
                             )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier
+                                    .background(PrimaryCobalt.copy(alpha = 0.2f), RoundedCornerShape(4.dp))
+                                    .border(1.dp, PrimaryCobaltLight.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text("⚡", fontSize = 9.sp)
+                                Text(
+                                    text = "Analyzed in ${String.format(java.util.Locale.US, "%.2f", record.analysisTimeMs / 1000f)}s (${record.analysisTimeMs}ms)",
+                                    color = AccentCyan,
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                         Box(
                             modifier = Modifier

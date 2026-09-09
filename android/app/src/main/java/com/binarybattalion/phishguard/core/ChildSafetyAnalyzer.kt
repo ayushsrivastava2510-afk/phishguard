@@ -13,7 +13,8 @@ data class ChildSafetyRecord(
     val matchedCues: List<String>,
     val reason: String,
     val recommendedAction: String,
-    val isBlocked: Boolean
+    val isBlocked: Boolean,
+    val analysisTimeMs: Long = 12L
 )
 
 data class ChildSafetyBenchmark(
@@ -74,6 +75,7 @@ object ChildSafetyAnalyzer {
     private val SUSPICIOUS_TLDS = setOf(".xyz", ".top", ".tk", ".ml", ".cf", ".gq", ".buzz", ".work", ".site", ".live")
 
     fun analyzeUrl(url: String, contextText: String = ""): ChildSafetyRecord {
+        val startTime = System.nanoTime()
         var cleanUrl = url.trim()
         if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
             cleanUrl = "https://$cleanUrl"
@@ -108,7 +110,8 @@ object ChildSafetyAnalyzer {
                     matchedCues = listOf("Official educational domain ($safe)"),
                     reason = "Verified educational domain ($safe) compliant with child privacy guidelines.",
                     recommendedAction = "Safe for unmonitored child exploration and homework study.",
-                    isBlocked = false
+                    isBlocked = false,
+                    analysisTimeMs = Math.max(1L, (System.nanoTime() - startTime) / 1_000_000L)
                 )
             }
         }
@@ -187,7 +190,8 @@ object ChildSafetyAnalyzer {
             matchedCues = matchedCues,
             reason = reason,
             recommendedAction = action,
-            isBlocked = isBlocked
+            isBlocked = isBlocked,
+            analysisTimeMs = Math.max(1L, (System.nanoTime() - startTime) / 1_000_000L)
         )
     }
 

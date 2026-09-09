@@ -788,7 +788,8 @@ fun SmishingScreen(
         // 5. Circular Risk Gauge
         CircularRiskGauge(
             score = currentAnalysis.riskScore,
-            verdict = currentAnalysis.verdict
+            verdict = currentAnalysis.verdict,
+            analysisTimeMs = currentAnalysis.analysisTimeMs
         )
 
         Spacer(modifier = Modifier.height(14.dp))

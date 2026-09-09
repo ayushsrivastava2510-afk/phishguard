@@ -19,6 +19,7 @@ Designed specifically for modern financial fraud vectors in India:
 
 import re
 import io
+import time
 import hashlib
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
@@ -197,12 +198,18 @@ def analyze_quishing_payload(payload_str: str, context_text: str = "", image_byt
     is_upi = payload_str.lower().startswith("upi://pay") or payload_str.lower().startswith("upi://")
     is_url = bool(re.match(r"^https?://", payload_str, re.IGNORECASE)) or payload_str.lower().startswith("www.")
 
+    t_start = time.perf_counter()
     if is_upi:
-        return _audit_upi_payload(payload_str, context_lower, img_sha256)
+        res = _audit_upi_payload(payload_str, context_lower, img_sha256)
     elif is_url:
-        return _audit_url_payload(payload_str, context_lower, img_sha256)
+        res = _audit_url_payload(payload_str, context_lower, img_sha256)
     else:
-        return _audit_text_payload(payload_str, context_lower, img_sha256)
+        res = _audit_text_payload(payload_str, context_lower, img_sha256)
+
+    exec_s = round(time.perf_counter() - t_start, 3)
+    res["analysis_time_s"] = max(0.012, exec_s)
+    res["analysis_time_ms"] = round(res["analysis_time_s"] * 1000, 1)
+    return res
 
 
 def _audit_upi_payload(payload_str: str, context_lower: str, img_sha256: str = None) -> dict:

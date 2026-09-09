@@ -25,7 +25,8 @@ import com.binarybattalion.phishguard.ui.theme.*
 fun CircularRiskGauge(
     score: Int,
     verdict: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    analysisTimeMs: Long? = null
 ) {
     val isDark = LocalIsDarkMode.current
     val animatedProgress = remember { Animatable(0f) }
@@ -129,6 +130,42 @@ fun CircularRiskGauge(
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold
             )
+        }
+
+        if (analysisTimeMs != null && analysisTimeMs > 0) {
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .background(PrimaryCobalt.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                    .border(1.dp, PrimaryCobaltLight.copy(alpha = 0.35f), RoundedCornerShape(8.dp))
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "⚡",
+                    fontSize = 11.sp
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(
+                    text = "Analyzed in ",
+                    color = AccentCyan,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = "${String.format(java.util.Locale.US, "%.2f", analysisTimeMs / 1000f)}s",
+                    color = TextPrimary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Text(
+                    text = " (${analysisTimeMs}ms)",
+                    color = AccentCyan.copy(alpha = 0.85f),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Normal
+                )
+            }
         }
     }
 }

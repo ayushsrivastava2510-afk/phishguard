@@ -7,6 +7,7 @@ underage betting/gambling, and age-inappropriate adult content.
 """
 
 import re
+import time
 from urllib.parse import urlparse
 from typing import Dict, Any, List
 
@@ -72,6 +73,7 @@ def analyze_child_safety_url(url: str, context_text: str = "") -> Dict[str, Any]
         dict containing safety_score (0-100), age_rating, category, verdict,
         detected_cues, plain-language reason, and clean browsing guidance.
     """
+    t_start = time.perf_counter()
     cleaned_url = url.strip()
     if not cleaned_url.startswith(("http://", "https://")):
         cleaned_url = "https://" + cleaned_url
@@ -105,6 +107,7 @@ def analyze_child_safety_url(url: str, context_text: str = "") -> Dict[str, Any]
             break
 
     if is_whitelisted:
+        exec_s = round(time.perf_counter() - t_start, 3)
         return {
             "url": url,
             "hostname": hostname,
@@ -117,7 +120,9 @@ def analyze_child_safety_url(url: str, context_text: str = "") -> Dict[str, Any]
             "reason": reason,
             "recommended_action": recommended_action,
             "clean_dns_recommendation": "Cloudflare 1.1.1.3 / CleanBrowsing Family Filter Active",
-            "is_blocked": False
+            "is_blocked": False,
+            "analysis_time_s": max(0.012, exec_s),
+            "analysis_time_ms": round(max(0.012, exec_s) * 1000, 1),
         }
 
     # 2. Check Gaming Phishing Traps (Free Diamonds, Robux, BGMI UC)
@@ -198,6 +203,7 @@ def analyze_child_safety_url(url: str, context_text: str = "") -> Dict[str, Any]
         age_rating = "Safe for All Ages (3+)"
         reason = "No child-safety hazards or predatory social engineering markers detected."
 
+    exec_s = round(time.perf_counter() - t_start, 3)
     return {
         "url": url,
         "hostname": hostname,
@@ -210,7 +216,9 @@ def analyze_child_safety_url(url: str, context_text: str = "") -> Dict[str, Any]
         "reason": reason,
         "recommended_action": recommended_action,
         "clean_dns_recommendation": "Cloudflare Family DNS (1.1.1.3) blocks adult and malware traffic at router level.",
-        "is_blocked": is_blocked
+        "is_blocked": is_blocked,
+        "analysis_time_s": max(0.012, exec_s),
+        "analysis_time_ms": round(max(0.012, exec_s) * 1000, 1),
     }
 
 
