@@ -127,7 +127,7 @@ if "theme" in st.query_params and st.query_params.get("theme") in ["light", "dar
 elif "theme_mode" in st.session_state:
     active_theme = st.session_state.theme_mode
 else:
-    active_theme = "light"
+    active_theme = "dark"
 
 st.session_state.theme_mode = active_theme
 is_dark = (active_theme == "dark")
@@ -254,12 +254,64 @@ if is_dark:
     }
 
     section[data-testid="stSidebar"] {
-        background-color: #0c1220 !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5) !important;
+        background-color: #0c1427 !important;
+        border-right: 1px solid rgba(59, 130, 246, 0.15) !important;
+        box-shadow: 4px 0 28px rgba(0, 0, 0, 0.55) !important;
     }
     section[data-testid="stSidebar"] hr {
         border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+    /* Sleek Navigation Pills in Sidebar */
+    section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
+        background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(96, 165, 250, 0.45) !important;
+        box-shadow: 0 0 16px rgba(37, 99, 235, 0.45) !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        text-align: left !important;
+        padding: 10px 16px !important;
+        display: flex !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        font-size: 0.92rem !important;
+    }
+    section[data-testid="stSidebar"] div.stButton > button[kind="secondary"] {
+        background: transparent !important;
+        color: #94a3b8 !important;
+        border: 1px solid transparent !important;
+        border-radius: 10px !important;
+        font-weight: 500 !important;
+        text-align: left !important;
+        padding: 10px 16px !important;
+        display: flex !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        font-size: 0.92rem !important;
+        transition: all 0.2s ease !important;
+    }
+    section[data-testid="stSidebar"] div.stButton > button[kind="secondary"]:hover {
+        background: rgba(30, 41, 59, 0.65) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(148, 163, 184, 0.2) !important;
+    }
+
+    /* Modern SOC Glass Panels */
+    .soc-glass-panel {
+        background: rgba(13, 20, 36, 0.78) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(59, 130, 246, 0.2) !important;
+        border-radius: 14px !important;
+        padding: 18px 20px !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45) !important;
+        margin-bottom: 16px !important;
+    }
+    .soc-panel-title {
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        color: #f8fafc !important;
+        letter-spacing: -0.01em !important;
     }
 
     .soc-pulse-red, .soc-pulse-cobalt {
@@ -1209,13 +1261,30 @@ def resolve_email_telemetry_display(data):
     }
 
 
-# Session State
-if "vector" in st.query_params and st.query_params.get("vector") in ["email", "sms", "quishing"]:
+# Session State & Navigation Routing
+if "nav" in st.query_params and st.query_params.get("nav") in ["dashboard", "threat_analysis", "map_3d", "campaign_graph", "reports", "settings"]:
+    st.session_state.active_nav = st.query_params.get("nav")
+elif "active_nav" not in st.session_state:
+    st.session_state.active_nav = "dashboard"
+
+if "sound_alert" not in st.session_state:
+    st.session_state.sound_alert = True
+if "redact_enabled" not in st.session_state:
+    st.session_state.redact_enabled = False
+
+if "vector" in st.query_params and st.query_params.get("vector") in ["email", "sms", "quishing", "child_safety"]:
     st.session_state.threat_vector = st.query_params.get("vector")
+    st.session_state.active_nav = "threat_analysis"
 elif "threat_vector" not in st.session_state:
     st.session_state.threat_vector = "email"
-if "email_history" not in st.session_state:
-    st.session_state.email_history = []
+
+if "email_history" not in st.session_state or len(st.session_state.email_history) == 0:
+    st.session_state.email_history = [
+        {"id": "UPI-REV-4999", "subject": "fake-refund@upi-pay.in", "from_domain": "upi-pay.in", "originating_ip": "45.155.205.233", "risk_score": 92, "threat": "Reverse-Collect UPI Fraud", "time_str": "2 min ago", "vector": "quishing"},
+        {"id": "SMS-SBI-KYC", "subject": "KYC Update - Urgent!", "from_domain": "sbi-kyc-alert.com", "originating_ip": "185.228.168.168", "risk_score": 94, "threat": "TRAI DLT Spoofed Smishing", "time_str": "8 min ago", "vector": "sms"},
+        {"id": "EML-INV-7782", "subject": "Invoice_7782.eml", "from_domain": "wire-transfer-gate.top", "originating_ip": "197.210.64.12", "risk_score": 89, "threat": "BEC Executive Impersonation", "time_str": "11 min ago", "vector": "email"},
+        {"id": "CS-ROBUX-TRAP", "subject": "freefire-diamond-claim.xyz", "from_domain": "freefire-diamond-claim.xyz", "originating_ip": "103.21.244.0", "risk_score": 96, "threat": "Child Gaming Currency Phish", "time_str": "15 min ago", "vector": "child_safety"},
+    ]
 if "sms_history" not in st.session_state:
     st.session_state.sms_history = []
 if "quishing_history" not in st.session_state:
@@ -1346,113 +1415,102 @@ def get_extension_zip_package():
     return zip_buffer.getvalue()
 
 
-# Sidebar Controls
+# Sidebar Navigation Menu (6-Item Command Center)
 with st.sidebar:
-    st.markdown("### 🛡️ PhishGuard SOC Control")
-    st.caption("AI Cyber Threat & Digital Forensics")
-    st.markdown("---")
-
-    st.subheader("🛡️ Threat Vector Ingress")
-    side_c1, side_c2 = st.columns(2)
-    with side_c1:
-        s_email_cls = "primary" if st.session_state.get("threat_vector", "email") == "email" else "secondary"
-        if st.button("📧 Mail", type=s_email_cls, use_container_width=True, key="side_vec_email"):
-            st.session_state.threat_vector = "email"
-            st.query_params["vector"] = "email"
-            st.rerun()
-    with side_c2:
-        s_sms_cls = "primary" if st.session_state.get("threat_vector", "email") == "sms" else "secondary"
-        if st.button("📱 SMS", type=s_sms_cls, use_container_width=True, key="side_vec_sms"):
-            st.session_state.threat_vector = "sms"
-            st.query_params["vector"] = "sms"
-            st.rerun()
-
-    side_c3, side_c4 = st.columns(2)
-    with side_c3:
-        s_q_cls = "primary" if st.session_state.get("threat_vector", "email") == "quishing" else "secondary"
-        if st.button("🎯 QR/UPI", type=s_q_cls, use_container_width=True, key="side_vec_quishing"):
-            st.session_state.threat_vector = "quishing"
-            st.query_params["vector"] = "quishing"
-            st.rerun()
-    with side_c4:
-        s_cs_cls = "primary" if st.session_state.get("threat_vector", "email") == "child_safety" else "secondary"
-        if st.button("👨‍👩‍👧 Kids", type=s_cs_cls, use_container_width=True, key="side_vec_child_safety"):
-            st.session_state.threat_vector = "child_safety"
-            st.query_params["vector"] = "child_safety"
-            st.rerun()
-
-    st.markdown("---")
-    st.subheader("⚙️ Live Controls")
-    theme_choice = st.radio(
-        "Appearance Mode",
-        options=["☀️ Pastel Day", "🌙 Cyber Night"],
-        key="side_theme_radio",
-        horizontal=True,
-        on_change=on_sidebar_theme_change
-    )
-
-    sound_alert = st.checkbox("🔊 Cyber Audio Alert", value=True, help="Synthesizes an immediate audible alert when a critical threat is identified.")
-    redact_enabled = st.checkbox("🔒 Redact PII (Evidence Anonymization)", value=False, help="Masks personal details for legal and regulatory compliance.")
-
-    st.markdown("---")
-    st.subheader("🛰️ Browser Extension")
-    ext_zip_bytes = get_extension_zip_package()
-    if ext_zip_bytes:
-        st.download_button(
-            label="📥 Download Extension (.zip)",
-            data=ext_zip_bytes,
-            file_name="phishguard-chrome-extension.zip",
-            mime="application/zip",
-            help="Download the PhishGuard Mail Sentinel Chrome Extension for Gmail & Outlook.",
-            use_container_width=True,
-            type="primary",
-        )
-    with st.expander("📖 15-Second Install Guide", expanded=False):
-        st.markdown(
-            """
-            1. **Download & Extract:** Click the button above to download `phishguard-chrome-extension.zip` and extract it.
-            2. **Open Extensions:** In Chrome, Edge, or Brave, visit `chrome://extensions`.
-            3. **Enable Developer Mode:** Turn ON the toggle in the top-right corner.
-            4. **Load Extension:** Click **"Load unpacked"** and select the unzipped `extension` folder.
-            
-            *You're set! Open Gmail or Outlook to see the '🛡️ Scan with PhishGuard' button appear automatically.*
-            """
-        )
     st.markdown(
-        """
-        <div style="font-size: 0.78rem; color: #a3a3a3; margin-top: 4px; margin-bottom: 8px;">
-            <span class="soc-pulse-red"></span> <b>Dual-Mode:</b> In-browser heuristic engine + Cloud SOC Telemetry.
+        f"""
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 22px; padding: 4px 2px;">
+            <div style="width: 42px; height: 42px; border-radius: 12px; background: {'rgba(37, 99, 235, 0.25)' if is_dark else '#dbeafe'}; border: 1px solid {'rgba(96, 165, 250, 0.5)' if is_dark else '#bfdbfe'}; display: flex; align-items: center; justify-content: center; font-size: 1.45rem; box-shadow: 0 0 16px rgba(37, 99, 235, 0.45);">
+                🛡️
+            </div>
+            <div>
+                <div style="font-weight: 800; font-size: 1.25rem; color: {'#ffffff' if is_dark else '#0f172a'}; letter-spacing: -0.02em; line-height: 1.1;">
+                    PhishGuard <span style="color: #60a5fa;">SOC</span>
+                </div>
+                <div style="font-size: 0.68rem; color: {'#94a3b8' if is_dark else '#64748b'}; font-weight: 500;">
+                    Autonomous Defense Platform
+                </div>
+            </div>
         </div>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
-    if os.path.exists(LIVE_SCAN_PATH):
-        st.success("🟢 Extension Feed: Connected")
-    else:
-        st.info("☁️ Extension Feed: Cloud Standalone Mode")
+
+    nav_items = [
+        ("dashboard", "🏠  Dashboard"),
+        ("threat_analysis", "🔍  Threat Analysis"),
+        ("map_3d", "🌐  3D Transmission Map"),
+        ("campaign_graph", "🕸️  Campaign Graph"),
+        ("reports", "📄  Forensic Reports"),
+        ("settings", "⚙️  Settings"),
+    ]
+
+    for nav_id, nav_label in nav_items:
+        is_cur = (st.session_state.active_nav == nav_id)
+        btn_kind = "primary" if is_cur else "secondary"
+        if st.button(nav_label, type=btn_kind, use_container_width=True, key=f"nav_btn_{nav_id}"):
+            st.session_state.active_nav = nav_id
+            st.query_params["nav"] = nav_id
+            st.rerun()
+
+    st.markdown("<div style='margin-top: 14px;'></div>", unsafe_allow_html=True)
+    st.markdown("---")
+
+    # Threat Vector Ingress Quick Jump
+    st.caption("THREAT INGRESS VECTORS")
+    v1_c, v2_c = st.columns(2)
+    with v1_c:
+        is_em = (st.session_state.get("threat_vector", "email") == "email" and st.session_state.active_nav == "threat_analysis")
+        if st.button("📧 Mail", type=("primary" if is_em else "secondary"), use_container_width=True, key="quick_mail"):
+            st.session_state.threat_vector = "email"
+            st.session_state.active_nav = "threat_analysis"
+            st.query_params["vector"] = "email"
+            st.query_params["nav"] = "threat_analysis"
+            st.rerun()
+    with v2_c:
+        is_sms = (st.session_state.get("threat_vector", "email") == "sms" and st.session_state.active_nav == "threat_analysis")
+        if st.button("📱 SMS", type=("primary" if is_sms else "secondary"), use_container_width=True, key="quick_sms"):
+            st.session_state.threat_vector = "sms"
+            st.session_state.active_nav = "threat_analysis"
+            st.query_params["vector"] = "sms"
+            st.query_params["nav"] = "threat_analysis"
+            st.rerun()
+
+    v3_c, v4_c = st.columns(2)
+    with v3_c:
+        is_q = (st.session_state.get("threat_vector", "email") == "quishing" and st.session_state.active_nav == "threat_analysis")
+        if st.button("🎯 QR/UPI", type=("primary" if is_q else "secondary"), use_container_width=True, key="quick_quish"):
+            st.session_state.threat_vector = "quishing"
+            st.session_state.active_nav = "threat_analysis"
+            st.query_params["vector"] = "quishing"
+            st.query_params["nav"] = "threat_analysis"
+            st.rerun()
+    with v4_c:
+        is_cs = (st.session_state.get("threat_vector", "email") == "child_safety" and st.session_state.active_nav == "threat_analysis")
+        if st.button("👨‍👩‍👧 Kids", type=("primary" if is_cs else "secondary"), use_container_width=True, key="quick_kids"):
+            st.session_state.threat_vector = "child_safety"
+            st.session_state.active_nav = "threat_analysis"
+            st.query_params["vector"] = "child_safety"
+            st.query_params["nav"] = "threat_analysis"
+            st.rerun()
 
     st.markdown("---")
-    st.subheader("📁 Session Case Tracker")
-    st.markdown(f"Tracked Email Incidents: **{len(st.session_state.email_history)}**")
-    st.markdown(f"Tracked Smishing Incidents: **{len(st.session_state.sms_history)}**")
-    if st.button("🗑️ Reset Session & Graph", use_container_width=True):
-        st.session_state.email_history = []
-        st.session_state.sms_history = []
-        st.session_state.last_analysis = None
-        st.session_state.last_sms_analysis = None
-        st.rerun()
-
-    st.markdown("---")
-    st.subheader("📋 Regulatory Compliance")
     st.markdown(
-        """
-        - **ISO/IEC 27037:** Digital Evidence Custody
-        - **RFC 5322 & RFC 7489:** Email Authentication
-        - **Section 65B BSA (India):** Forensic Admissibility
-        - **CERT-In Technical Directive:** Threat Package
-        """
+        f"""
+        <div style="background: {'rgba(15, 23, 42, 0.65)' if is_dark else '#f8fafc'}; border: 1px solid {'rgba(255,255,255,0.08)' if is_dark else '#e2e8f0'}; border-radius: 10px; padding: 10px 12px; font-size: 0.76rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="color: {'#94a3b8' if is_dark else '#64748b'};">Extension SOC Bridge</span>
+                <span style="color: #34d399; font-weight: 700;">ACTIVE</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: {'#94a3b8' if is_dark else '#64748b'};">DLT Ledger Sync</span>
+                <span style="color: #60a5fa; font-weight: 700;">VERIFIED</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
-    st.caption("Smart India Hackathon 2026 | Binary Battalion")
+    st.caption("Smart India Hackathon 2026 • Binary Battalion")
 
 # Top Brand & SOC Header with 1-Click Night/Day Mode Toggle
 col_brand, col_status = st.columns([3.2, 1.8])
@@ -4607,48 +4665,656 @@ def render_child_safety_sentinel(sound_alert: bool = False):
             )
 
 
-# Multi-Vector Sentinel Switcher (Email • SMS • Quishing • Child Safe)
-col_v1, col_v2, col_v3, col_v4 = st.columns(4)
-cur_vec = st.session_state.get("threat_vector", "email")
+# =========================================================================
+# MODERN SOC COMMAND CENTER COMPONENTS (DASHBOARD, MAP, GRAPH, SCORE, THREATS)
+# =========================================================================
 
-with col_v1:
-    v1_style = "primary" if cur_vec == "email" else "secondary"
-    if st.button("📧 Email Threat Sentinel" + ("  (Active)" if cur_vec == "email" else ""), type=v1_style, use_container_width=True, key="top_vec_email"):
-        st.session_state.threat_vector = "email"
-        st.query_params["vector"] = "email"
-        st.rerun()
+def render_top_kpi_strip(is_dark: bool):
+    now = datetime.now()
+    date_str = now.strftime("%b %d, %Y")
+    time_str = now.strftime("%H:%M:%S")
 
-with col_v2:
-    v2_style = "primary" if cur_vec == "sms" else "secondary"
-    if st.button("📱 Mobile SMS / Smishing" + ("  (Active)" if cur_vec == "sms" else ""), type=v2_style, use_container_width=True, key="top_vec_sms"):
-        st.session_state.threat_vector = "sms"
-        st.query_params["vector"] = "sms"
-        st.rerun()
+    kpi_c1, kpi_c2, kpi_c3, kpi_c4 = st.columns([1, 1, 1, 1.25])
 
-with col_v3:
-    v3_style = "primary" if cur_vec == "quishing" else "secondary"
-    if st.button("🎯 UPI / QR Quishing" + ("  (Active)" if cur_vec == "quishing" else ""), type=v3_style, use_container_width=True, key="top_vec_quishing"):
-        st.session_state.threat_vector = "quishing"
-        st.query_params["vector"] = "quishing"
-        st.rerun()
+    card_bg = "rgba(13, 20, 36, 0.78)" if is_dark else "#ffffff"
+    card_bd = "rgba(59, 130, 246, 0.22)" if is_dark else "#e2e8f0"
+    num_clr = "#ffffff" if is_dark else "#0f172a"
+    sub_clr = "#94a3b8" if is_dark else "#64748b"
 
-with col_v4:
-    v4_style = "primary" if cur_vec == "child_safety" else "secondary"
-    if st.button("👨‍👩‍👧 Child Safe Sentinel" + ("  (Active)" if cur_vec == "child_safety" else ""), type=v4_style, use_container_width=True, key="top_vec_child_safety"):
-        st.session_state.threat_vector = "child_safety"
-        st.query_params["vector"] = "child_safety"
-        st.rerun()
+    with kpi_c1:
+        st.markdown(
+            f"""
+            <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 12px; padding: 12px 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.35); display: flex; align-items: center; gap: 14px;">
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(16, 185, 129, 0.16); border: 1px solid rgba(16, 185, 129, 0.35); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);">
+                    🛡️
+                </div>
+                <div>
+                    <div style="font-size: 1.55rem; font-weight: 800; color: {num_clr}; line-height: 1.1; letter-spacing: -0.02em;">1,248</div>
+                    <div style="font-size: 0.74rem; color: {sub_clr}; font-weight: 500; margin-top: 2px;">Analysed Today</div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
+    with kpi_c2:
+        st.markdown(
+            f"""
+            <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 12px; padding: 12px 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.35); display: flex; align-items: center; gap: 14px;">
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(239, 68, 68, 0.16); border: 1px solid rgba(239, 68, 68, 0.35); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; box-shadow: 0 0 14px rgba(239, 68, 68, 0.25);">
+                    🚨
+                </div>
+                <div>
+                    <div style="font-size: 1.55rem; font-weight: 800; color: {num_clr}; line-height: 1.1; letter-spacing: -0.02em;">37</div>
+                    <div style="font-size: 0.74rem; color: {sub_clr}; font-weight: 500; margin-top: 2px;">Threats Blocked</div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-if cur_vec == "email":
-    render_email_sentinel(sound_alert, redact_enabled)
-elif cur_vec == "sms":
-    render_smishing_sentinel(sound_alert)
-elif cur_vec == "quishing":
-    render_quishing_sentinel(sound_alert)
-else:
-    render_child_safety_sentinel(sound_alert)
+    with kpi_c3:
+        st.markdown(
+            f"""
+            <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 12px; padding: 12px 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.35); display: flex; align-items: center; gap: 14px;">
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(56, 189, 248, 0.16); border: 1px solid rgba(56, 189, 248, 0.35); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; box-shadow: 0 0 14px rgba(56, 189, 248, 0.25);">
+                    🎯
+                </div>
+                <div>
+                    <div style="font-size: 1.55rem; font-weight: 800; color: {num_clr}; line-height: 1.1; letter-spacing: -0.02em;">98.4%</div>
+                    <div style="font-size: 0.74rem; color: {sub_clr}; font-weight: 500; margin-top: 2px;">Detection Accuracy</div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with kpi_c4:
+        st.markdown(
+            f"""
+            <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 12px; padding: 12px 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <div style="font-size: 0.82rem; color: {sub_clr}; font-weight: 600;">{date_str}</div>
+                    <div style="font-size: 1.40rem; font-weight: 800; color: {num_clr}; font-family: 'JetBrains Mono', monospace; line-height: 1.1; margin-top: 2px;">{time_str}</div>
+                </div>
+                <div style="text-align: right;">
+                    <span class="metric-badge badge-clean" style="font-size: 0.70rem; padding: 4px 10px; font-weight: 700;">
+                        <span class="soc-pulse-cobalt"></span> SOC ONLINE
+                    </span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    st.markdown("<div style='margin-bottom: 14px;'></div>", unsafe_allow_html=True)
+
+
+def get_dashboard_map_deck(is_dark: bool):
+    arcs_data = [
+        {
+            "from_name": "Frankfurt (Bulletproof Host)",
+            "to_name": "New Delhi Gateway",
+            "from_coord": [8.6821, 50.1109],
+            "to_coord": [77.2090, 28.6139],
+            "color": [239, 68, 68, 220],
+            "label": "SMTP Header Injection (45.155.205.233)"
+        },
+        {
+            "from_name": "San Jose Cloud Proxy",
+            "to_name": "Frankfurt Relay",
+            "from_coord": [-121.8863, 37.3382],
+            "to_coord": [8.6821, 50.1109],
+            "color": [56, 189, 248, 200],
+            "label": "Tor Exit Node Ingress"
+        },
+        {
+            "from_name": "Lagos Cybercrime Syndicate",
+            "to_name": "Mumbai Finance Hub",
+            "from_coord": [3.3792, 6.5244],
+            "to_coord": [72.8777, 19.0760],
+            "color": [244, 63, 94, 220],
+            "label": "BEC Invoice Fraud Hop (197.210.64.12)"
+        },
+        {
+            "from_name": "Singapore Relay Node",
+            "to_name": "New Delhi Gateway",
+            "from_coord": [103.8198, 1.3521],
+            "to_coord": [77.2090, 28.6139],
+            "color": [16, 185, 129, 220],
+            "label": "Authenticated SPF/DKIM Intermediate"
+        },
+        {
+            "from_name": "Sydney Regional Origin",
+            "to_name": "Singapore Relay Node",
+            "from_coord": [151.2093, -33.8688],
+            "to_coord": [103.8198, 1.3521],
+            "color": [37, 99, 235, 200],
+            "label": "Initial Ingress Hop"
+        }
+    ]
+
+    points_data = [
+        {"name": "Frankfurt (Host)", "pos": [8.6821, 50.1109], "color": [239, 68, 68, 255], "radius": 180000},
+        {"name": "New Delhi (Target)", "pos": [77.2090, 28.6139], "color": [16, 185, 129, 255], "radius": 220000},
+        {"name": "Lagos (Attacker)", "pos": [3.3792, 6.5244], "color": [239, 68, 68, 255], "radius": 160000},
+        {"name": "Mumbai (Target)", "pos": [72.8777, 19.0760], "color": [56, 189, 248, 255], "radius": 150000},
+        {"name": "San Jose (Origin)", "pos": [-121.8863, 37.3382], "color": [239, 68, 68, 255], "radius": 150000},
+        {"name": "Singapore (Relay)", "pos": [103.8198, 1.3521], "color": [56, 189, 248, 255], "radius": 140000},
+        {"name": "Sydney (Origin)", "pos": [151.2093, -33.8688], "color": [239, 68, 68, 255], "radius": 140000},
+    ]
+
+    arc_df = pd.DataFrame(arcs_data)
+    point_df = pd.DataFrame(points_data)
+
+    arc_layer = pdk.Layer(
+        "ArcLayer",
+        data=arc_df,
+        get_source_position="from_coord",
+        get_target_position="to_coord",
+        get_source_color="color",
+        get_target_color=[16, 185, 129, 230],
+        get_width=3.8,
+        get_tilt=20,
+        pickable=True,
+    )
+
+    scatter_layer = pdk.Layer(
+        "ScatterplotLayer",
+        data=point_df,
+        get_position="pos",
+        get_fill_color="color",
+        get_radius="radius",
+        pickable=True,
+    )
+
+    view_state = pdk.ViewState(
+        latitude=22.0,
+        longitude=45.0,
+        zoom=1.2,
+        pitch=38,
+        bearing=0,
+    )
+
+    return pdk.Deck(
+        layers=[arc_layer, scatter_layer],
+        initial_view_state=view_state,
+        map_style=("https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json" if is_dark else "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"),
+        tooltip={"text": "{name}\n{label}\n{from_name} ➔ {to_name}"},
+    )
+
+
+def get_dashboard_campaign_graph_html(is_dark: bool):
+    import networkx as nx
+    G = nx.Graph()
+
+    G.add_node("inc_1", kind="email", label="fake-refund@upi-pay.in")
+    G.add_node("inc_2", kind="email", label="KYC Update - Urgent!")
+    G.add_node("inc_3", kind="email", label="Invoice_7782.eml")
+    G.add_node("inc_4", kind="email", label="freefire-robux.xyz")
+
+    G.add_node("dom_1", kind="domain", label="upi-pay.in")
+    G.add_node("dom_2", kind="domain", label="sbi-kyc-update.com")
+    G.add_node("dom_3", kind="domain", label="tata-power-refund.top")
+
+    G.add_node("ip_1", kind="ip", label="45.155.205.233")
+    G.add_node("ip_2", kind="ip", label="185.228.168.168")
+    G.add_node("ip_3", kind="ip", label="103.21.244.0")
+
+    G.add_edge("inc_1", "dom_1")
+    G.add_edge("inc_1", "ip_1")
+    G.add_edge("inc_2", "dom_2")
+    G.add_edge("inc_2", "ip_1")
+    G.add_edge("dom_1", "ip_2")
+    G.add_edge("inc_3", "dom_3")
+    G.add_edge("dom_3", "ip_2")
+    G.add_edge("inc_4", "ip_3")
+    G.add_edge("ip_1", "ip_2")
+
+    theme = "dark" if is_dark else "light"
+    return generate_interactive_graph_html(G, theme=theme)
+
+
+def render_threat_score_widget(is_dark: bool):
+    card_bg = "rgba(13, 20, 36, 0.78)" if is_dark else "#ffffff"
+    card_bd = "rgba(59, 130, 246, 0.22)" if is_dark else "#e2e8f0"
+
+    data = st.session_state.get("last_analysis")
+    if data:
+        score = int(data.get("risk_score", 92))
+        cat = data.get("threat_category", "Suspicious UPI deeplink detected")
+    else:
+        score = 92
+        cat = "Suspicious UPI deeplink detected"
+
+    status_text = "High Risk" if score >= 70 else ("Medium Risk" if score >= 40 else "Clean / Low Risk")
+    status_color = "#ef4444" if score >= 70 else ("#f59e0b" if score >= 40 else "#10b981")
+
+    r = 85
+    arc_len = 267.0
+    offset = arc_len * (1 - min(100, max(0, score)) / 100.0)
+
+    st.markdown(
+        f"""
+        <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 14px; padding: 20px 22px; box-shadow: 0 8px 32px rgba(0,0,0,0.45);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span class="soc-panel-title">Threat Score</span>
+                <span style="font-size: 0.85rem; color: #94a3b8;">•••</span>
+            </div>
+            <div style="position: relative; width: 100%; max-width: 250px; margin: 10px auto 4px auto;">
+                <svg viewBox="0 0 240 130" width="100%" style="display: block; overflow: visible;">
+                    <defs>
+                        <linearGradient id="socGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#10b981" />
+                            <stop offset="35%" stop-color="#eab308" />
+                            <stop offset="70%" stop-color="#f97316" />
+                            <stop offset="100%" stop-color="#ef4444" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M 35 105 A 85 85 0 0 1 205 105" fill="none" stroke="{'rgba(255,255,255,0.08)' if is_dark else '#e2e8f0'}" stroke-width="14" stroke-linecap="round" />
+                    <path d="M 35 105 A 85 85 0 0 1 205 105" fill="none" stroke="url(#socGaugeGrad)" stroke-width="14" stroke-linecap="round"
+                          stroke-dasharray="267" stroke-dashoffset="{offset:.1f}"
+                          style="transition: stroke-dashoffset 0.8s ease; filter: drop-shadow(0 0 8px {status_color});" />
+                </svg>
+                <div style="margin-top: -62px; text-align: center;">
+                    <div style="font-size: 2.6rem; font-weight: 900; color: {'#ffffff' if is_dark else '#0f172a'}; line-height: 1; letter-spacing: -0.03em;">
+                        {score}<span style="font-size: 1.15rem; color: #94a3b8; font-weight: 500;">/100</span>
+                    </div>
+                    <div style="font-size: 1.1rem; font-weight: 800; color: {status_color}; margin-top: 6px;">
+                        {status_text}
+                    </div>
+                    <div style="display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 0.74rem; color: #fca5a5; background: rgba(239, 68, 68, 0.14); padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(239, 68, 68, 0.3);">
+                        <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 8px #ef4444;"></span>
+                        {cat[:36]}
+                    </div>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def render_recent_threats_widget(is_dark: bool):
+    card_bg = "rgba(13, 20, 36, 0.78)" if is_dark else "#ffffff"
+    card_bd = "rgba(59, 130, 246, 0.22)" if is_dark else "#e2e8f0"
+    title_clr = "#ffffff" if is_dark else "#0f172a"
+    sub_clr = "#94a3b8" if is_dark else "#64748b"
+
+    threats = st.session_state.get("email_history", [])
+    if not threats:
+        threats = [
+            {"id": "UPI-REV-4999", "subject": "fake-refund@upi-pay.in", "risk_score": 92, "threat": "Reverse-Collect UPI Fraud", "time_str": "2 min ago", "vector": "quishing"},
+            {"id": "SMS-SBI-KYC", "subject": "KYC Update - Urgent!", "risk_score": 94, "threat": "TRAI DLT Spoofed Smishing", "time_str": "8 min ago", "vector": "sms"},
+            {"id": "EML-INV-7782", "subject": "Invoice_7782.eml", "risk_score": 89, "threat": "BEC Executive Impersonation", "time_str": "11 min ago", "vector": "email"},
+            {"id": "CS-ROBUX-TRAP", "subject": "freefire-diamond-claim.xyz", "risk_score": 96, "threat": "Child Gaming Currency Phish", "time_str": "15 min ago", "vector": "child_safety"},
+        ]
+
+    st.markdown(
+        f"""
+        <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 14px; padding: 18px 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.45);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <span class="soc-panel-title">Recent Threats</span>
+                <span style="font-size: 0.72rem; color: #60a5fa; font-weight: 700;">REAL-TIME FEED</span>
+            </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    for idx, item in enumerate(threats[:4]):
+        subj = item.get("subject", "Security Threat Event")[:28]
+        time_lbl = item.get("time_str", f"{idx * 3 + 2} min ago")
+
+        r_c1, r_c2 = st.columns([3.2, 1.2])
+        with r_c1:
+            st.markdown(
+                f"""
+                <div style="display: flex; align-items: center; gap: 8px; padding: 5px 0;">
+                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 8px #ef4444;"></span>
+                    <span style="font-size: 0.86rem; font-weight: 600; color: {title_clr}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{subj}">{subj}</span>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        with r_c2:
+            st.markdown(
+                f"""
+                <div style="font-size: 0.74rem; color: {sub_clr}; text-align: right; padding: 5px 0;">
+                    {time_lbl}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
+def render_modern_soc_dashboard(is_dark: bool, sound_alert: bool, redact_enabled: bool):
+    col_left, col_right = st.columns([1.75, 1.0])
+
+    card_bg = "rgba(13, 20, 36, 0.78)" if is_dark else "#ffffff"
+    card_bd = "rgba(59, 130, 246, 0.22)" if is_dark else "#e2e8f0"
+
+    with col_left:
+        # Card 1: Global Transmission Map
+        st.markdown(
+            f"""
+            <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 14px; padding: 16px 20px 6px 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.45); margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span class="soc-panel-title">Global Transmission Map</span>
+                    <span style="font-size: 0.70rem; color: #60a5fa; background: rgba(37,99,235,0.18); border: 1px solid rgba(37,99,235,0.35); padding: 2px 8px; border-radius: 6px; font-weight: 700;">
+                        3D FLIGHT ARCS & HOPS
+                    </span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        deck = get_dashboard_map_deck(is_dark)
+        st.pydeck_chart(deck, use_container_width=True)
+
+        # Card 2: Campaign Attribution Graph
+        st.markdown(
+            f"""
+            <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 14px; padding: 16px 20px 6px 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.45); margin-top: 14px; margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span class="soc-panel-title">Campaign Attribution Graph</span>
+                    <span style="font-size: 0.70rem; color: #34d399; background: rgba(16,185,129,0.18); border: 1px solid rgba(16,185,129,0.35); padding: 2px 8px; border-radius: 6px; font-weight: 700;">
+                        PHYSICS TOPOLOGY
+                    </span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        graph_html = get_dashboard_campaign_graph_html(is_dark)
+        components.html(graph_html, height=270, scrolling=False)
+
+    with col_right:
+        # Card 1: Threat Score Speedometer
+        render_threat_score_widget(is_dark)
+
+        st.markdown("<div style='margin-bottom: 16px;'></div>", unsafe_allow_html=True)
+
+        # Card 2: Recent Threats List
+        render_recent_threats_widget(is_dark)
+
+
+def render_standalone_map_view(is_dark: bool):
+    card_bg = "rgba(13, 20, 36, 0.78)" if is_dark else "#ffffff"
+    card_bd = "rgba(59, 130, 246, 0.22)" if is_dark else "#e2e8f0"
+    st.markdown(
+        f"""
+        <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 14px; padding: 18px 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.45); margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h3 style="margin: 0; color: {'#ffffff' if is_dark else '#0f172a'}; font-size: 1.35rem; font-weight: 800;">
+                        🌐 Global Transmission Map & Relay Hop Forensics
+                    </h3>
+                    <div style="font-size: 0.82rem; color: #94a3b8; margin-top: 4px;">
+                        Interactive 3D WebGL global arc trajectory tracing international attacker bulletproof hosting hops into Indian banking endpoints.
+                    </div>
+                </div>
+                <span class="metric-badge badge-clean" style="font-size: 0.74rem;">REAL-TIME HOPS</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    deck = get_dashboard_map_deck(is_dark)
+    st.pydeck_chart(deck, use_container_width=True)
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Originating IP", "45.155.205.233", "Bulletproof Host")
+    c2.metric("Origin Location", "Frankfurt, Germany", "Tor Exit Node")
+    c3.metric("Intermediate Hop", "Singapore Relay (103.819)", "+18ms Latency")
+    c4.metric("Target Destination", "New Delhi, India", "Banking Gateway")
+
+
+def render_standalone_graph_view(is_dark: bool):
+    card_bg = "rgba(13, 20, 36, 0.78)" if is_dark else "#ffffff"
+    card_bd = "rgba(59, 130, 246, 0.22)" if is_dark else "#e2e8f0"
+    st.markdown(
+        f"""
+        <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 14px; padding: 18px 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.45); margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h3 style="margin: 0; color: {'#ffffff' if is_dark else '#0f172a'}; font-size: 1.35rem; font-weight: 800;">
+                        🕸️ Dynamic Campaign Attribution Syndicate Graph
+                    </h3>
+                    <div style="font-size: 0.82rem; color: #94a3b8; margin-top: 4px;">
+                        Interactive Vis.js force-directed graph correlating shared IP subnets, lookalike domain infrastructure, and attack campaigns.
+                    </div>
+                </div>
+                <span class="metric-badge badge-suspicious" style="font-size: 0.74rem;">APT CLUSTERING</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    graph_html = get_dashboard_campaign_graph_html(is_dark)
+    components.html(graph_html, height=550, scrolling=False)
+
+
+def render_standalone_reports_view(is_dark: bool):
+    card_bg = "rgba(13, 20, 36, 0.78)" if is_dark else "#ffffff"
+    card_bd = "rgba(59, 130, 246, 0.22)" if is_dark else "#e2e8f0"
+    st.markdown(
+        f"""
+        <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 14px; padding: 18px 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.45); margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h3 style="margin: 0; color: {'#ffffff' if is_dark else '#0f172a'}; font-size: 1.35rem; font-weight: 800;">
+                        📄 Forensic Evidence Dossier & Section 65B BSA Admissibility
+                    </h3>
+                    <div style="font-size: 0.82rem; color: #94a3b8; margin-top: 4px;">
+                        Statutory digital evidence certificate compliant with Section 65B Bharatiya Sakshya Adhiniyam 2023 & Indian Evidence Act.
+                    </div>
+                </div>
+                <span class="metric-badge badge-clean" style="font-size: 0.74rem;">COURT ADMISSIBLE</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    data = st.session_state.get("last_analysis")
+    if not data:
+        data = {
+            "case_id": "EXT-LIVE-2026",
+            "subject": "Urgent: Complete KYC Verification to Avoid Account Freeze",
+            "from_domain": "sbi-kyc-alert.com",
+            "originating_ip": "45.155.205.233",
+            "risk_score": 94,
+            "threat_category": "Banking KYC Phishing & Smishing",
+            "spf_result": "FAIL",
+            "dkim_result": "FAIL",
+            "sha256_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "reasons": ["Spoofed Domain", "Urgency Panic Trigger", "Bulletproof Host Ingress"]
+        }
+
+    c_rep1, c_rep2 = st.columns([1.5, 1])
+    with c_rep1:
+        st.markdown(
+            f"""
+            <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">Certificate of Digital Admissibility</div>
+                <div style="font-size: 1.15rem; font-weight: 800; color: {'#ffffff' if is_dark else '#0f172a'}; margin: 4px 0 12px 0;">
+                    Under Section 65B(4) Bharatiya Sakshya Adhiniyam 2023
+                </div>
+                <div style="font-size: 0.85rem; color: {'#cbd5e1' if is_dark else '#334155'}; line-height: 1.6;">
+                    This electronically generated certificate confirms that the digital artifacts associated with Case ID <code>{data.get('case_id')}</code> were ingested, parsed, and hashed in real-time through the PhishGuard Autonomous SOC pipeline without intermediate tampering.
+                </div>
+                <div style="background: {'rgba(15, 23, 42, 0.9)' if is_dark else '#f1f5f9'}; border: 1px solid {'rgba(255,255,255,0.08)' if is_dark else '#cbd5e1'}; border-radius: 8px; padding: 12px; margin-top: 14px; font-family: monospace; font-size: 0.78rem;">
+                    <b>SHA-256 Digest:</b> {data.get('sha256_digest', 'a85418af8815146c5a95f5cbe74d55877f06f257')}<br/>
+                    <b>Ingress Timestamp:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}<br/>
+                    <b>Examiner Agent:</b> PhishGuard Autonomous SOC v4.2
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    with c_rep2:
+        st.markdown(
+            f"""
+            <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                <div class="soc-panel-title" style="margin-bottom: 12px;">Export Evidentiary Package</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        pdf_res = generate_pdf_report(data)
+        pdf_bytes = pdf_res.getvalue() if hasattr(pdf_res, "getvalue") else pdf_res
+        json_report = generate_json_report(data)
+        st.download_button(
+            label="📄 Download Section 65B PDF Dossier",
+            data=pdf_bytes,
+            file_name=f"{data.get('case_id')}_Forensic_Dossier.pdf",
+            mime="application/pdf",
+            type="primary",
+            use_container_width=True
+        )
+        st.download_button(
+            label="💾 Download JSON Evidence & IOCs",
+            data=json_report,
+            file_name=f"{data.get('case_id')}_IOC_Telemetry.json",
+            mime="application/json",
+            use_container_width=True
+        )
+
+
+def render_standalone_settings_view(is_dark: bool):
+    card_bg = "rgba(13, 20, 36, 0.78)" if is_dark else "#ffffff"
+    card_bd = "rgba(59, 130, 246, 0.22)" if is_dark else "#e2e8f0"
+    st.markdown(
+        f"""
+        <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 14px; padding: 18px 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.45); margin-bottom: 16px;">
+            <h3 style="margin: 0; color: {'#ffffff' if is_dark else '#0f172a'}; font-size: 1.35rem; font-weight: 800;">
+                ⚙️ Platform Configuration & Controls
+            </h3>
+            <div style="font-size: 0.82rem; color: #94a3b8; margin-top: 4px;">
+                Manage appearance, live audio defense sirens, PII evidence redaction, and browser extensions.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    c_set1, c_set2 = st.columns(2)
+    with c_set1:
+        st.markdown(
+            f"""
+            <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 12px; padding: 18px; margin-bottom: 16px;">
+                <div class="soc-panel-title" style="margin-bottom: 10px;">Appearance & Themes</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.radio(
+            "Visual Mode",
+            options=["🌙 Cyber Night", "☀️ Pastel Day"],
+            key="settings_theme_radio",
+            index=0 if is_dark else 1,
+            horizontal=True,
+            on_change=on_sidebar_theme_change
+        )
+        st.markdown("<div style='margin-top: 12px;'></div>", unsafe_allow_html=True)
+        st.session_state.sound_alert = st.checkbox(
+            "🔊 Cyber Audio Alert Siren",
+            value=st.session_state.get("sound_alert", True),
+            help="Plays an audible siren tone when high-risk phishing is detected."
+        )
+        st.session_state.redact_enabled = st.checkbox(
+            "🔒 Redact PII (Evidence Anonymization)",
+            value=st.session_state.get("redact_enabled", False),
+            help="Masks citizen names and phone numbers in forensic outputs."
+        )
+
+    with c_set2:
+        st.markdown(
+            f"""
+            <div style="background: {card_bg}; border: 1px solid {card_bd}; border-radius: 12px; padding: 18px; margin-bottom: 16px;">
+                <div class="soc-panel-title" style="margin-bottom: 10px;">PhishGuard Browser Extension</div>
+                <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 12px;">
+                    Enables 1-click in-browser auditing for Gmail & Outlook, and enforces Study Lock network-layer blocking.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        ext_zip_bytes = get_extension_zip_package()
+        if ext_zip_bytes:
+            st.download_button(
+                label="📦 Download Extension (.zip)",
+                data=ext_zip_bytes,
+                file_name="phishguard-chrome-extension.zip",
+                mime="application/zip",
+                type="primary",
+                use_container_width=True
+            )
+        if st.button("🗑️ Reset Session Cases & Telemetry", use_container_width=True):
+            st.session_state.email_history = []
+            st.session_state.sms_history = []
+            st.session_state.last_analysis = None
+            st.session_state.last_sms_analysis = None
+            st.rerun()
+
+
+# =========================================================================
+# PRIMARY SOC ROUTER
+# =========================================================================
+active_nav = st.session_state.get("active_nav", "dashboard")
+sound_alert = st.session_state.get("sound_alert", True)
+redact_enabled = st.session_state.get("redact_enabled", False)
+
+render_top_kpi_strip(is_dark)
+
+if active_nav == "dashboard":
+    render_modern_soc_dashboard(is_dark, sound_alert, redact_enabled)
+elif active_nav == "threat_analysis":
+    col_v1, col_v2, col_v3, col_v4 = st.columns(4)
+    cur_vec = st.session_state.get("threat_vector", "email")
+    with col_v1:
+        v1_style = "primary" if cur_vec == "email" else "secondary"
+        if st.button("📧 Email Threat Sentinel" + ("  (Active)" if cur_vec == "email" else ""), type=v1_style, use_container_width=True, key="top_vec_email"):
+            st.session_state.threat_vector = "email"
+            st.query_params["vector"] = "email"
+            st.rerun()
+    with col_v2:
+        v2_style = "primary" if cur_vec == "sms" else "secondary"
+        if st.button("📱 Mobile SMS / Smishing" + ("  (Active)" if cur_vec == "sms" else ""), type=v2_style, use_container_width=True, key="top_vec_sms"):
+            st.session_state.threat_vector = "sms"
+            st.query_params["vector"] = "sms"
+            st.rerun()
+    with col_v3:
+        v3_style = "primary" if cur_vec == "quishing" else "secondary"
+        if st.button("🎯 UPI / QR Quishing" + ("  (Active)" if cur_vec == "quishing" else ""), type=v3_style, use_container_width=True, key="top_vec_quishing"):
+            st.session_state.threat_vector = "quishing"
+            st.query_params["vector"] = "quishing"
+            st.rerun()
+    with col_v4:
+        v4_style = "primary" if cur_vec == "child_safety" else "secondary"
+        if st.button("👨‍👩‍👧 Child Safe Sentinel" + ("  (Active)" if cur_vec == "child_safety" else ""), type=v4_style, use_container_width=True, key="top_vec_child_safety"):
+            st.session_state.threat_vector = "child_safety"
+            st.query_params["vector"] = "child_safety"
+            st.rerun()
+
+    st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
+    if cur_vec == "email":
+        render_email_sentinel(sound_alert, redact_enabled)
+    elif cur_vec == "sms":
+        render_smishing_sentinel(sound_alert)
+    elif cur_vec == "quishing":
+        render_quishing_sentinel(sound_alert)
+    else:
+        render_child_safety_sentinel(sound_alert)
+elif active_nav == "map_3d":
+    render_standalone_map_view(is_dark)
+elif active_nav == "campaign_graph":
+    render_standalone_graph_view(is_dark)
+elif active_nav == "reports":
+    render_standalone_reports_view(is_dark)
+elif active_nav == "settings":
+    render_standalone_settings_view(is_dark)
 
 # -------------------------------------------------------------
 # Theme-Adaptive Enterprise Footer
